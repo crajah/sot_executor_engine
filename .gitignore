@@ -117,4 +117,4 @@ project/plugins/project/
 .cache
 .lib/
 
-./**/target/*
+target/*
