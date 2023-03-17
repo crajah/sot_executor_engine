@@ -4,7 +4,7 @@
   "schemas": [
     {
       "type": "avro",
-      "name": "avroschema1",
+      "id": "avroschema1",
       "version": "version2",
       "definition": {
         "type": "record",
@@ -41,15 +41,15 @@
       }
     }
   ],
-  "sources": [
+  "taps": [
     {
       "type": "pubsub",
-      "name": "pubsubsource1",
+      "id": "pubsubsource1",
       "topic": "p2pout"
     },
     {
       "type": "bigtable",
-      "name": "bigtablesource1",
+      "id": "bigtablesource1",
       "instanceId": "bigtable-test",
       "tableId": "bigquerytest",
       "numNodes": 3,

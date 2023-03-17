@@ -4,7 +4,7 @@
   "schemas": [
     {
       "type": "avro",
-      "name": "avroschema1",
+      "id": "avroschema1",
       "version": "version2",
       "definition": {
         "type": "record",
@@ -42,7 +42,7 @@
     },
     {
       "type": "avro",
-      "name": "avroschema2",
+      "id": "avroschema2",
       "version": "version2",
       "definition": {
         "type": "record",
@@ -84,15 +84,15 @@
       }
     }
   ],
-  "sources": [
+  "taps": [
     {
       "type": "pubsub",
-      "name": "pubsubsource1",
+      "id": "pubsubsource1",
       "topic": "p2pin"
     },
     {
       "type": "pubsub",
-      "name": "pubsubsource2",
+      "id": "pubsubsource2",
       "topic": "p2pout"
     }
   ],

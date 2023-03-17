@@ -4,11 +4,11 @@
   "schemas": [
     {
       "type": "avro",
-      "name": "avroschema1",
+      "id": "avroschema1",
       "version": "version2",
       "definition": {
         "type": "record",
-        "name": "MessageExtended",
+        "name": "Message",
         "namespace": "parallelai.sot.avro",
         "fields": [
           {
@@ -35,11 +35,6 @@
             "name": "eventTimeStr",
             "type": "string",
             "doc": "event time string for debugging"
-          },
-          {
-            "name": "count",
-            "type": "int",
-            "doc": "example count"
           }
         ],
         "doc": "A basic schema for storing user records"
@@ -47,7 +42,7 @@
     },
     {
       "type": "bigquery",
-      "name": "bigqueryschema1",
+      "id": "bigqueryschema1",
       "version": "version3",
       "definition": {
         "type": "bigquerydefinition",
@@ -72,15 +67,15 @@
       }
     }
   ],
-  "sources" : [
+  "taps" : [
     {
       "type": "pubsub",
-      "name":  "pubsubsource1",
+      "id":  "pubsubsource1",
       "topic": "p2pout"
     },
     {
       "type": "bigquery",
-      "name" : "bigquerysource1",
+      "id" : "bigquerysource1",
       "dataset": "bigquerytest",
       "table": "streaming_word_extract26"
     }

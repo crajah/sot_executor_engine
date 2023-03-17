@@ -3,3 +3,8 @@ test:consoleQuick
 {file:/home/ryadh/Dev/workspaces/ladbrokes/SOT/}sot-macros/test
 {file:/home/ryadh/Dev/workspaces/ladbrokes/SOT/}sot/clean
 {file:/home/ryadh/Dev/workspaces/ladbrokes/SOT/}sot/test
+{file:/home/ryadh/Dev/workspaces/ladbrokes/sot_executor_engine/}sot/compile
+version
+sbtVersion
+sbt compile
+compile

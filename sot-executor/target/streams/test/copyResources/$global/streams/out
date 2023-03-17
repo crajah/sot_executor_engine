@@ -1,3 +1,0 @@
-[0m[[0mdebug[0m] [0mCopy resource mappings: [0m
-[0m[[0mdebug[0m] [0m	(/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-executor/src/test/resources/log4j.properties,/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-executor/target/scala-2.12/test-classes/log4j.properties)[0m
-[0m[[0mdebug[0m] [0m	(/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-executor/src/test/resources/logback-test.xml,/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-executor/target/scala-2.12/test-classes/logback-test.xml)[0m

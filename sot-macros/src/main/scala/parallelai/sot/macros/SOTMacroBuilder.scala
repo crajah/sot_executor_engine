@@ -4,27 +4,30 @@ import java.io.File
 
 import spray.json._
 import parallelai.sot.executor.model.{SOTMacroJsonConfig, Topology}
-import parallelai.sot.executor.model.SOTMacroConfig.{Source => SOTSource, _}
 import com.typesafe.config.ConfigFactory
+import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
 import parallelai.sot.executor.model.SOTMacroJsonConfig._
 
 import scala.collection.immutable.Seq
 import scala.meta._
 
-class SOTBuilder extends scala.annotation.StaticAnnotation {
+class SOTBuilder extends scala.annotation.StaticAnnotation with EngineConfig {
 
   inline def apply(defn: Any): Any = meta {
+    val source = getClass.getResource("/application.conf").getPath
+    val fileName = ConfigFactory.parseFile(new File(source)).getString("json.file.name")
+    val config = SOTMacroJsonConfig(fileName)
 
     defn match {
-      case q"object $name { ..$stats }" =>
-        val source = getClass.getResource("/application.conf").getPath
-        val fileName = ConfigFactory.parseFile(new File(source)).getString("json.file.name")
-        SOTMainMacroImpl.expand(name, stats, fileName)
+      case q"object $name { ..$statements }" =>
+        SOTMainMacroImpl.expand(name, statements, config)
       case _ =>
         abort("@main must annotate an object.")
     }
   }
 }
+
+
 
 object SOTMainMacroImpl {
 
@@ -58,14 +61,8 @@ object SOTMainMacroImpl {
        """)
   }
 
-  def expand(name: Term.Name, stats: Seq[Stat], fileName: String): Defn.Object = {
-    val config = SOTMacroJsonConfig(fileName)
-    val dag = SOTMacroHelper.validateDag(config)
-    expand(name, stats, config, dag)
-  }
-
-  def expand(name: Term.Name, stats: Seq[Stat], config: Config, dag: Topology[String, DAGMapping]): Defn.Object = {
-
+  def expand(name: Term.Name, statements: Seq[Stat], config: Config): Defn.Object = {
+    val dag = config.parseDAG()
     val parsedSchemas = config.schemas.flatMap {
       case bq: BigQuerySchema =>
         bq.definition match {
@@ -82,7 +79,7 @@ object SOTMainMacroImpl {
           case dsd: DatastoreDefinition => Some(datastoreSchemaCodeGeneration(dsd))
           case _ => throw new Exception("Datastore does not support this definition")
         }
-      case _ => throw new Exception("Unsupported Type")
+      case _ => throw new Exception("Unsupported Schema Type")
     }.flatten
 
     val transformations = transformationsCodeGenerator(config, dag)
@@ -96,7 +93,24 @@ object SOTMainMacroImpl {
 
     val builder = argsCodeGenerator(sourceOp, sinkOp, config)
 
-    val syn = parsedSchemas ++ transformations ++ builder ++ stats
+    val readInputGen =
+      Seq(
+        q"""
+         def readInput[In <: HasAvroAnnotation : Manifest](sc: ScioContext) = {
+           sc.typedPubSub[In]("bi-crm-poc", "p2pin")
+         }
+       """)
+
+    val writeOutputGen =
+      Seq(
+        q"""
+         def writeOutput[Out <: HasAnnotation : Manifest](sCollection: SCollection[Out]) = {
+           sCollection.saveAsTypedBigQuery("bigquerytest.testtable")
+         }
+       """)
+
+
+    val syn = parsedSchemas ++ transformations ++ builder ++ statements ++ readInputGen ++ writeOutputGen
 
     val x =
       q"""object $name {
@@ -104,6 +118,29 @@ object SOTMainMacroImpl {
          }"""
     println(x)
     x
+  }
+
+  trait SourceCodeGenerator[A] {
+    def generate(config: A): Seq[Defn]
+  }
+
+  object SourceCodeGenerator {
+
+    def apply[A <: TapDefinition](implicit inputGenerator: SourceCodeGenerator[A]) = inputGenerator
+
+    def instance[A <: TapDefinition](func: A => Seq[Defn]): SourceCodeGenerator[A] =
+      new SourceCodeGenerator[A] {
+        def generate(config: A): Seq[Defn] =
+          func(config)
+      }
+
+    implicit def pubSubSource = instance[PubSubTapDefinition](pubSubTap =>
+      Seq(
+      q"""
+         def readInput[In <: HasAvroAnnotation : Manifest](sc: ScioContext) = {
+           sc.typedPubSub[In](${Lit.String(pubSubTap.topic)}, ${Lit.String(pubSubTap.topic)})
+         }
+       """))
   }
 
   /**
@@ -118,25 +155,25 @@ object SOTMainMacroImpl {
     */
 
   def argsCodeGenerator(in: SourceOp, out: SinkOp, config: Config): Seq[Defn] = {
-    val sinkSource = SOTMacroHelper.getSource(in.source, config.sources)
-    val sourceSource = SOTMacroHelper.getSource(out.source, config.sources)
+    val sinkSource = SOTMacroHelper.getTap(in.tap, config.taps)
+    val sourceSource = SOTMacroHelper.getTap(out.tap, config.taps)
 
     (sinkSource, sourceSource) match {
-      case (i: PubSubSource, o: BigQuerySource) =>
+      case (i: PubSubTapDefinition, o: BigQueryTapDefinition) =>
         Seq(q"val inArgs = PubSubArgs(topic = ${Lit.String(i.topic)})",
           q"val outArgs = BigQueryArgs(dataset = ${Lit.String(o.dataset)}, table = ${Lit.String(o.table)})",
           q"val getBuilder = new ScioBuilderPubSubToBigQuery(transform, inArgs, outArgs)")
-      case (i: PubSubSource, o: PubSubSource) =>
+      case (i: PubSubTapDefinition, o: PubSubTapDefinition) =>
         Seq(q"val inArgs = PubSubArgs(topic = ${Lit.String(i.topic)})",
           q"val outArgs = PubSubArgs(topic = ${Lit.String(o.topic)})",
           q"val getBuilder = new ScioBuilderPubSubToPubSub(transform, inArgs, outArgs)")
-      case (i: PubSubSource, o: BigTableSource) =>
+      case (i: PubSubTapDefinition, o: BigTableTapDefinition) =>
         val cfValues = o.familyName.map(Lit.String(_))
         val cfList = Term.Apply(Term.Name("List"), cfValues)
         Seq(q"val inArgs = PubSubArgs(topic = ${Lit.String(i.topic)})",
           q"val outArgs = BigTableArgs(instanceId = ${Lit.String(o.instanceId)}, tableId = ${Lit.String(o.tableId)}, familyName = $cfList, numNodes = ${Lit.Int(o.numNodes)})",
           q"val getBuilder = new ScioBuilderPubSubToBigTable(transform, inArgs, outArgs)")
-      case (i: PubSubSource, o: DatastoreSource) =>
+      case (i: PubSubTapDefinition, o: DatastoreTapDefinition) =>
 
         //check if there is any schema defined for out source
         val builder = out.schema match {

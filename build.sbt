@@ -45,7 +45,7 @@ lazy val `sot-macros` = (project in file("sot-macros"))
     libraryDependencies ++= Seq(
       scalaTest,
       "io.spray" %% "spray-json" % "1.3.3",
-      "parallelai" %% "sot_executor_model" % "0.1.14",
+      "parallelai" %% "sot_executor_model" % "0.1.20",
       "com.typesafe" % "config" % "1.3.1"
     ),
     resolvers ++= Seq[Resolver](

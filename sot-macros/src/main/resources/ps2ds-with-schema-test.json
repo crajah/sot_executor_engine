@@ -4,7 +4,7 @@
   "schemas": [
     {
       "type": "avro",
-      "name": "avroschema1",
+      "id": "avroschema1",
       "version": "version2",
       "definition": {
         "type": "record",
@@ -42,7 +42,7 @@
     },
     {
       "type": "datastore",
-      "name": "datastore1",
+      "id": "datastore1",
       "version": "version3",
       "definition": {
         "type": "datastoredefinition",
@@ -64,15 +64,15 @@
       }
     }
   ],
-  "sources": [
+  "taps": [
     {
       "type": "pubsub",
-      "name": "pubsubsource1",
+      "id": "pubsubsource1",
       "topic": "p2pin"
     },
     {
       "type": "datastore",
-      "name": "datastoresource1",
+      "id": "datastoresource1",
       "kind": "kind1"
     }
   ],

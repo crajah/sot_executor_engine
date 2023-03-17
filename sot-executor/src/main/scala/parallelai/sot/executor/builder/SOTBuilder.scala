@@ -5,7 +5,7 @@ import java.util.TimeZone
 import com.spotify.scio._
 import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.bigquery.BigQueryType
-import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.{SCollection, WindowOptions}
 import org.apache.beam.sdk.io.gcp.datastore.DatastoreIO
 import org.apache.beam.sdk.options.StreamingOptions
 import org.joda.time.{DateTimeZone, Duration, Instant}
@@ -16,6 +16,15 @@ import parallelai.sot.macros.SOTBuilder
 import shapeless._
 import syntax.singleton._
 import com.google.datastore.v1.{GqlQuery, Query}
+import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
+import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
+import com.spotify.scio.streaming.ACCUMULATING_FIRED_PANES
+import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
+import org.apache.beam.sdk.transforms.windowing.{AfterProcessingTime, Repeatedly}
+import org.slf4j.LoggerFactory
+import parallelai.sot.executor.builder.SOTBuilder.{readInput, transform, writeOutput}
+import parallelai.sot.executor.utils.AvroUtils
+import parallelai.sot.executor.scio.PaiScioContext._
 
 
 /*
@@ -60,6 +69,24 @@ object SOTBuilder {
 //  val outArgs = DatastoreArgs("testkindtest2")
 //  val getBuilder = new ScioBuilderPubSubToDatastoreWithSchema(transform, inArgs, outArgs, keyBuilder)
 
+
+
+  class Builder[In <: HasAvroAnnotation : Manifest, Out <: HasAnnotation : Manifest](transform: SCollection[In] => SCollection[Out], inArgs: PubSubArgs, outArgs: BigQueryArgs) extends Serializable() {
+    private val logger = LoggerFactory.getLogger(this.getClass)
+
+    def execute(opts: SOTOptions, args: Args, exampleUtils: SOTUtils, sc: ScioContext) = {
+      val allowedLateness = Duration.standardMinutes(args.int("allowedLateness", 120))
+      val project = opts.as(classOf[GcpOptions]).getProject
+      val scIn = readInput(sc)
+      val in = scIn.withGlobalWindow(WindowOptions(trigger = Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardMinutes(2))), accumulationMode = ACCUMULATING_FIRED_PANES, allowedLateness = allowedLateness))
+      val out = writeOutput(transform(in))
+      val result = sc.close()
+      exampleUtils.waitToFinish(result.internal)
+    }
+  }
+
+  val genericBuilder = new Builder(transform, inArgs, outArgs)
+
   def main(cmdArg: Array[String]): Unit = {
     val parsedArgs = ScioContext.parseArguments[SOTOptions](cmdArg)
     val opts = parsedArgs._1
@@ -67,7 +94,7 @@ object SOTBuilder {
     opts.as(classOf[StreamingOptions]).setStreaming(true)
     val exampleUtils = new SOTUtils(opts)
     val sc = ScioContext(opts)
-    val builder = getBuilder
+    val builder = genericBuilder
     builder.execute(opts, args, exampleUtils, sc)
   }
 }
