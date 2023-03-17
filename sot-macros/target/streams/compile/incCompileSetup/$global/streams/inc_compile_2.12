@@ -1,0 +1,588 @@
+format version: 5
+output mode:
+1 items
+0 -> single
+output directories:
+1 items
+output dir -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes
+compile options:
+2 items
+0 -> -Xplugin-require:macroparadise
+1 -> -Xplugin:/home/ryadh/.ivy2/cache/org.scalameta/paradise_2.12.2/jars/paradise_2.12.2-3.0.0-M9.jar
+javac options:
+0 items
+compiler version:
+1 items
+0 -> 2.12.2
+compile order:
+1 items
+0 -> Mixed
+name hashing:
+1 items
+0 -> true
+products:
+22 items
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTBuilder$inline$$anon$1.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTBuilder$inline$.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTBuilder$inline.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTBuilder.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMainMacroImpl$.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMainMacroImpl.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$BigQuerySchemaType$.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$BigQuerySchemaType.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$BigTableSchemaType$.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$BigTableSchemaType.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$Config$.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$Config.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$Op$.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$Op.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$PubSubSchemaType$.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$PubSubSchemaType.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$SchemaType.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroJsonConfig$.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroJsonConfig$SchemaJsonFormat$.class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroJsonConfig.class
+binary dependencies:
+14 items
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/.ivy2/cache/io.spray/spray-json_2.12/bundles/spray-json_2.12-1.3.3.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.2.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/.ivy2/cache/org.scalameta/common_2.12/jars/common_2.12-1.8.0.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/.ivy2/cache/org.scalameta/dialects_2.12/jars/dialects_2.12-1.8.0.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/.ivy2/cache/org.scalameta/inline_2.12/jars/inline_2.12-1.8.0.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/.ivy2/cache/org.scalameta/inputs_2.12/jars/inputs_2.12-1.8.0.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/.ivy2/cache/org.scalameta/parsers_2.12/jars/parsers_2.12-1.8.0.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/.ivy2/cache/org.scalameta/quasiquotes_2.12/jars/quasiquotes_2.12-1.8.0.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/.ivy2/cache/org.scalameta/scalameta_2.12/jars/scalameta_2.12-1.8.0.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/.ivy2/cache/org.scalameta/trees_2.12/jars/trees_2.12-1.8.0.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /usr/lib/jvm/java-8-oracle/jre/lib/rt.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/.ivy2/cache/io.spray/spray-json_2.12/bundles/spray-json_2.12-1.3.3.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /home/ryadh/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.2.jar
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> /usr/lib/jvm/java-8-oracle/jre/lib/rt.jar
+direct source dependencies:
+0 items
+direct external dependencies:
+0 items
+public inherited source dependencies:
+0 items
+public inherited external dependencies:
+0 items
+member reference internal dependencies:
+1 items
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> /home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala
+member reference external dependencies:
+0 items
+inheritance internal dependencies:
+0 items
+inheritance external dependencies:
+0 items
+class names:
+22 items
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parallelai.sot.macros.SOTBuilder
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parallelai.sot.macros.SOTBuilder$inline
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parallelai.sot.macros.SOTBuilder$inline$
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parallelai.sot.macros.SOTBuilder$inline$$anon$1
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parallelai.sot.macros.SOTMainMacroImpl
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parallelai.sot.macros.SOTMainMacroImpl$
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$BigQuerySchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$BigQuerySchemaType$
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$BigTableSchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$BigTableSchemaType$
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$Config
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$Config$
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$Op
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$Op$
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$PubSubSchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$PubSubSchemaType$
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroConfig$SchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroJsonConfig
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroJsonConfig$
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai.sot.macros.SOTMacroJsonConfig$SchemaJsonFormat$
+used names:
+410 items
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> !=
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> $anon
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> &&
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> ++
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> ::
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> <byname>
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> <init>
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> <repeated>
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> ==
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> ???
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> A
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Annotation
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Anonymous
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Any
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> AnyRef
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Apply
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> ApplyType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Arg
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Array
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> ArrayOps
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> B
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> BigQuerySchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> BigTableSchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Block
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Boolean
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Call
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> CanBuildFrom
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> ClassTag
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Coll
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Config
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Convert
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Ctor
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Def
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Defn
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Dialect
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Eager
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Exception
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Flatten
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Function1
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> GenTraversableOnce
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> I
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Input
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Int
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Iterable
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> JsObject
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> JsString
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Lift
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> List
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Lit
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> MatchError
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Mod
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Name
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Named
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> New
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Nil
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> None
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Nothing
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> O
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Object
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Op
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Option
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Options
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Param
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Parse
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Parsed
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Pat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Predef
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Primary
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> PubSubSchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Ref
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> SOTBuilder
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> SOTBuilder$inline
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> SOTMacroConfig
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> SOTMacroJsonConfig
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> SOTMainMacroImpl
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> SchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Select
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Seq
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Some
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Stat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> StaticAnnotation
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> String
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> StringContext
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> StringOps
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Syntax
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> T
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> T0
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> T1
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> T2
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Template
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Term
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> That
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Tree
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Tuple2
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Tuple3
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Tuple4
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Type
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> U
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Unit
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Unlift
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Val
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> Var
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> XtensionParseInputLike
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> XtensionQuasiquoteTerm
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> XtensionSyntax
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> _$4
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> _$7
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> _1
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> _2
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> _3
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> _4
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> _root_
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> abort
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> annotation
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> apply
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> asInstanceOf
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> augmentString
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> avroSchemaCodeGenerator
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> bigQuerySchemaCodeGenerator
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> block
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> builder
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> builderCodeGenerator
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> canBuildFrom
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> cfList
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> cfValues
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> className
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> code
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> collection
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> compactPrint
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> config
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> current
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> dag
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> dataset
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> defn
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> expand
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> expression
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> familyName
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> fileName
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> filter
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> flatMap
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> fromJson
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> func
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> get
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> getOrElse
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> getStep
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> head
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> i
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> immutable
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> in
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> inType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> input
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> inputSchema
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> inputs
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> instanceId
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> internal
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> isEmpty
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> isInstanceOf
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> json
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> length
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> lengthCompare
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> macros
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> map
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> materializeClassTag
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> meta
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> name
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> ne
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> nonEmpty
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> numNodes
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> o
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> ofRef
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> op
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> operation
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> ops
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> option2Iterable
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> out
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> outType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> outputSchema
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> package
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parallelai
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parse
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parseExpression
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parseTerm
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parseType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> parsers
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> prettyprinters
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> println
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> q
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> quasiquote$macro$1$hole$0
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> quasiquote$macro$1$hole$1
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> quasiquote$macro$1$result$0
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> quasiquote$macro$1$result$1
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> quasiquotes
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> query
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> queryString
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> refArrayOps
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> reflect
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> require
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> s
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> scala
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> schema
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> serialization
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> showSyntax
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> sot
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> split
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> spray
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> stats
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> step
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> steps
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> stringToInput
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> syn
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> syntax
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> table
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> tableId
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> tail
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> toList
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> topic
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> trans
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> transformations
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> transformationsCodeGenerator
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> tree
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> trim
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> type
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> unapply
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> unapplySeq
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> unary_!
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> unchecked
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> value
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> x
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> !=
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> &&
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> +
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> ->
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> <init>
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> <refinement>
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> <repeated>
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> ==
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> ?0
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> A
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> AbstractFunction4
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> AbstractFunction5
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Any
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> AnyRef
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> ArrowAssoc
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> B
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> BigDecimal
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> BigQuerySchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> BigTableSchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Boolean
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> BufferedSource
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> CanBuildFrom
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Class
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> ClassManifest
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> ClassManifestFactory
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Codec
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Coll
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Config
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> DefaultJsonProtocol
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Function1
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Function4
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Function5
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> IndexOutOfBoundsException
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> InputStream
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Int
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Iterator
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> JF
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> JsArray
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> JsField
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> JsNumber
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> JsObject
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> JsString
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> JsValue
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> JsonFormat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> JsonReader
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> JsonWriter
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> List
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> MatchError
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> None
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Nothing
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Object
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Op
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Option
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> P1
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> P2
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> P3
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> P4
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> P5
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> PimpedAny
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> PimpedString
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Predef
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Product
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> PubSubSchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> RootJsObjectFormat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> RootJsonFormat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> SOTMacroConfig
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> SOTMacroJsonConfig
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> ScalaRunTime
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> SchemaJsonFormat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> SchemaType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Seq
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Serializable
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Some
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Source
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Statics
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> String
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> StringJsonFormat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> T
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> T0
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> T1
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> T2
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> T3
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> T4
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> T5
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> That
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Throwable
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Tuple2
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Tuple4
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Tuple5
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Unit
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> Vector
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> _hashCode
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> _root_
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> _toString
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> anyHash
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> apply
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> asInstanceOf
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> asJsObject
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> avroSchemaFormat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> bigQueryFormat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> c
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> canBuildFrom
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> classType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> close
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> collection
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> config
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> configFormat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> convertTo
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> dag
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> dataset
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> deserializationError
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> e
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> eq
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> fallbackSystemCodec
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> familyName
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> fileName
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> finalizeHash
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> fn
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> fromInputStream
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> func
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> get
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> getClass
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> getFields
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> getResourceAsStream
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> immutable
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> in
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> instanceId
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> io
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> isEmpty
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> isInstanceOf
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> java
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> json
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> jsonFormat4
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> jsonFormat5
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> lengthCompare
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> lines
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> listFormat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> macros
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> map
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> mix
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> mkString
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> name
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> numNodes
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> objType
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> op
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> opFormat
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> out
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> package
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parallelai
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> parseJson
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> pimpAny
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> pimpString
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> reflect
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> runtime
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> scala
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> schema
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> serialization
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> sot
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> source
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> spray
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> steps
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> stream
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> table
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> tableId
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> toInt
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> toJson
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> toString
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> toVector
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> topic
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> typ
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> type
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> typedProductIterator
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> unapplySeq
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> unary_!
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> value
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> x$1
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> x$2
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> x$3
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> x$4
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> x$5
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> ||
+product stamps:
+22 items
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTBuilder$inline$$anon$1.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTBuilder$inline$.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTBuilder$inline.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTBuilder.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$BigQuerySchemaType$.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$BigQuerySchemaType.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$BigTableSchemaType$.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$BigTableSchemaType.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$Config$.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$Config.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$Op$.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$Op.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$PubSubSchemaType$.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$PubSubSchemaType.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig$SchemaType.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroConfig.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroJsonConfig$.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroJsonConfig$SchemaJsonFormat$.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMacroJsonConfig.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMainMacroImpl$.class -> lastModified(1505296337000)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/target/scala-2.12/classes/parallelai/sot/macros/SOTMainMacroImpl.class -> lastModified(1505296337000)
+source stamps:
+2 items
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> hash(0f3e340ebc602969934f6314e678fd3c19c91196)
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> hash(0af2413fd9a11a0cce50b041399d831f1116eb16)
+binary stamps:
+11 items
+/home/ryadh/.ivy2/cache/io.spray/spray-json_2.12/bundles/spray-json_2.12-1.3.3.jar -> lastModified(1483006115000)
+/home/ryadh/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.2.jar -> lastModified(1492071552000)
+/home/ryadh/.ivy2/cache/org.scalameta/common_2.12/jars/common_2.12-1.8.0.jar -> lastModified(1495484210000)
+/home/ryadh/.ivy2/cache/org.scalameta/dialects_2.12/jars/dialects_2.12-1.8.0.jar -> lastModified(1495484190000)
+/home/ryadh/.ivy2/cache/org.scalameta/inline_2.12/jars/inline_2.12-1.8.0.jar -> lastModified(1495484231000)
+/home/ryadh/.ivy2/cache/org.scalameta/inputs_2.12/jars/inputs_2.12-1.8.0.jar -> lastModified(1495484196000)
+/home/ryadh/.ivy2/cache/org.scalameta/parsers_2.12/jars/parsers_2.12-1.8.0.jar -> lastModified(1495484287000)
+/home/ryadh/.ivy2/cache/org.scalameta/quasiquotes_2.12/jars/quasiquotes_2.12-1.8.0.jar -> lastModified(1495484297000)
+/home/ryadh/.ivy2/cache/org.scalameta/scalameta_2.12/jars/scalameta_2.12-1.8.0.jar -> lastModified(1495484303000)
+/home/ryadh/.ivy2/cache/org.scalameta/trees_2.12/jars/trees_2.12-1.8.0.jar -> lastModified(1495484273000)
+/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar -> lastModified(1493284265000)
+class names:
+11 items
+/home/ryadh/.ivy2/cache/io.spray/spray-json_2.12/bundles/spray-json_2.12-1.3.3.jar -> spray.json.RootJsonFormat
+/home/ryadh/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.12.2.jar -> scala.Serializable
+/home/ryadh/.ivy2/cache/org.scalameta/common_2.12/jars/common_2.12-1.8.0.jar -> scala.meta.prettyprinters.Syntax
+/home/ryadh/.ivy2/cache/org.scalameta/dialects_2.12/jars/dialects_2.12-1.8.0.jar -> scala.meta.dialects.package$
+/home/ryadh/.ivy2/cache/org.scalameta/inline_2.12/jars/inline_2.12-1.8.0.jar -> scala.meta.inline.Api
+/home/ryadh/.ivy2/cache/org.scalameta/inputs_2.12/jars/inputs_2.12-1.8.0.jar -> scala.meta.inputs.Input$
+/home/ryadh/.ivy2/cache/org.scalameta/parsers_2.12/jars/parsers_2.12-1.8.0.jar -> scala.meta.parsers.Parse
+/home/ryadh/.ivy2/cache/org.scalameta/quasiquotes_2.12/jars/quasiquotes_2.12-1.8.0.jar -> scala.meta.internal.quasiquotes.Unlift$
+/home/ryadh/.ivy2/cache/org.scalameta/scalameta_2.12/jars/scalameta_2.12-1.8.0.jar -> scala.meta.package$
+/home/ryadh/.ivy2/cache/org.scalameta/trees_2.12/jars/trees_2.12-1.8.0.jar -> scala.meta.Template
+/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar -> java.lang.Object
+internal apis:
+2 items
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> 
+rO0ABXNyABB4c2J0aS5hcGkuU291cmNlSjH5SdlLSkQCAAdJAAdhcGlIYXNoWgAIaGFzTWFjcm9aABBoYXNQYWNrYWdlT2JqZWN0TAAYX2ludGVybmFsT25seV9uYW1lSGFzaGVzdAAkTHhzYnRpL2FwaS9faW50ZXJuYWxPbmx5X05hbWVIYXNoZXM7TAADYXBpdAAVTHhzYnRpL2FwaS9Tb3VyY2VBUEk7TAALY29tcGlsYXRpb250ABdMeHNidGkvYXBpL0NvbXBpbGF0aW9uO1sABGhhc2h0AAJbQnhwqu20oAAAc3IAInhzYnRpLmFwaS5faW50ZXJuYWxPbmx5X05hbWVIYXNoZXNU2r6Z+tTsTAIAAlsAD2ltcGxpY2l0TWVtYmVyc3QAI1tMeHNidGkvYXBpL19pbnRlcm5hbE9ubHlfTmFtZUhhc2g7WwAOcmVndWxhck1lbWJlcnNxAH4AB3hwdXIAI1tMeHNidGkuYXBpLl9pbnRlcm5hbE9ubHlfTmFtZUhhc2g7SVqAtt2Wi/QCAAB4cAAAAAB1cQB+AAkAAAAfc3IAIHhzYnRpLmFwaS5faW50ZXJuYWxPbmx5X05hbWVIYXNoWw71InY4V88CAAJJAARoYXNoTAAEbmFtZXQAEkxqYXZhL2xhbmcvU3RyaW5nO3hwrs1fznQAClNPVEJ1aWxkZXJzcQB+AAzj8HeQdAAGbm90aWZ5c3EAfgAMcl0f5nQAEVNPVEJ1aWxkZXIkaW5saW5lc3EAfgAMTy8GZXQAD3BhcnNlRXhwcmVzc2lvbnNxAH4ADKT5fEp0ABtiaWdRdWVyeVNjaGVtYUNvZGVHZW5lcmF0b3JzcQB+AAwd6koddAAEd2FpdHNxAH4ADOiqjcJ0AA0kYXNJbnN0YW5jZU9mc3EAfgAMo3TOLnQAFGJ1aWxkZXJDb2RlR2VuZXJhdG9yc3EAfgAM1ZrZMXQABmVxdWFsc3NxAH4ADCoqGrh0ABx0cmFuc2Zvcm1hdGlvbnNDb2RlR2VuZXJhdG9yc3EAfgAMspUsWXQADGFzSW5zdGFuY2VPZnNxAH4ADIeBGJh0AAxzeW5jaHJvbml6ZWRzcQB+AAwAikoGdAANJGlzSW5zdGFuY2VPZnNxAH4ADE0d39N0AAlub3RpZnlBbGxzcQB+AAywu+W4dAAGZXhwYW5kc3EAfgAMxLuB23QADGlzSW5zdGFuY2VPZnNxAH4ADD89T8h0AAY8aW5pdD5zcQB+AAx4L2P9dAAXYXZyb1NjaGVtYUNvZGVHZW5lcmF0b3JzcQB+AAwUx1aFdAAFYXBwbHlzcQB+AAzOUX80dAACPT1zcQB+AAyri5gmdAAFY2xvbmVzcQB+AAxZNpSLdAAIdG9TdHJpbmdzcQB+AAwdOqG8dAAZcGFyc2VFeHByZXNzaW9uJGRlZmF1bHQkMnNxAH4ADLaVJZt0ABBTT1RNYWluTWFjcm9JbXBsc3EAfgAM1SZ3C3QAAiE9c3EAfgAM3dibGXQACGdldENsYXNzc3EAfgAM0D7FNXQAAm5lc3EAfgAMIHeKRHQAAmVxc3EAfgAMkh0PhXQAAiMjc3EAfgAMNN0l1HQACGZpbmFsaXplc3EAfgAM8B/8bXQACGhhc2hDb2Rlc3IAE3hzYnRpLmFwaS5Tb3VyY2VBUEm5Xqf5KSM4pAIAAlsAC2RlZmluaXRpb25zdAAXW0x4c2J0aS9hcGkvRGVmaW5pdGlvbjtbAAhwYWNrYWdlc3QAFFtMeHNidGkvYXBpL1BhY2thZ2U7eHB1cgAXW0x4c2J0aS5hcGkuRGVmaW5pdGlvbjuIyVzntONeDgIAAHhwAAAAA3NyABN4c2J0aS5hcGkuQ2xhc3NMaWtlgzQcod+wl2wCAARMAA5kZWZpbml0aW9uVHlwZXQAGkx4c2J0aS9hcGkvRGVmaW5pdGlvblR5cGU7WwAQc2F2ZWRBbm5vdGF0aW9uc3QAE1tMamF2YS9sYW5nL1N0cmluZztMAAhzZWxmVHlwZXQAEEx4c2J0aS9hcGkvTGF6eTtMAAlzdHJ1Y3R1cmVxAH4AVXhyACF4c2J0aS5hcGkuUGFyYW1ldGVyaXplZERlZmluaXRpb275EW6x1VA84gIAAVsADnR5cGVQYXJhbWV0ZXJzdAAaW0x4c2J0aS9hcGkvVHlwZVBhcmFtZXRlcjt4cgAUeHNidGkuYXBpLkRlZmluaXRpb26HKhvocULjRgIABEwABmFjY2Vzc3QAEkx4c2J0aS9hcGkvQWNjZXNzO1sAC2Fubm90YXRpb25zdAAXW0x4c2J0aS9hcGkvQW5ub3RhdGlvbjtMAAltb2RpZmllcnN0ABVMeHNidGkvYXBpL01vZGlmaWVycztMAARuYW1lcQB+AA14cHNyABB4c2J0aS5hcGkuUHVibGljulg9rmwtYEICAAB4cgAQeHNidGkuYXBpLkFjY2Vzc91imvgdYzFIAgAAeHB1cgAXW0x4c2J0aS5hcGkuQW5ub3RhdGlvbjvrl+sZEPaNSAIAAHhwAAAAAXNyABR4c2J0aS5hcGkuQW5ub3RhdGlvbt4OgaL2XAqyAgACWwAJYXJndW1lbnRzdAAfW0x4c2J0aS9hcGkvQW5ub3RhdGlvbkFyZ3VtZW50O0wABGJhc2V0ABBMeHNidGkvYXBpL1R5cGU7eHB1cgAfW0x4c2J0aS5hcGkuQW5ub3RhdGlvbkFyZ3VtZW50O1Gdpo84JQ94AgAAeHAAAAABc3IAHHhzYnRpLmFwaS5Bbm5vdGF0aW9uQXJndW1lbnTWRbHYAxsXfAIAAkwABG5hbWVxAH4ADUwABXZhbHVlcQB+AA14cHQAAHQA6igibWFjcm8gYW5ub3RhdGlvbiBjb3VsZCBub3QgYmUgZXhwYW5kZWQgKHRoZSBtb3N0IGNvbW1vbiByZWFzb24gZm9yIHRoYXQgaXMgdGhhdCB5b3UgbmVlZCB0byBlbmFibGUgdGhlIG1hY3JvIHBhcmFkaXNlIHBsdWdpbjsgYW5vdGhlciBwb3NzaWJpbGl0eSBpcyB0aGF0IHlvdSB0cnkgdG8gdXNlIG1hY3JvIGFubm90YXRpb24gaW4gdGhlIHNhbWUgY29tcGlsYXRpb24gcnVuIHRoYXQgZGVmaW5lcyBpdCkiKXNyABR4c2J0aS5hcGkuUHJvamVjdGlvbvPSjVTpRaQtAgACTAACaWRxAH4ADUwABnByZWZpeHQAFkx4c2J0aS9hcGkvU2ltcGxlVHlwZTt4cgAUeHNidGkuYXBpLlNpbXBsZVR5cGVyeGKIISO/QAIAAHhyAA54c2J0aS5hcGkuVHlwZT9q2SEWSarKAgAAeHB0AA9jb21waWxlVGltZU9ubHlzcgATeHNidGkuYXBpLlNpbmdsZXRvbvynX/jPVuRGAgABTAAEcGF0aHQAEEx4c2J0aS9hcGkvUGF0aDt4cQB+AG5zcgAOeHNidGkuYXBpLlBhdGibPVwIzqUnhAIAAVsACmNvbXBvbmVudHN0ABpbTHhzYnRpL2FwaS9QYXRoQ29tcG9uZW50O3hwdXIAGltMeHNidGkuYXBpLlBhdGhDb21wb25lbnQ7Q9oJdC1nFnQCAAB4cAAAAANzcgAMeHNidGkuYXBpLklkmDJsizdTxEACAAFMAAJpZHEAfgANeHIAF3hzYnRpLmFwaS5QYXRoQ29tcG9uZW50X5oiWy6Gn7wCAAB4cHQABXNjYWxhc3EAfgB6dAAKYW5ub3RhdGlvbnNyAA54c2J0aS5hcGkuVGhpc9sJ7abMWkBcAgAAeHEAfgB7c3IAE3hzYnRpLmFwaS5Nb2RpZmllcnOX52HcEyZ7swIAAUIABWZsYWdzeHAAdAAgcGFyYWxsZWxhaS5zb3QubWFjcm9zLlNPVEJ1aWxkZXJ1cgAaW0x4c2J0aS5hcGkuVHlwZVBhcmFtZXRlcjvZbSYPKJ3ytgIAAHhwAAAAAH5yABh4c2J0aS5hcGkuRGVmaW5pdGlvblR5cGUAAAAAAAAAABIAAHhyAA5qYXZhLmxhbmcuRW51bQAAAAAAAAAAEgAAeHB0AAhDbGFzc0RlZnVyABNbTGphdmEubGFuZy5TdHJpbmc7rdJW5+kde0cCAAB4cAAAAAF0ACFzY2FsYS5tZXRhLmludGVybmFsLmlubGluZS5pbmxpbmVzcgAheHNidGkuYXBpLkFic3RyYWN0TGF6eSRTdHJpY3RMYXp5DWYcaykWKrgCAAFMAAV2YWx1ZXQAEkxqYXZhL2xhbmcvT2JqZWN0O3hwc3IAE3hzYnRpLmFwaS5FbXB0eVR5cGW8/Z5GSTuJJAIAAHhxAH4AbnNxAH4AjnNyABN4c2J0aS5hcGkuU3RydWN0dXJlqar5gJNv2AACAANMAAhkZWNsYXJlZHEAfgBVTAAJaW5oZXJpdGVkcQB+AFVMAAdwYXJlbnRzcQB+AFV4cQB+AG9zcQB+AI51cQB+AFAAAAAAc3EAfgCOdXEAfgBQAAAAAHNxAH4AjnVyABFbTHhzYnRpLmFwaS5UeXBlO3T/pVp7+elBAgAAeHAAAAAEc3EAfgBsdAAQU3RhdGljQW5ub3RhdGlvbnNxAH4AcnNxAH4AdXVxAH4AeAAAAANzcQB+AHpxAH4AfXNxAH4AenEAfgB/cQB+AIFzcQB+AGx0AApBbm5vdGF0aW9ucQB+AJ9zcQB+AGx0AAZPYmplY3RzcQB+AHJzcQB+AHV1cQB+AHgAAAADc3EAfgB6dAAEamF2YXNxAH4AenQABGxhbmdxAH4AgXNxAH4AbHQAA0FueXNxAH4AcnNxAH4AdXVxAH4AeAAAAAJzcQB+AHpxAH4AfXEAfgCBc3EAfgBScQB+AF91cQB+AGAAAAAAc3EAfgCCAHQAJ3BhcmFsbGVsYWkuc290Lm1hY3Jvcy5TT1RCdWlsZGVyJGlubGluZXVxAH4AhQAAAAB+cQB+AId0AAZNb2R1bGV1cQB+AIsAAAAAc3EAfgCOcQB+AJJzcQB+AI5zcQB+AJRzcQB+AI51cQB+AFAAAAAAc3EAfgCOdXEAfgBQAAAAAHNxAH4AjnVxAH4AmwAAAAJzcQB+AGxxAH4Ap3NxAH4AcnNxAH4AdXVxAH4AeAAAAANzcQB+AHpxAH4ArHNxAH4AenEAfgCucQB+AIFzcQB+AGxxAH4AsHNxAH4AcnNxAH4AdXVxAH4AeAAAAAJzcQB+AHpxAH4AfXEAfgCBc3EAfgBScQB+AF91cQB+AGAAAAAAc3EAfgCCAHQAJnBhcmFsbGVsYWkuc290Lm1hY3Jvcy5TT1RNYWluTWFjcm9JbXBsdXEAfgCFAAAAAHEAfgC6dXEAfgCLAAAAAHNxAH4AjnEAfgCSc3EAfgCOc3EAfgCUc3EAfgCOdXEAfgBQAAAAAHNxAH4AjnVxAH4AUAAAAABzcQB+AI51cQB+AJsAAAACc3EAfgBscQB+AKdzcQB+AHJzcQB+AHV1cQB+AHgAAAADc3EAfgB6cQB+AKxzcQB+AHpxAH4ArnEAfgCBc3EAfgBscQB+ALBzcQB+AHJzcQB+AHV1cQB+AHgAAAACc3EAfgB6cQB+AH1xAH4AgXVyABRbTHhzYnRpLmFwaS5QYWNrYWdlO1sTGTdwpyehAgAAeHAAAAADc3IAEXhzYnRpLmFwaS5QYWNrYWdlflmP9q7OOVgCAAFMAARuYW1lcQB+AA14cHQACnBhcmFsbGVsYWlzcQB+AO10ABVwYXJhbGxlbGFpLnNvdC5tYWNyb3NzcQB+AO10AA5wYXJhbGxlbGFpLnNvdHNyABV4c2J0aS5hcGkuQ29tcGlsYXRpb27t+uDDauigQgIAAkoACXN0YXJ0VGltZVsAB291dHB1dHN0ABpbTHhzYnRpL2FwaS9PdXRwdXRTZXR0aW5nO3hwAAABXnqnJzd1cgAaW0x4c2J0aS5hcGkuT3V0cHV0U2V0dGluZzt/asLzp4elQgIAAHhwAAAAAXNyABd4c2J0aS5hcGkuT3V0cHV0U2V0dGluZ3rZmkd0+x17AgACTAAPb3V0cHV0RGlyZWN0b3J5cQB+AA1MAA9zb3VyY2VEaXJlY3RvcnlxAH4ADXhwdABNL2hvbWUvcnlhZGgvRGV2L3dvcmtzcGFjZXMvbGFkYnJva2VzL1NPVC9zb3QtbWFjcm9zL3RhcmdldC9zY2FsYS0yLjEyL2NsYXNzZXN0AAEvdXIAAltCrPMX+AYIVOACAAB4cAAAABQPPjQOvGApaZNPYxTmeP08GckRlg==
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> 
+rO0ABXNyABB4c2J0aS5hcGkuU291cmNlSjH5SdlLSkQCAAdJAAdhcGlIYXNoWgAIaGFzTWFjcm9aABBoYXNQYWNrYWdlT2JqZWN0TAAYX2ludGVybmFsT25seV9uYW1lSGFzaGVzdAAkTHhzYnRpL2FwaS9faW50ZXJuYWxPbmx5X05hbWVIYXNoZXM7TAADYXBpdAAVTHhzYnRpL2FwaS9Tb3VyY2VBUEk7TAALY29tcGlsYXRpb250ABdMeHNidGkvYXBpL0NvbXBpbGF0aW9uO1sABGhhc2h0AAJbQnhwOHGK0AAAc3IAInhzYnRpLmFwaS5faW50ZXJuYWxPbmx5X05hbWVIYXNoZXNU2r6Z+tTsTAIAAlsAD2ltcGxpY2l0TWVtYmVyc3QAI1tMeHNidGkvYXBpL19pbnRlcm5hbE9ubHlfTmFtZUhhc2g7WwAOcmVndWxhck1lbWJlcnNxAH4AB3hwdXIAI1tMeHNidGkuYXBpLl9pbnRlcm5hbE9ubHlfTmFtZUhhc2g7SVqAtt2Wi/QCAAB4cAAAAAVzcgAgeHNidGkuYXBpLl9pbnRlcm5hbE9ubHlfTmFtZUhhc2hbDvUidjhXzwIAAkkABGhhc2hMAARuYW1ldAASTGphdmEvbGFuZy9TdHJpbmc7eHBjdjqndAAMY29uZmlnRm9ybWF0c3EAfgALgHjktXQACG9wRm9ybWF0c3EAfgALlcgVL3QAEGF2cm9TY2hlbWFGb3JtYXRzcQB+AAt/5tbqdAAQU2NoZW1hSnNvbkZvcm1hdHNxAH4AC7Osc3l0AA5iaWdRdWVyeUZvcm1hdHVxAH4ACQAAAEBzcQB+AAuoN3/9dAAKZmFtaWx5TmFtZXNxAH4AC8Evutp0AAppbnN0YW5jZUlkc3EAfgALUCcsknQABm5vdGlmeXNxAH4ACyBSvdV0AARyZWFkc3EAfgAL64UmcnQAB3VuYXBwbHlzcQB+AAuoleyCdAAHY3VycmllZHNxAH4ACxOCGgl0AApTY2hlbWFUeXBlc3EAfgAL8vmP8HQABG5hbWVzcQB+AAsTTZSWdAACaW5zcQB+AAsRIbp3dAAEd2FpdHNxAH4AC98dn190AA5jb3B5JGRlZmF1bHQkMnNxAH4AC8NvnIN0AA0kYXNJbnN0YW5jZU9mc3EAfgALZl1wwHQADmNvcHkkZGVmYXVsdCQ1c3EAfgALGNYvjXQADHByb2R1Y3RBcml0eXNxAH4AC8NiMDZ0AAZlcXVhbHNzcQB+AAs14XKHdAAMYXNJbnN0YW5jZU9mc3EAfgAL3t70HnQAElNPVE1hY3JvSnNvbkNvbmZpZ3NxAH4AC1ckuTp0AAxzeW5jaHJvbml6ZWRzcQB+AAuswvvRdAANJGlzSW5zdGFuY2VPZnNxAH4AC5frWAp0ABJCaWdRdWVyeVNjaGVtYVR5cGVzcQB+AAtZg3ZodAAGdHVwbGVkc3EAfgALjYnKnHQAAk9wc3EAfgALE1t62XQACGNhbkVxdWFsc3EAfgALWOcCb3QADmNvcHkkZGVmYXVsdCQ0c3EAfgAL/+1M5XQADXByb2R1Y3RQcmVmaXhzcQB+AAt9/CxPdAAJbm90aWZ5QWxsc3EAfgALtNPycXQAA291dHNxAH4AC3tUUBJ0AAhudW1Ob2Rlc3NxAH4AC2vHb7F0AA1zZXJpYWxpemF0aW9uc3EAfgALjXmk/3QADGlzSW5zdGFuY2VPZnNxAH4AC2BzB8F0AA5TT1RNYWNyb0NvbmZpZ3NxAH4AC1MgCx50ABJCaWdUYWJsZVNjaGVtYVR5cGVzcQB+AAsfQS1MdAAGPGluaXQ+c3EAfgALb7KZ9XQABkNvbmZpZ3NxAH4AC0WFKax0AAZzY2hlbWFzcQB+AAuSCKtidAAFYXBwbHlzcQB+AAsYdLiudAACPT1zcQB+AAspTrhydAAQUHViU3ViU2NoZW1hVHlwZXNxAH4AC7Ksp0t0AAVjbG9uZXNxAH4AC2Je3JF0AAYkaW5pdCRzcQB+AAu6uh6QdAAHdGFibGVJZHNxAH4AC23T1tJ0AAdkYXRhc2V0c3EAfgALeWEFn3QADmNvcHkkZGVmYXVsdCQzc3EAfgAL5UKVWHQABGZ1bmNzcQB+AAv3dyC2dAAEY29weXNxAH4AC2RLkYt0AAh0b1N0cmluZ3NxAH4AC/+fFm50AAhmcm9tSnNvbnNxAH4AC+l061R0AANkYWdzcQB+AAu14WYadAAFc3RlcHNzcQB+AAueRUcYdAACIT1zcQB+AAsq1tdcdAAFdG9waWNzcQB+AAvgnMWzdAAIZ2V0Q2xhc3NzcQB+AAt1yXUhdAAOY29weSRkZWZhdWx0JDFzcQB+AAt4qvY4dAAEdHlwZXNxAH4ACx0EA2R0AAJuZXNxAH4AC4JaY7t0AAJlcXNxAH4AC7o8ebx0AA9wcm9kdWN0SXRlcmF0b3JzcQB+AAu7c7hCdAAFd3JpdGVzcQB+AAtUXidLdAACIyNzcQB+AAv+jEN4dAAIZmluYWxpemVzcQB+AAvUfdm6dAAFdGFibGVzcQB+AAtV9azrdAAOcHJvZHVjdEVsZW1lbnRzcQB+AAt8o/U7dAAIaGFzaENvZGVzcQB+AAvtZJXgdAACb3BzcgATeHNidGkuYXBpLlNvdXJjZUFQSblep/kpIzikAgACWwALZGVmaW5pdGlvbnN0ABdbTHhzYnRpL2FwaS9EZWZpbml0aW9uO1sACHBhY2thZ2VzdAAUW0x4c2J0aS9hcGkvUGFja2FnZTt4cHVyABdbTHhzYnRpLmFwaS5EZWZpbml0aW9uO4jJXOe0414OAgAAeHAAAAACc3IAE3hzYnRpLmFwaS5DbGFzc0xpa2WDNByh37CXbAIABEwADmRlZmluaXRpb25UeXBldAAaTHhzYnRpL2FwaS9EZWZpbml0aW9uVHlwZTtbABBzYXZlZEFubm90YXRpb25zdAATW0xqYXZhL2xhbmcvU3RyaW5nO0wACHNlbGZUeXBldAAQTHhzYnRpL2FwaS9MYXp5O0wACXN0cnVjdHVyZXEAfgCheHIAIXhzYnRpLmFwaS5QYXJhbWV0ZXJpemVkRGVmaW5pdGlvbvkRbrHVUDziAgABWwAOdHlwZVBhcmFtZXRlcnN0ABpbTHhzYnRpL2FwaS9UeXBlUGFyYW1ldGVyO3hyABR4c2J0aS5hcGkuRGVmaW5pdGlvbocqG+hxQuNGAgAETAAGYWNjZXNzdAASTHhzYnRpL2FwaS9BY2Nlc3M7WwALYW5ub3RhdGlvbnN0ABdbTHhzYnRpL2FwaS9Bbm5vdGF0aW9uO0wACW1vZGlmaWVyc3QAFUx4c2J0aS9hcGkvTW9kaWZpZXJzO0wABG5hbWVxAH4ADHhwc3IAEHhzYnRpLmFwaS5QdWJsaWO6WD2ubC1gQgIAAHhyABB4c2J0aS5hcGkuQWNjZXNz3WKa+B1jMUgCAAB4cHVyABdbTHhzYnRpLmFwaS5Bbm5vdGF0aW9uO+uX6xkQ9o1IAgAAeHAAAAAAc3IAE3hzYnRpLmFwaS5Nb2RpZmllcnOX52HcEyZ7swIAAUIABWZsYWdzeHAAdAAkcGFyYWxsZWxhaS5zb3QubWFjcm9zLlNPVE1hY3JvQ29uZmlndXIAGltMeHNidGkuYXBpLlR5cGVQYXJhbWV0ZXI72W0mDyid8rYCAAB4cAAAAAB+cgAYeHNidGkuYXBpLkRlZmluaXRpb25UeXBlAAAAAAAAAAASAAB4cgAOamF2YS5sYW5nLkVudW0AAAAAAAAAABIAAHhwdAAGTW9kdWxldXIAE1tMamF2YS5sYW5nLlN0cmluZzut0lbn6R17RwIAAHhwAAAAAHNyACF4c2J0aS5hcGkuQWJzdHJhY3RMYXp5JFN0cmljdExhenkNZhxrKRYquAIAAUwABXZhbHVldAASTGphdmEvbGFuZy9PYmplY3Q7eHBzcgATeHNidGkuYXBpLkVtcHR5VHlwZbz9nkZJO4kkAgAAeHIAFHhzYnRpLmFwaS5TaW1wbGVUeXBlcnhiiCEjv0ACAAB4cgAOeHNidGkuYXBpLlR5cGU/atkhFkmqygIAAHhwc3EAfgC5c3IAE3hzYnRpLmFwaS5TdHJ1Y3R1cmWpqvmAk2/YAAIAA0wACGRlY2xhcmVkcQB+AKFMAAlpbmhlcml0ZWRxAH4AoUwAB3BhcmVudHNxAH4AoXhxAH4AvnNxAH4AuXVxAH4AnAAAAABzcQB+ALl1cQB+AJwAAAAAc3EAfgC5dXIAEVtMeHNidGkuYXBpLlR5cGU7dP+lWnv56UECAAB4cAAAAAJzcgAUeHNidGkuYXBpLlByb2plY3Rpb27z0o1U6UWkLQIAAkwAAmlkcQB+AAxMAAZwcmVmaXh0ABZMeHNidGkvYXBpL1NpbXBsZVR5cGU7eHEAfgC9dAAGT2JqZWN0c3IAE3hzYnRpLmFwaS5TaW5nbGV0b278p1/4z1bkRgIAAUwABHBhdGh0ABBMeHNidGkvYXBpL1BhdGg7eHEAfgC9c3IADnhzYnRpLmFwaS5QYXRomz1cCM6lJ4QCAAFbAApjb21wb25lbnRzdAAaW0x4c2J0aS9hcGkvUGF0aENvbXBvbmVudDt4cHVyABpbTHhzYnRpLmFwaS5QYXRoQ29tcG9uZW50O0PaCXQtZxZ0AgAAeHAAAAADc3IADHhzYnRpLmFwaS5JZJgybIs3U8RAAgABTAACaWRxAH4ADHhyABd4c2J0aS5hcGkuUGF0aENvbXBvbmVudF+aIlsuhp+8AgAAeHB0AARqYXZhc3EAfgDWdAAEbGFuZ3NyAA54c2J0aS5hcGkuVGhpc9sJ7abMWkBcAgAAeHEAfgDXc3EAfgDKdAADQW55c3EAfgDOc3EAfgDRdXEAfgDUAAAAAnNxAH4A1nQABXNjYWxhcQB+AN1zcQB+AJ5xAH4Aq3VxAH4ArAAAAABzcQB+AK4AdAAocGFyYWxsZWxhaS5zb3QubWFjcm9zLlNPVE1hY3JvSnNvbkNvbmZpZ3VxAH4AsQAAAABxAH4AtXVxAH4AtwAAAABzcQB+ALlxAH4Av3NxAH4AuXNxAH4AwXNxAH4AuXVxAH4AnAAAAABzcQB+ALl1cQB+AJwAAAAAc3EAfgC5dXEAfgDIAAAAAnNxAH4AynEAfgDNc3EAfgDOc3EAfgDRdXEAfgDUAAAAA3NxAH4A1nEAfgDZc3EAfgDWcQB+ANtxAH4A3XNxAH4AynEAfgDfc3EAfgDOc3EAfgDRdXEAfgDUAAAAAnNxAH4A1nEAfgDkcQB+AN11cgAUW0x4c2J0aS5hcGkuUGFja2FnZTtbExk3cKcnoQIAAHhwAAAAA3NyABF4c2J0aS5hcGkuUGFja2FnZX5Zj/auzjlYAgABTAAEbmFtZXEAfgAMeHB0AApwYXJhbGxlbGFpc3EAfgEBdAAVcGFyYWxsZWxhaS5zb3QubWFjcm9zc3EAfgEBdAAOcGFyYWxsZWxhaS5zb3RzcgAVeHNidGkuYXBpLkNvbXBpbGF0aW9u7frgw2rooEICAAJKAAlzdGFydFRpbWVbAAdvdXRwdXRzdAAaW0x4c2J0aS9hcGkvT3V0cHV0U2V0dGluZzt4cAAAAV56pyc3dXIAGltMeHNidGkuYXBpLk91dHB1dFNldHRpbmc7f2rC86eHpUICAAB4cAAAAAFzcgAXeHNidGkuYXBpLk91dHB1dFNldHRpbmd62ZpHdPsdewIAAkwAD291dHB1dERpcmVjdG9yeXEAfgAMTAAPc291cmNlRGlyZWN0b3J5cQB+AAx4cHQATS9ob21lL3J5YWRoL0Rldi93b3Jrc3BhY2VzL2xhZGJyb2tlcy9TT1Qvc290LW1hY3Jvcy90YXJnZXQvc2NhbGEtMi4xMi9jbGFzc2VzdAABL3VyAAJbQqzzF/gGCFTgAgAAeHAAAAAUCvJBP9mhGgzOULBBOZ2DHxEW6xY=
+external apis:
+0 items
+source infos:
+2 items
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroBuilder.scala -> 
+AAAAAAAAAAA=
+/home/ryadh/Dev/workspaces/ladbrokes/SOT/sot-macros/src/main/scala/parallelai/sot/macros/SOTMacroConfig.scala -> 
+AAAAAAAAAAA=
+compilations:
+3 items
+0 -> rO0ABXNyABV4c2J0aS5hcGkuQ29tcGlsYXRpb27t+uDDauigQgIAAkoACXN0YXJ0VGltZVsAB291dHB1dHN0ABpbTHhzYnRpL2FwaS9PdXRwdXRTZXR0aW5nO3hwAAABXnVTqKF1cgAaW0x4c2J0aS5hcGkuT3V0cHV0U2V0dGluZzt/asLzp4elQgIAAHhwAAAAAXNyABd4c2J0aS5hcGkuT3V0cHV0U2V0dGluZ3rZmkd0+x17AgACTAAPb3V0cHV0RGlyZWN0b3J5dAASTGphdmEvbGFuZy9TdHJpbmc7TAAPc291cmNlRGlyZWN0b3J5cQB+AAZ4cHQATS9ob21lL3J5YWRoL0Rldi93b3Jrc3BhY2VzL2xhZGJyb2tlcy9TT1Qvc290LW1hY3Jvcy90YXJnZXQvc2NhbGEtMi4xMi9jbGFzc2VzdAABLw==
+1 -> rO0ABXNyABV4c2J0aS5hcGkuQ29tcGlsYXRpb27t+uDDauigQgIAAkoACXN0YXJ0VGltZVsAB291dHB1dHN0ABpbTHhzYnRpL2FwaS9PdXRwdXRTZXR0aW5nO3hwAAABXnqkbtV1cgAaW0x4c2J0aS5hcGkuT3V0cHV0U2V0dGluZzt/asLzp4elQgIAAHhwAAAAAXNyABd4c2J0aS5hcGkuT3V0cHV0U2V0dGluZ3rZmkd0+x17AgACTAAPb3V0cHV0RGlyZWN0b3J5dAASTGphdmEvbGFuZy9TdHJpbmc7TAAPc291cmNlRGlyZWN0b3J5cQB+AAZ4cHQATS9ob21lL3J5YWRoL0Rldi93b3Jrc3BhY2VzL2xhZGJyb2tlcy9TT1Qvc290LW1hY3Jvcy90YXJnZXQvc2NhbGEtMi4xMi9jbGFzc2VzdAABLw==
+2 -> rO0ABXNyABV4c2J0aS5hcGkuQ29tcGlsYXRpb27t+uDDauigQgIAAkoACXN0YXJ0VGltZVsAB291dHB1dHN0ABpbTHhzYnRpL2FwaS9PdXRwdXRTZXR0aW5nO3hwAAABXnqnJzd1cgAaW0x4c2J0aS5hcGkuT3V0cHV0U2V0dGluZzt/asLzp4elQgIAAHhwAAAAAXNyABd4c2J0aS5hcGkuT3V0cHV0U2V0dGluZ3rZmkd0+x17AgACTAAPb3V0cHV0RGlyZWN0b3J5dAASTGphdmEvbGFuZy9TdHJpbmc7TAAPc291cmNlRGlyZWN0b3J5cQB+AAZ4cHQATS9ob21lL3J5YWRoL0Rldi93b3Jrc3BhY2VzL2xhZGJyb2tlcy9TT1Qvc290LW1hY3Jvcy90YXJnZXQvc2NhbGEtMi4xMi9jbGFzc2VzdAABLw==

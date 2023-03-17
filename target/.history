@@ -1,0 +1,5 @@
+import scala.meta._ 
+test:consoleQuick 
+{file:/home/ryadh/Dev/workspaces/ladbrokes/SOT/}sot-macros/test
+{file:/home/ryadh/Dev/workspaces/ladbrokes/SOT/}sot/clean
+{file:/home/ryadh/Dev/workspaces/ladbrokes/SOT/}sot/test

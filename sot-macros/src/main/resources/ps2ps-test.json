@@ -1,0 +1,129 @@
+{
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "name": "avroschema1",
+      "version": "version2",
+      "definition": {
+        "type": "record",
+        "name": "Message",
+        "namespace": "parallelai.sot.avro",
+        "fields": [
+          {
+            "name": "user",
+            "type": "string",
+            "doc": "Name of the user"
+          },
+          {
+            "name": "teamName",
+            "type": "string",
+            "doc": "Name of the team"
+          },
+          {
+            "name": "score",
+            "type": "int",
+            "doc": "User score"
+          },
+          {
+            "name": "eventTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "eventTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "doc": "A basic schema for storing user records"
+      }
+    },
+    {
+      "type": "avro",
+      "name": "avroschema2",
+      "version": "version2",
+      "definition": {
+        "type": "record",
+        "name": "MessageExtended",
+        "namespace": "parallelai.sot.avro",
+        "fields": [
+          {
+            "name": "user",
+            "type": "string",
+            "doc": "Name of the user"
+          },
+          {
+            "name": "teamName",
+            "type": "string",
+            "doc": "Name of the team"
+          },
+          {
+            "name": "score",
+            "type": "int",
+            "doc": "User score"
+          },
+          {
+            "name": "eventTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "eventTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          },
+          {
+            "name": "count",
+            "type": "int",
+            "doc": "example count"
+          }
+        ],
+        "doc": "A basic schema for storing user records"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "type": "pubsub",
+      "name": "pubsubsource1",
+      "topic": "p2pin"
+    },
+    {
+      "type": "pubsub",
+      "name": "pubsubsource2",
+      "topic": "p2pout"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "name": "in",
+      "schema": "avroschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "transformation",
+      "name": "mapper1",
+      "op": "map",
+      "func": "m => MessageExtended(m.user, m.teamName, m.score, m.eventTime, m.eventTimeStr, 1)"
+    },
+    {
+      "type": "sink",
+      "name": "out",
+      "schema": "avroschema2",
+      "source": "pubsubsource2"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "mapper1"
+    },
+    {
+      "from": "mapper1",
+      "to": "out"
+    }
+  ]
+}

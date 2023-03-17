@@ -1,0 +1,115 @@
+{
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "name": "avroschema1",
+      "version": "version2",
+      "definition": {
+        "type": "record",
+        "name": "Message",
+        "namespace": "parallelai.sot.avro",
+        "fields": [
+          {
+            "name": "user",
+            "type": "string",
+            "doc": "Name of the user"
+          },
+          {
+            "name": "teamName",
+            "type": "string",
+            "doc": "Name of the team"
+          },
+          {
+            "name": "score",
+            "type": "int",
+            "doc": "User score"
+          },
+          {
+            "name": "eventTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "eventTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "doc": "A basic schema for storing user records"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "type": "pubsub",
+      "name": "pubsubsource1",
+      "topic": "p2pin"
+    },
+    {
+      "type": "datastore",
+      "name": "datastoresource1",
+      "kind": "kind1"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "name": "in",
+      "schema": "avroschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "transformation",
+      "name": "mapper1",
+      "op": "map",
+      "func": "m => (m.teamName, m.score.toInt)"
+    },
+    {
+      "type": "transformation",
+      "name": "filter",
+      "op": "filter",
+      "func": "m => m.score > 2"
+    },
+    {
+      "type": "transformation",
+      "name": "mapper2",
+      "op": "map",
+      "func": "m => 'teamscores ->> m._1 :: 'score1 ->> m._2.toString :: 'score2 ->> (m._2 * 0.123) :: HNil"
+    },
+    {
+      "type": "transformation",
+      "name": "sumByKey",
+      "op": "sumByKey",
+      "func": ""
+    },
+    {
+      "type": "sink",
+      "name": "out",
+      "source": "datastoresource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "filter"
+    },
+    {
+      "from": "filter",
+      "to": "mapper1"
+    },
+    {
+      "from": "mapper1",
+      "to": "sumByKey"
+    },
+    {
+      "from": "sumByKey",
+      "to": "mapper2"
+    },
+    {
+      "from": "mapper2",
+      "to": "out"
+    }
+  ]
+}

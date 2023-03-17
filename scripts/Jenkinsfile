@@ -1,0 +1,30 @@
+GITRepository="status-token"
+
+VerticalName="${GITRepository}-service"
+RegistryPath="registry.ipttools.io"
+DockerFile="DockerServiceDescription/Dockerfile"
+MavenSettings="${env.JENKINS_HOME}/settings.xml"
+Maven="/opt/maven/bin/mvn"
+
+node ('docker_env') {
+    stage "Checkout ${GITRepository}"
+    checkout scm
+    def gitBranch = sh(returnStdout: true, script: 'git name-rev --name-only HEAD').trim().tokenize('/').last()
+
+    ImageName = VerticalName + '-' + gitBranch
+    ImagePath = RegistryPath + '/' + ImageName.tr('A-Z','a-z')
+    echo ImagePath
+
+    sh 'docker version'
+    sh "ls -lh ${MavenSettings}"
+    sh "${Maven} -v"
+
+    stage "Build ${GITRepository}.war"
+    sh "${Maven} -f pom.xml -gs ${MavenSettings} install"
+
+    stage "Build and publish ${GITRepository} docker image"
+    pom = readMavenPom file: 'pom.xml'
+    echo 'I have version ' + pom.version
+    sh "docker build -t ${ImagePath}:${pom.version} --pull=true --file=${DockerFile} ."
+    sh "docker push ${ImagePath}:${pom.version}"
+}

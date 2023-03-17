@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    ingress.kubernetes.io/secure-backends: "true"
+  name: sot-executor
+spec:
+  rules:
+  - host: sot-executor-dev.notprod.homeoffice.gov.uk
+    http:
+      paths:
+      - backend:
+          serviceName: sot-executor
+          servicePort: 443
+        path: /
