@@ -7,6 +7,7 @@ import parallelai.sot.executor.model.{SOTMacroJsonConfig, Topology}
 import com.typesafe.config.ConfigFactory
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
 import parallelai.sot.executor.model.SOTMacroJsonConfig._
+import parallelai.sot.macros.SOTMainMacroImpl.getSchemaType
 
 import scala.collection.immutable.Seq
 import scala.meta._
@@ -84,7 +85,6 @@ object SOTMainMacroImpl {
 
     val transformations = transformationsCodeGenerator(config, dag)
 
-    //TODO: rewrite this code once a generic solution is developed for the templates
     val source = dag.getSourceVertices().head
     val sourceOp = SOTMacroHelper.getOp(source, config.steps).asInstanceOf[SourceOp]
 
@@ -92,6 +92,19 @@ object SOTMainMacroImpl {
     val sinkOp = SOTMacroHelper.getOp(sink, config.steps).asInstanceOf[SinkOp]
 
     val builder = argsCodeGenerator(sourceOp, sinkOp, config)
+
+    val typeInGen = Seq(
+      q"""
+         type In = ${getSchemaType(config, sourceOp)}
+       """
+    )
+
+    val typeOutGen = Seq(
+      q"""
+         type Out = ${getSchemaType(config, sinkOp)}
+       """
+    )
+
 
     val readInputGen =
       Seq(
@@ -110,7 +123,7 @@ object SOTMainMacroImpl {
        """)
 
 
-    val syn = parsedSchemas ++ transformations ++ builder ++ statements ++ readInputGen ++ writeOutputGen
+    val syn = parsedSchemas ++ typeInGen ++ typeOutGen ++ transformations ++ builder ++ statements ++ readInputGen ++ writeOutputGen
 
     val x =
       q"""object $name {
@@ -120,28 +133,36 @@ object SOTMainMacroImpl {
     x
   }
 
-  trait SourceCodeGenerator[A] {
-    def generate(config: A): Seq[Defn]
+
+  private def getSchemaType(config: Config, sourceOp: SourceOp) = {
+    SOTMacroHelper.getSchema(sourceOp.schema, config.schemas).definition.name.parse[Type].get
+  }
+  private def getSchemaType(config: Config, sinkOp: SinkOp) = {
+    SOTMacroHelper.getSchema(sinkOp.schema.get, config.schemas).definition.name.parse[Type].get
   }
 
-  object SourceCodeGenerator {
-
-    def apply[A <: TapDefinition](implicit inputGenerator: SourceCodeGenerator[A]) = inputGenerator
-
-    def instance[A <: TapDefinition](func: A => Seq[Defn]): SourceCodeGenerator[A] =
-      new SourceCodeGenerator[A] {
-        def generate(config: A): Seq[Defn] =
-          func(config)
-      }
-
-    implicit def pubSubSource = instance[PubSubTapDefinition](pubSubTap =>
-      Seq(
-      q"""
-         def readInput[In <: HasAvroAnnotation : Manifest](sc: ScioContext) = {
-           sc.typedPubSub[In](${Lit.String(pubSubTap.topic)}, ${Lit.String(pubSubTap.topic)})
-         }
-       """))
+  trait SourceCodeGenerator[A, C] {
+    def generate(config: A, options: C): Seq[Defn]
   }
+
+//  object SourceCodeGenerator {
+//
+//    def apply[A <: TapDefinition, C](implicit inputGenerator: SourceCodeGenerator[A, C]) = inputGenerator
+//
+//    def instance[A <: TapDefinition, C](func: (A, C) => Seq[Defn]): SourceCodeGenerator[A, C] =
+//      new SourceCodeGenerator[A, C] {
+//        def generate(config: A, options: C): Seq[Defn] =
+//          func(config)
+//      }
+//
+//    implicit def pubSubSource = instance[PubSubTapDefinition, ](pubSubTap =>
+//      Seq(
+//      q"""
+//         def readInput[In <: HasAvroAnnotation : Manifest](sc: ScioContext) = {
+//           sc.typedPubSub[In](${Lit.String(pubSubTap.topic)}, ${Lit.String(pubSubTap.topic)})
+//         }
+//       """))
+//  }
 
   /**
     * Generates the code block for
@@ -161,8 +182,9 @@ object SOTMainMacroImpl {
     (sinkSource, sourceSource) match {
       case (i: PubSubTapDefinition, o: BigQueryTapDefinition) =>
         Seq(q"val inArgs = PubSubArgs(topic = ${Lit.String(i.topic)})",
-          q"val outArgs = BigQueryArgs(dataset = ${Lit.String(o.dataset)}, table = ${Lit.String(o.table)})",
-          q"val getBuilder = new ScioBuilderPubSubToBigQuery(transform, inArgs, outArgs)")
+          q"val outArgs = BigQueryArgs(dataset = ${Lit.String(o.dataset)}, table = ${Lit.String(o.table)})")
+//    ,
+//          q"val getBuilder = new ScioBuilderPubSubToBigQuery(transform, inArgs, outArgs)")
       case (i: PubSubTapDefinition, o: PubSubTapDefinition) =>
         Seq(q"val inArgs = PubSubArgs(topic = ${Lit.String(i.topic)})",
           q"val outArgs = PubSubArgs(topic = ${Lit.String(o.topic)})",

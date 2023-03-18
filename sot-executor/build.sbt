@@ -17,6 +17,7 @@ libraryDependencies ++= Seq(
   "me.lyh" %% "shapeless-datatype-core" % "0.1.7",
   "me.lyh" %% "shapeless-datatype-datastore_1.3" % "0.1.7",
   "com.google.cloud" % "google-cloud-datastore" % "1.6.0",
+  "parallelai" %% "sot_executor_model" % "0.1.20",
   "org.scalacheck" %% "scalacheck" % "1.13.5",
   // Logback with slf4j facade
   "ch.qos.logback" % "logback-classic" % "1.2.3",

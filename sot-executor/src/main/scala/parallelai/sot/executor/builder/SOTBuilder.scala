@@ -1,5 +1,6 @@
 package parallelai.sot.executor.builder
 
+import java.io.File
 import java.util.TimeZone
 
 import com.spotify.scio._
@@ -12,19 +13,24 @@ import org.joda.time.{DateTimeZone, Duration, Instant}
 import org.joda.time.format.DateTimeFormat
 import parallelai.sot.executor.common.{SOTOptions, SOTUtils}
 import parallelai.sot.executor.templates._
-import parallelai.sot.macros.SOTBuilder
+import parallelai.sot.macros.{SOTBuilder, SOTMacroHelper}
 import shapeless._
 import syntax.singleton._
 import com.google.datastore.v1.{GqlQuery, Query}
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.streaming.ACCUMULATING_FIRED_PANES
+import com.typesafe.config.ConfigFactory
 import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import org.apache.beam.sdk.transforms.windowing.{AfterProcessingTime, Repeatedly}
 import org.slf4j.LoggerFactory
 import parallelai.sot.executor.builder.SOTBuilder.{readInput, transform, writeOutput}
+import parallelai.sot.executor.model.SOTMacroConfig._
+import parallelai.sot.executor.model.SOTMacroJsonConfig
 import parallelai.sot.executor.utils.AvroUtils
 import parallelai.sot.executor.scio.PaiScioContext._
+
+import scala.meta.Lit
 
 
 /*
@@ -70,32 +76,73 @@ object SOTBuilder {
 //  val getBuilder = new ScioBuilderPubSubToDatastoreWithSchema(transform, inArgs, outArgs, keyBuilder)
 
 
+  class Builder extends Serializable {
 
-  class Builder[In <: HasAvroAnnotation : Manifest, Out <: HasAnnotation : Manifest](transform: SCollection[In] => SCollection[Out], inArgs: PubSubArgs, outArgs: BigQueryArgs) extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
 
-    def execute(opts: SOTOptions, args: Args, exampleUtils: SOTUtils, sc: ScioContext) = {
+    def execute(transform: SCollection[In] => SCollection[Out], outArgs: BigQueryArgs, jobConfig: Config,
+     opts: SOTOptions, args: Args, sotUtils: SOTUtils, sc: ScioContext) = {
+
+      val config = opts.as(classOf[GcpOptions])
+      val (sourceTap, sourceSchema) = getSource(jobConfig)
+      val scIn = sourceTap match {
+        case tap: PubSubTapDefinition => {
+          InputReader[PubSubTapDefinition, GcpOptions, HasAvroAnnotation].read[In](sc, tap, config)
+        }
+      }
+
       val allowedLateness = Duration.standardMinutes(args.int("allowedLateness", 120))
-      val project = opts.as(classOf[GcpOptions]).getProject
-      val scIn = readInput(sc)
-      val in = scIn.withGlobalWindow(WindowOptions(trigger = Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardMinutes(2))), accumulationMode = ACCUMULATING_FIRED_PANES, allowedLateness = allowedLateness))
-      val out = writeOutput(transform(in))
+      val in = scIn.withGlobalWindow(WindowOptions(trigger = Repeatedly.forever(
+        AfterProcessingTime.pastFirstElementInPane().
+          plusDelayOf(Duration.standardMinutes(2))),
+                      accumulationMode = ACCUMULATING_FIRED_PANES,
+                      allowedLateness = allowedLateness)
+      )
+
+      val sColl = transform(in)
+
+      val (sinkTap, sinkSchema) = getSource(jobConfig)
+      sinkTap match {
+        case tap: BigQueryTapDefinition => {
+          OutputWriter[BigQueryTapDefinition, GcpOptions, HasAnnotation].write[Out](sColl, tap, config)
+        }
+      }
+
       val result = sc.close()
-      exampleUtils.waitToFinish(result.internal)
+      sotUtils.waitToFinish(result.internal)
     }
   }
 
-  val genericBuilder = new Builder(transform, inArgs, outArgs)
+
+  def getSource(jobConfig: Config) = {
+    val source = jobConfig.parseDAG().getSourceVertices().head
+    val sourceOp = SOTMacroHelper.getOp(source, jobConfig.steps).asInstanceOf[SourceOp]
+    (SOTMacroHelper.getTap(sourceOp.tap, jobConfig.taps), SOTMacroHelper.getSchema(sourceOp.schema, jobConfig.schemas))
+  }
+
+
+  def getSink(jobConfig: Config) = {
+    val sink = jobConfig.parseDAG().getSinkVertices().head
+    val sinkOp = SOTMacroHelper.getOp(sink, jobConfig.steps).asInstanceOf[SinkOp]
+    (SOTMacroHelper.getTap(sinkOp.tap, jobConfig.taps), SOTMacroHelper.getSchema(sinkOp.schema.get, jobConfig.schemas))
+  }
+
+
+  val source = getClass.getResource("/application.conf").getPath
+  val fileName = ConfigFactory.parseFile(new File(source)).getString("json.file.name")
+  val jobConfig = SOTMacroJsonConfig(fileName)
+
+  val genericBuilder = new Builder
 
   def main(cmdArg: Array[String]): Unit = {
     val parsedArgs = ScioContext.parseArguments[SOTOptions](cmdArg)
     val opts = parsedArgs._1
     val args = parsedArgs._2
     opts.as(classOf[StreamingOptions]).setStreaming(true)
-    val exampleUtils = new SOTUtils(opts)
+    val sotUtils = new SOTUtils(opts)
     val sc = ScioContext(opts)
     val builder = genericBuilder
-    builder.execute(opts, args, exampleUtils, sc)
+    builder.execute(transform, outArgs, jobConfig, opts, args, sotUtils, sc)
   }
 }
 
