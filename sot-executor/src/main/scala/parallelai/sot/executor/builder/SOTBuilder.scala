@@ -24,7 +24,6 @@ import com.typesafe.config.ConfigFactory
 import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import org.apache.beam.sdk.transforms.windowing.{AfterProcessingTime, Repeatedly}
 import org.slf4j.LoggerFactory
-import parallelai.sot.executor.builder.SOTBuilder.{readInput, transform, writeOutput}
 import parallelai.sot.executor.model.SOTMacroConfig._
 import parallelai.sot.executor.model.SOTMacroJsonConfig
 import parallelai.sot.executor.utils.AvroUtils
@@ -84,11 +83,13 @@ object SOTBuilder {
      opts: SOTOptions, args: Args, sotUtils: SOTUtils, sc: ScioContext) = {
 
       val config = opts.as(classOf[GcpOptions])
-      val (sourceTap, sourceSchema) = getSource(jobConfig)
+      val source = getSource(jobConfig)
+      val sourceTap = source._1
       val scIn = sourceTap match {
         case tap: PubSubTapDefinition => {
           InputReader[PubSubTapDefinition, GcpOptions, HasAvroAnnotation].read[In](sc, tap, config)
         }
+        case _ => throw new Exception(s"Unexpected type: ${sourceTap.getClass.getName}")
       }
 
       val allowedLateness = Duration.standardMinutes(args.int("allowedLateness", 120))
@@ -101,11 +102,13 @@ object SOTBuilder {
 
       val sColl = transform(in)
 
-      val (sinkTap, sinkSchema) = getSource(jobConfig)
+      val sink = getSink(jobConfig)
+      val sinkTap = sink._1
       sinkTap match {
         case tap: BigQueryTapDefinition => {
           OutputWriter[BigQueryTapDefinition, GcpOptions, HasAnnotation].write[Out](sColl, tap, config)
         }
+        case _ => throw new Exception(s"Unexpected type: ${sourceTap.getClass.getName}")
       }
 
       val result = sc.close()
