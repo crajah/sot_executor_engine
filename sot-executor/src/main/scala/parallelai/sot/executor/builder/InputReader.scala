@@ -14,7 +14,7 @@ trait InputReader[T, C, A] {
 object InputReader {
   def apply[T, C, A]()(implicit inputReader: InputReader[T, C, A]) = inputReader
 
-  implicit def pubSubReader = new InputReader[PubSubTapDefinition, GcpOptions, HasAvroAnnotation] {
+  implicit def pubSubReader: InputReader[PubSubTapDefinition, GcpOptions, HasAvroAnnotation] = new InputReader[PubSubTapDefinition, GcpOptions, HasAvroAnnotation] {
     def read[In <: HasAvroAnnotation : Manifest](sc: ScioContext, tap: PubSubTapDefinition, config: GcpOptions): SCollection[In] =
       sc.typedPubSub[In](config.getProject, tap.topic)
   }
