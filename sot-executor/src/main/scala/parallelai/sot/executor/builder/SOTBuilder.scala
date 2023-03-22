@@ -101,14 +101,14 @@ object SOTBuilder {
 
     private val logger = LoggerFactory.getLogger(this.getClass)
 
-    def execute(transform: SCollection[In] => SCollection[Out], outArgs: BigQueryArgs, jobConfig: Config,
+    def execute(outArgs: BigQueryArgs, jobConfig: Config,
                 opts: SOTOptions, args: Args, sotUtils: SOTUtils, sc: ScioContext) = {
 
       val config = opts.as(classOf[GcpOptions])
       val source = getSource(jobConfig)
       val sourceTap = source._1
-      val schema = source._2
-      val scIn = schema.definition match {
+      val schemaIn = source._2
+      val scIn = schemaIn.definition match {
         case d: AvroDefinition => {
           val caseType = avroSchemaTypes(d.name)
           sourceTap match {
@@ -118,8 +118,7 @@ object SOTBuilder {
             case _ => throw new Exception(s"Unexpected type: ${sourceTap.getClass.getName}")
           }
         }
-        case _ => throw new Exception(s"Unexpected schema definition: ${schema.getClass}")
-
+        case _ => throw new Exception(s"Unexpected schema definition: ${schemaIn.getClass}")
       }
 
       val allowedLateness = Duration.standardMinutes(args.int("allowedLateness", 120))
@@ -134,12 +133,30 @@ object SOTBuilder {
 
       val sink = getSink(jobConfig)
       val sinkTap = sink._1
-      sinkTap match {
-        case tap: BigQueryTapDefinition => {
-          OutputWriter[BigQueryTapDefinition, GcpOptions, HasAnnotation].write[Out](sColl, tap, config)
+      val schemaOut = sink._2
+
+      schemaOut.definition match {
+        case d: AvroDefinition => {
+          val caseType = avroSchemaTypes(d.name)
+          sinkTap match {
+            case tap: PubSubTapDefinition => {
+              Writer[PubSubTapDefinition, GcpOptions, caseType.A, caseType.T].write(sColl, tap, config)
+            }
+            case _ => throw new Exception(s"Unexpected type: ${sourceTap.getClass.getName}" + schemaOut.definition)
+          }
         }
-        case _ => throw new Exception(s"Unexpected type: ${sourceTap.getClass.getName}")
+        case d: BigQueryTapDefinition => {
+          val caseType = bigquerySchemaTypes(d.name)
+          sinkTap match {
+            case tap: BigQueryTapDefinition => {
+              Writer[BigQueryTapDefinition, GcpOptions, caseType.A, caseType.T].write(sColl, tap, config)
+            }
+            case _ => throw new Exception(s"Unexpected type: ${sourceTap.getClass.getName}")
+          }
+        }
+        case _ => throw new Exception(s"Unexpected schema definition: ${schemaOut.getClass}" + schemaOut.definition)
       }
+
 
       val result = sc.close()
       sotUtils.waitToFinish(result.internal)
@@ -175,7 +192,7 @@ object SOTBuilder {
     val sotUtils = new SOTUtils(opts)
     val sc = ScioContext(opts)
     val builder = genericBuilder
-    builder.execute(transform, outArgs, jobConfig, opts, args, sotUtils, sc)
+    builder.execute(outArgs, jobConfig, opts, args, sotUtils, sc)
   }
 }
 
