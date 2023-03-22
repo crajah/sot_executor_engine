@@ -53,6 +53,9 @@ object Helper {
 }
 
 
+
+
+
 trait SchemaType {
   type A
   type T <: A
@@ -108,7 +111,7 @@ object SOTBuilder {
       val source = getSource(jobConfig)
       val sourceTap = source._1
       val schemaIn = source._2
-      val scIn = schemaIn.definition match {
+      val resultIn = schemaIn.definition match {
         case d: AvroDefinition => {
           val caseType = avroSchemaTypes(d.name)
           sourceTap match {
@@ -122,14 +125,13 @@ object SOTBuilder {
       }
 
       val allowedLateness = Duration.standardMinutes(args.int("allowedLateness", 120))
-      val in = scIn.withGlobalWindow(WindowOptions(trigger = Repeatedly.forever(
+      val in = resultIn.res.withGlobalWindow(WindowOptions(trigger = Repeatedly.forever(
         AfterProcessingTime.pastFirstElementInPane().
           plusDelayOf(Duration.standardMinutes(2))),
         accumulationMode = ACCUMULATING_FIRED_PANES,
         allowedLateness = allowedLateness)
       )
 
-      val sColl = transform(in)
 
       val sink = getSink(jobConfig)
       val sinkTap = sink._1
@@ -138,6 +140,17 @@ object SOTBuilder {
       schemaOut.definition match {
         case d: AvroDefinition => {
           val caseType = avroSchemaTypes(d.name)
+          type In = resultIn.R
+          type Out = caseType.T
+            def transform[In <: Product, Out <: Product](in: SCollection[In]): SCollection[Out] = {
+              val row = in.toRow
+              // row code
+              row.toGeneric
+              in.filter(m => m.score > 2).map(m => (m.teamName, m.score.toInt)).sumByKey.map(m => BigQueryRow(m._1, m._2, Helper.fmt.print(Instant.now())))
+            }
+
+          val sColl = transform(in)
+
           sinkTap match {
             case tap: PubSubTapDefinition => {
               Writer[PubSubTapDefinition, GcpOptions, caseType.A, caseType.T].write(sColl, tap, config)
@@ -147,6 +160,11 @@ object SOTBuilder {
         }
         case d: BigQueryTapDefinition => {
           val caseType = bigquerySchemaTypes(d.name)
+//          type In = resultIn.R
+//          type Out = caseType.T
+
+          val sColl = transform(in)
+
           sinkTap match {
             case tap: BigQueryTapDefinition => {
               Writer[BigQueryTapDefinition, GcpOptions, caseType.A, caseType.T].write(sColl, tap, config)

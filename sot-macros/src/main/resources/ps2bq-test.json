@@ -52,16 +52,6 @@
             "mode": "REQUIRED",
             "name": "user",
             "type": "STRING"
-          },
-          {
-            "mode": "REQUIRED",
-            "name": "total_score",
-            "type": "INTEGER"
-          },
-          {
-            "mode": "REQUIRED",
-            "name": "processing_time",
-            "type": "STRING"
           }
         ]
       }
@@ -91,7 +81,7 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => (m.teamName, m.score.toInt)"
+      "func": "m => val row = Row[In](m).get('user); row.to[Out]"
     },
     {
       "type": "transformation",
@@ -121,22 +111,10 @@
   "dag": [
     {
       "from": "in",
-      "to": "filter"
-    },
-    {
-      "from": "filter",
       "to": "mapper1"
     },
     {
       "from": "mapper1",
-      "to": "sumByKey"
-    },
-    {
-      "from": "sumByKey",
-      "to": "mapper2"
-    },
-    {
-      "from": "mapper2",
       "to": "out"
     }
   ]

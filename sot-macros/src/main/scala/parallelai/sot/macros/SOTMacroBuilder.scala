@@ -56,7 +56,7 @@ object SOTMainMacroImpl {
 
     Seq(
       q"""
-         def transform(in : SCollection[$sourceTypeName]): SCollection[BigQueryRow] = {
+         def transform[In <: Product, Out <: Product](in : SCollection[In]): SCollection[Out] = {
            $transformations
          }
        """)
@@ -107,17 +107,17 @@ object SOTMainMacroImpl {
 
     val builder = argsCodeGenerator(sourceOp, sinkOp, config)
 
-    val typeInGen = Seq()
-//      q"""
-//         type In = ${getSchemaType(config, sourceOp)}
-//       """
-//    )
+    val typeInGen = Seq(
+      q"""
+         type In = ${getSchemaType(config, sourceOp)}
+       """
+    )
 
-    val typeOutGen = Seq()
-//      q"""
-//         type Out = ${getSchemaType(config, sinkOp)}
-//       """
-//    )
+    val typeOutGen = Seq(
+      q"""
+         type Out = ${getSchemaType(config, sinkOp)}
+       """
+    )
 
 
     val readInputGen =
