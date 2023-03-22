@@ -83,6 +83,20 @@ object SOTMainMacroImpl {
       case _ => throw new Exception("Unsupported Schema Type")
     }.flatten
 
+
+    val definitionsSchemasTypes = config.schemas.groupBy(_.`type`).map(x => {
+      x._1 match {
+        case "bigquery" =>
+          schemaTypeValDecl(x._1, x._2, "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation")
+        case "avro" =>
+          schemaTypeValDecl(x._1, x._2, "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation")
+        case "datastore" =>
+          schemaTypeValDecl(x._1, x._2, "parallelai.sot.macros.HasDatastoreAnnotation")
+        case _ => throw new Exception("Unsupported Schema Type")
+      }
+    })
+
+
     val transformations = transformationsCodeGenerator(config, dag)
 
     val source = dag.getSourceVertices().head
@@ -123,7 +137,7 @@ object SOTMainMacroImpl {
        """)
 
 
-    val syn = parsedSchemas ++ typeInGen ++ typeOutGen ++ transformations ++ builder ++ statements ++ readInputGen ++ writeOutputGen
+    val syn = parsedSchemas ++ definitionsSchemasTypes ++ typeInGen ++ typeOutGen ++ transformations ++ builder ++ statements ++ readInputGen ++ writeOutputGen
 
     val x =
       q"""object $name {
@@ -230,7 +244,7 @@ object SOTMainMacroImpl {
     val name = Type.Name(definition.name)
     val block =
       q"""
-        case class $name ( ..$listSchema)
+        case class $name ( ..$listSchema) extends HasDatastoreAnnotation
         """
     Seq(block)
   }
@@ -248,4 +262,20 @@ object SOTMainMacroImpl {
     Term.Block.unapply(block).get
   }
 
+
+  def schemaTypeValDecl(schemaType: String, schemas: List[Schema], annotation: String) = {
+    val args = schemas.map(d => buildSchemaType(d.definition.name, annotation))
+    val mapApply = Term.Apply(Term.Name("Map"), args)
+    val schemaTypesValName = schemaType + "SchemaTypes"
+    val schemaMapName = Pat.Var.Term(Term.Name(schemaTypesValName))
+    q" val ${schemaMapName} = ${mapApply}"
+
+  }
+
+  def buildSchemaType(definitionName: String, annotation: String): Term.ApplyInfix = {
+    q"${Lit.String(definitionName)} -> ${Term.ApplyType(Term.Name("SchemaType"), List(Type.Name(annotation), Type.Name(definitionName)))}"
+  }
+
 }
+
+trait HasDatastoreAnnotation

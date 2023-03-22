@@ -52,27 +52,49 @@ object Helper {
 
 }
 
+
+trait SchemaType {
+  type A
+  type T <: A
+  val m: Manifest[T]
+}
+
+object SchemaType {
+
+  type Aux[A0, T0 <: A0] = SchemaType {type A = A0; type T = T0}
+
+  def apply[A0, T0 <: A0]()(implicit ma: Manifest[T0], ev: T0 <:< A0): SchemaType.Aux[A0, T0] = {
+    new SchemaType() {
+      type T = T0
+      type A = A0
+      val m = ma
+    }
+  }
+}
+
+
 @SOTBuilder
 object SOTBuilder {
 
-//  @AvroType.fromSchema("{\"name\":\"Message\",\"doc\":\"A basic schema for storing user records\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"int\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}],\"type\":\"record\",\"namespace\":\"parallelai.sot.avro\"}")
-//  class Message
-//
-//  case class OutSchemaTest2(teamscores: String, score1x: Int, time: String)
-//
-//  type In = Message
-//  type Out = OutSchemaTest2
-//
-//  def transform(in: SCollection[In]) = {
-//    in.filter(m => m.score > 2).map(m => (m.teamName, m.score.toInt)).sumByKey.
-//      map(m => OutSchemaTest2(m._1, m._2, Helper.fmt.print(Instant.now())))
-//  }
-//
-//  val keyBuilder = (d: OutSchemaTest2) => Left(d.teamscores)
-//
-//  val inArgs = PubSubArgs(topic = "p2pin")
-//  val outArgs = DatastoreArgs("testkindtest2")
-//  val getBuilder = new ScioBuilderPubSubToDatastoreWithSchema(transform, inArgs, outArgs, keyBuilder)
+  //  @AvroType.fromSchema("{\"name\":\"Message\",\"doc\":\"A basic schema for storing user records\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"int\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}],\"type\":\"record\",\"namespace\":\"parallelai.sot.avro\"}")
+  //  class Message
+  //
+  //  case class OutSchemaTest2(teamscores: String, score1x: Int, time: String)
+  //
+  //  type In = Message
+  //  type Out = OutSchemaTest2
+  //
+  //  def transform(in: SCollection[In]) = {
+  //    in.filter(m => m.score > 2).map(m => (m.teamName, m.score.toInt)).sumByKey.
+  //      map(m => OutSchemaTest2(m._1, m._2, Helper.fmt.print(Instant.now())))
+  //  }
+  //
+  //  val keyBuilder = (d: OutSchemaTest2) => Left(d.teamscores)
+  //
+  //  val inArgs = PubSubArgs(topic = "p2pin")
+  //  val outArgs = DatastoreArgs("testkindtest2")
+  //  val getBuilder = new ScioBuilderPubSubToDatastoreWithSchema(transform, inArgs, outArgs, keyBuilder)
+
 
 
   class Builder extends Serializable {
@@ -80,24 +102,32 @@ object SOTBuilder {
     private val logger = LoggerFactory.getLogger(this.getClass)
 
     def execute(transform: SCollection[In] => SCollection[Out], outArgs: BigQueryArgs, jobConfig: Config,
-     opts: SOTOptions, args: Args, sotUtils: SOTUtils, sc: ScioContext) = {
+                opts: SOTOptions, args: Args, sotUtils: SOTUtils, sc: ScioContext) = {
 
       val config = opts.as(classOf[GcpOptions])
       val source = getSource(jobConfig)
       val sourceTap = source._1
-      val scIn = sourceTap match {
-        case tap: PubSubTapDefinition => {
-          InputReader[PubSubTapDefinition, GcpOptions, HasAvroAnnotation].read[In](sc, tap, config)
+      val schema = source._2
+      val scIn = schema.definition match {
+        case d: AvroDefinition => {
+          val caseType = avroSchemaTypes(d.name)
+          sourceTap match {
+            case tap: PubSubTapDefinition => {
+              Reader[PubSubTapDefinition, GcpOptions, caseType.A, caseType.T].read(sc, tap, config)
+            }
+            case _ => throw new Exception(s"Unexpected type: ${sourceTap.getClass.getName}")
+          }
         }
-        case _ => throw new Exception(s"Unexpected type: ${sourceTap.getClass.getName}")
+        case _ => throw new Exception(s"Unexpected schema definition: ${schema.getClass}")
+
       }
 
       val allowedLateness = Duration.standardMinutes(args.int("allowedLateness", 120))
       val in = scIn.withGlobalWindow(WindowOptions(trigger = Repeatedly.forever(
         AfterProcessingTime.pastFirstElementInPane().
           plusDelayOf(Duration.standardMinutes(2))),
-                      accumulationMode = ACCUMULATING_FIRED_PANES,
-                      allowedLateness = allowedLateness)
+        accumulationMode = ACCUMULATING_FIRED_PANES,
+        allowedLateness = allowedLateness)
       )
 
       val sColl = transform(in)
@@ -117,7 +147,7 @@ object SOTBuilder {
   }
 
 
-  def getSource(jobConfig: Config) = {
+  def getSource(jobConfig: Config): (TapDefinition, Schema) = {
     val source = jobConfig.parseDAG().getSourceVertices().head
     val sourceOp = SOTMacroHelper.getOp(source, jobConfig.steps).asInstanceOf[SourceOp]
     (SOTMacroHelper.getTap(sourceOp.tap, jobConfig.taps), SOTMacroHelper.getSchema(sourceOp.schema, jobConfig.schemas))

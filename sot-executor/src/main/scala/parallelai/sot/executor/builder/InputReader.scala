@@ -20,3 +20,19 @@ object InputReader {
   }
 
 }
+
+
+trait Reader[TAP, CONFIG, ANNO, TIN] {
+  def read(sc: ScioContext, tap: TAP, config: CONFIG)(implicit m: Manifest[TIN]): SCollection[TIN]
+}
+
+object Reader {
+  def apply[TAP, CONFIG, ANNO, TIN](implicit reader: Reader[TAP, CONFIG, ANNO, TIN]) = reader
+
+  implicit def pubSubAvroReader[T0 <: HasAvroAnnotation]: Reader[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] = new Reader[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] {
+    def read(sc: ScioContext, tap: PubSubTapDefinition, config: GcpOptions)(implicit m: Manifest[T0]): SCollection[T0] = {
+      sc.typedPubSub[T0](config.getProject, tap.topic)
+
+    }
+  }
+}

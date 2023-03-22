@@ -1,5 +1,6 @@
 package parallelai.sot.executor.builder
 
+import com.spotify.scio.ScioContext
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.values.SCollection
@@ -29,3 +30,19 @@ object OutputWriter {
   }
 
 }
+
+
+
+//trait Writer[TAP, CONFIG, ANNO, TOUT] {
+//  def write(sc: SCollection[TOUT], tap: TAP, config: CONFIG)(implicit m: Manifest[TOUT]): Unit
+//}
+//
+//object Writer {
+//  def apply[TAP, CONFIG, ANNO, TOUT](implicit reader: Writer[TAP, CONFIG, ANNO, TOUT]) = reader
+//
+//  implicit def pubSubAvroReader[T0 <: HasAvroAnnotation]: Writer[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] = new Writer[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] {
+//    def read(sCollection: SCollection[T0], tap: PubSubTapDefinition, config: GcpOptions)(implicit m: Manifest[T0]): Unit = {
+//      sCollection.typedPubSub[T0](config.getProject, tap.topic)
+//    }
+//  }
+//}
