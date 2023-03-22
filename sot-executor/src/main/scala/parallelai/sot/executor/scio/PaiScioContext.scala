@@ -20,4 +20,15 @@ object PaiScioContext {
         .map(f => fromGenericRecord(AvroUtils.decodeAvro(f, schemaString)))
     }
   }
+
+  implicit class PaiScioSCollection[Out <: HasAvroAnnotation : Manifest](c: SCollection[Out]) {
+    def saveAsTypedPubSub(project: String, topic: String): Unit = {
+      val avroT = AvroType[Out]
+      val schemaOut = avroT.schema
+      val toGenericRecordOut = avroT.toGenericRecord
+      val schemaStringOut = schemaOut.toString
+      c.map(r => AvroUtils.encodeAvro(toGenericRecordOut(r), schemaStringOut)).saveAsPubsub(s"projects/${project}/topics/${topic}")
+    }
+  }
+
 }
