@@ -7,29 +7,31 @@ import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition
 import parallelai.sot.executor.scio.PaiScioContext._
 
-trait Reader[TAP, CONFIG, ANNO, TIN] {
-  def read(sc: ScioContext, tap: TAP, config: CONFIG)(implicit m: Manifest[TIN]): Result.Aux[TIN]
+trait Reader[TAP, CONFIG, ANNO, TIN <: ANNO] {
+  def read(sc: ScioContext, tap: TAP, config: CONFIG)(implicit m: Manifest[TIN]): Result.Aux[ANNO, TIN]
 }
 
 object Reader {
-  def apply[TAP, CONFIG, ANNO, TIN](implicit reader: Reader[TAP, CONFIG, ANNO, TIN]) = reader
+  def apply[TAP, CONFIG, ANNO, TIN <: ANNO](implicit reader: Reader[TAP, CONFIG, ANNO, TIN]) = reader
 
   implicit def pubSubAvroReader[T0 <: HasAvroAnnotation]: Reader[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] = new Reader[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] {
-    def read(sc: ScioContext, tap: PubSubTapDefinition, config: GcpOptions)(implicit m: Manifest[T0]): Result.Aux[T0] = {
-      Result.instance(sc.typedPubSub[T0](config.getProject, tap.topic))
+    def read(sc: ScioContext, tap: PubSubTapDefinition, config: GcpOptions)(implicit m: Manifest[T0]): Result.Aux[HasAvroAnnotation, T0] = {
+      Result.instance[HasAvroAnnotation, T0](sc.typedPubSub[T0](config.getProject, tap.topic))
     }
   }
 }
 
 trait Result {
-  type R
+  type A
+  type R <: A
   val res: SCollection[R]
 }
 
 object Result {
-  type Aux[R0] = Result {type R = R0}
+  type Aux[A0, R0 <: A0] = Result {type A = A0; type R = R0}
 
-  implicit def instance[R0](l: SCollection[R0]): Result.Aux[R0] = new Result {
+  implicit def instance[A0, R0 <: A0](l: SCollection[R0]): Result.Aux[A0, R0] = new Result {
+    type A = A0
     type R = R0
     val res = l
   }

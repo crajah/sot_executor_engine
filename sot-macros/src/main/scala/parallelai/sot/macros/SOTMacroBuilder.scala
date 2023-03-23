@@ -2,12 +2,12 @@ package parallelai.sot.macros
 
 import java.io.File
 
-import spray.json._
-import parallelai.sot.executor.model.{SOTMacroJsonConfig, Topology}
 import com.typesafe.config.ConfigFactory
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
 import parallelai.sot.executor.model.SOTMacroJsonConfig._
-import parallelai.sot.macros.SOTMainMacroImpl.getSchemaType
+import parallelai.sot.executor.model.{SOTMacroJsonConfig, Topology}
+import parallelai.sot.macros.SOTMacroHelper._
+import spray.json._
 
 import scala.collection.immutable.Seq
 import scala.meta._
@@ -32,36 +32,6 @@ class SOTBuilder extends scala.annotation.StaticAnnotation with EngineConfig {
 
 object SOTMainMacroImpl {
 
-  /**
-    * Generates the code for the all the operations
-    */
-
-  def transformationsCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Def] = {
-
-    //there should be only one source
-    val sourceOperationName = dag.getSourceVertices().head
-    val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
-      case s: SourceOp => s
-      case _ => throw new Exception("Unsupported source operation")
-    }
-
-    val sourceOpCode = SOTMacroHelper.parseOperation(sourceOperation, dag, config)
-    val ops = SOTMacroHelper.getOps(dag, config, sourceOperationName, List(sourceOpCode)).flatten
-
-    val transformations = SOTMacroHelper.parseExpression(ops)
-
-    val sourceSchema = SOTMacroHelper.getSchema(sourceOperation.schema, config.schemas)
-    val sourceDefName = sourceSchema.definition
-    val sourceTypeName = sourceDefName.name.parse[Type].get
-
-    Seq(
-      q"""
-         def transform[In <: Product, Out <: Product](in : SCollection[In]): SCollection[Out] = {
-           $transformations
-         }
-       """)
-  }
-
   def expand(name: Term.Name, statements: Seq[Stat], config: Config): Defn.Object = {
     val dag = config.parseDAG()
     val parsedSchemas = config.schemas.flatMap {
@@ -83,19 +53,7 @@ object SOTMainMacroImpl {
       case _ => throw new Exception("Unsupported Schema Type")
     }.flatten
 
-
-    val definitionsSchemasTypes = config.schemas.groupBy(_.`type`).map(x => {
-      x._1 match {
-        case "bigquery" =>
-          schemaTypeValDecl(x._1, x._2, "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation")
-        case "avro" =>
-          schemaTypeValDecl(x._1, x._2, "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation")
-        case "datastore" =>
-          schemaTypeValDecl(x._1, x._2, "parallelai.sot.macros.HasDatastoreAnnotation")
-        case _ => throw new Exception("Unsupported Schema Type")
-      }
-    })
-
+    val definitionsSchemasTypes = schemaTypeValDecl(config, dag)
 
     val transformations = transformationsCodeGenerator(config, dag)
 
@@ -105,39 +63,7 @@ object SOTMainMacroImpl {
     val sink = dag.getSinkVertices().head
     val sinkOp = SOTMacroHelper.getOp(sink, config.steps).asInstanceOf[SinkOp]
 
-    val builder = argsCodeGenerator(sourceOp, sinkOp, config)
-
-    val typeInGen = Seq(
-      q"""
-         type In = ${getSchemaType(config, sourceOp)}
-       """
-    )
-
-    val typeOutGen = Seq(
-      q"""
-         type Out = ${getSchemaType(config, sinkOp)}
-       """
-    )
-
-
-    val readInputGen =
-      Seq(
-        q"""
-         def readInput[In <: HasAvroAnnotation : Manifest](sc: ScioContext) = {
-           sc.typedPubSub[In]("bi-crm-poc", "p2pin")
-         }
-       """)
-
-    val writeOutputGen =
-      Seq(
-        q"""
-         def writeOutput[Out <: HasAnnotation : Manifest](sCollection: SCollection[Out]) = {
-           sCollection.saveAsTypedBigQuery("bigquerytest.testtable")
-         }
-       """)
-
-
-    val syn = parsedSchemas ++ definitionsSchemasTypes ++ typeInGen ++ typeOutGen ++ transformations ++ builder ++ statements ++ readInputGen ++ writeOutputGen
+    val syn = parsedSchemas ++ definitionsSchemasTypes ++ transformations ++ statements
 
     val x =
       q"""object $name {
@@ -147,81 +73,50 @@ object SOTMainMacroImpl {
     x
   }
 
-
-  private def getSchemaType(config: Config, sourceOp: SourceOp) = {
-    SOTMacroHelper.getSchema(sourceOp.schema, config.schemas).definition.name.parse[Type].get
-  }
-  private def getSchemaType(config: Config, sinkOp: SinkOp) = {
-    SOTMacroHelper.getSchema(sinkOp.schema.get, config.schemas).definition.name.parse[Type].get
-  }
-
-  trait SourceCodeGenerator[A, C] {
-    def generate(config: A, options: C): Seq[Defn]
-  }
-
-//  object SourceCodeGenerator {
-//
-//    def apply[A <: TapDefinition, C](implicit inputGenerator: SourceCodeGenerator[A, C]) = inputGenerator
-//
-//    def instance[A <: TapDefinition, C](func: (A, C) => Seq[Defn]): SourceCodeGenerator[A, C] =
-//      new SourceCodeGenerator[A, C] {
-//        def generate(config: A, options: C): Seq[Defn] =
-//          func(config)
-//      }
-//
-//    implicit def pubSubSource = instance[PubSubTapDefinition, ](pubSubTap =>
-//      Seq(
-//      q"""
-//         def readInput[In <: HasAvroAnnotation : Manifest](sc: ScioContext) = {
-//           sc.typedPubSub[In](${Lit.String(pubSubTap.topic)}, ${Lit.String(pubSubTap.topic)})
-//         }
-//       """))
-//  }
-
   /**
-    * Generates the code block for
-    * val inArgs = ???
-    * val outArgs = ???
-    * val getBuilder = ???
-    *
-    * @param in
-    * @param out
-    * @return
+    * Generates the code for the all the operations
     */
 
-  def argsCodeGenerator(in: SourceOp, out: SinkOp, config: Config): Seq[Defn] = {
-    val sinkSource = SOTMacroHelper.getTap(in.tap, config.taps)
-    val sourceSource = SOTMacroHelper.getTap(out.tap, config.taps)
+  def transformationsCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Def] = {
 
-    (sinkSource, sourceSource) match {
-      case (i: PubSubTapDefinition, o: BigQueryTapDefinition) =>
-        Seq(q"val inArgs = PubSubArgs(topic = ${Lit.String(i.topic)})",
-          q"val outArgs = BigQueryArgs(dataset = ${Lit.String(o.dataset)}, table = ${Lit.String(o.table)})")
-//    ,
-//          q"val getBuilder = new ScioBuilderPubSubToBigQuery(transform, inArgs, outArgs)")
-      case (i: PubSubTapDefinition, o: PubSubTapDefinition) =>
-        Seq(q"val inArgs = PubSubArgs(topic = ${Lit.String(i.topic)})",
-          q"val outArgs = PubSubArgs(topic = ${Lit.String(o.topic)})",
-          q"val getBuilder = new ScioBuilderPubSubToPubSub(transform, inArgs, outArgs)")
-      case (i: PubSubTapDefinition, o: BigTableTapDefinition) =>
-        val cfValues = o.familyName.map(Lit.String(_))
-        val cfList = Term.Apply(Term.Name("List"), cfValues)
-        Seq(q"val inArgs = PubSubArgs(topic = ${Lit.String(i.topic)})",
-          q"val outArgs = BigTableArgs(instanceId = ${Lit.String(o.instanceId)}, tableId = ${Lit.String(o.tableId)}, familyName = $cfList, numNodes = ${Lit.Int(o.numNodes)})",
-          q"val getBuilder = new ScioBuilderPubSubToBigTable(transform, inArgs, outArgs)")
-      case (i: PubSubTapDefinition, o: DatastoreTapDefinition) =>
+    //there should be only one source
+    val sourceSchema = getSource(config)._1
+    val sourceDefName = sourceSchema.definition
+    val sourceTypeName = sourceDefName.name.parse[Type].get
+    val sourceAnnotation = getSchemaAnnotation(sourceSchema).parse[Type].get
 
-        //check if there is any schema defined for out source
-        val builder = out.schema match {
-          case Some(_) => q"val getBuilder = new ScioBuilderPubSubToDatastoreWithSchema(transform, inArgs, outArgs)"
-          case None => q"val getBuilder = new ScioBuilderPubSubToDatastore(transform, inArgs, outArgs)"
-        }
 
-        Seq(q"val inArgs = PubSubArgs(topic = ${Lit.String(i.topic)})",
-          q"val outArgs = DatastoreArgs(kind = ${Lit.String(o.kind)})", builder)
+    val sinkSchema = getSink(config)._1
+    val sinkDefName = sinkSchema.definition
+    val sinkTypeName = sinkDefName.name.parse[Type].get
+    val sinkAnnotation = getSchemaAnnotation(sinkSchema).parse[Type].get
 
-      case _ => throw new Exception("Unsupported in/out combination")
+    val transformations = geTtransformations(config, dag)
+
+    Seq(
+      q"""
+         implicit def genericTransformation:Transformer[$sourceAnnotation, $sourceTypeName, $sinkAnnotation, $sinkTypeName] = new Transformer[$sourceAnnotation, $sourceTypeName, $sinkAnnotation, $sinkTypeName] {
+           def transform(in: SCollection[$sourceTypeName]): Result.Aux[$sinkAnnotation, $sinkTypeName] = {
+               Result.instance[$sinkAnnotation, $sinkTypeName]({
+                    $transformations
+                }
+               )
+           }
+         }
+       """)
+  }
+
+  private def geTtransformations(config: Config, dag: Topology[String, DAGMapping]): Stat = {
+    val sourceOperationName = dag.getSourceVertices().head
+    val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
+      case s: SourceOp => s
+      case _ => throw new Exception("Unsupported source operation")
     }
+
+    val sourceOpCode = SOTMacroHelper.parseOperation(sourceOperation, dag, config)
+    val ops = SOTMacroHelper.getOps(dag, config, sourceOperationName, List(sourceOpCode)).flatten
+
+    SOTMacroHelper.parseExpression(ops)
   }
 
   def bigQuerySchemaCodeGenerator(definition: BigQueryDefinition): Seq[Stat] = {
@@ -262,20 +157,46 @@ object SOTMainMacroImpl {
     Term.Block.unapply(block).get
   }
 
+  def schemaTypeValDecl(config: Config, dag: Topology[String, DAGMapping]) = {
+    val (sourceSchema, sourceTap) = getSource(config)
+    val (sinkSchema, sinkTap) = getSink(config)
 
-  def schemaTypeValDecl(schemaType: String, schemas: List[Schema], annotation: String) = {
-    val args = schemas.map(d => buildSchemaType(d.definition.name, annotation))
-    val mapApply = Term.Apply(Term.Name("Map"), args)
-    val schemaTypesValName = schemaType + "SchemaTypes"
-    val schemaMapName = Pat.Var.Term(Term.Name(schemaTypesValName))
-    q" val ${schemaMapName} = ${mapApply}"
-
+    val args = List(sourceSchema, sinkSchema).map(sch => (sch.definition.name, getSchemaAnnotation(sch)))
+      .map {
+        case (definitionName, annotation) => Term.ApplyType(Term.Name("SchemaType"), List(Type.Name(annotation), Type.Name(definitionName)))
+      }
+    val configApply = Term.Apply(Term.ApplyType(Term.Name("RunnerConfig"),
+      List(Type.Name(getTapType(sourceTap)),
+        Type.Name("GcpOptions"),
+        Type.Name(getSchemaAnnotation(sourceSchema)),
+        Type.Name(sourceSchema.definition.name),
+        Type.Name(getSchemaAnnotation(sinkSchema)),
+        Type.Name(sinkSchema.definition.name),
+        Type.Name(getTapType(sinkTap)))), args)
+    val schemaMapName = Pat.Var.Term(Term.Name("inOutSchemaHList"))
+    Seq(q" val ${schemaMapName} = ${configApply}::HNil")
   }
 
   def buildSchemaType(definitionName: String, annotation: String): Term.ApplyInfix = {
     q"${Lit.String(definitionName)} -> ${Term.ApplyType(Term.Name("SchemaType"), List(Type.Name(annotation), Type.Name(definitionName)))}"
   }
 
+  def getSchemaAnnotation(schema: Schema) = schema.`type` match {
+    case "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
+    case "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
+    case "datastore" => "parallelai.sot.macros.HasDatastoreAnnotation"
+    case _ => throw new Exception("Unsupported Schema Type " + schema.`type`)
+  }
+
+  private def getTapType(tapDefinition: TapDefinition) = tapDefinition.getClass.getCanonicalName
+
+  private def getSchemaType(config: Config, sourceOp: SourceOp) = {
+    SOTMacroHelper.getSchema(sourceOp.schema, config.schemas).definition.name.parse[Type].get
+  }
+
+  private def getSchemaType(config: Config, sinkOp: SinkOp) = {
+    SOTMacroHelper.getSchema(sinkOp.schema.get, config.schemas).definition.name.parse[Type].get
+  }
 }
 
 trait HasDatastoreAnnotation

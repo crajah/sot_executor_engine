@@ -52,6 +52,16 @@
             "mode": "REQUIRED",
             "name": "user",
             "type": "STRING"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "total_score",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "processing_time",
+            "type": "STRING"
           }
         ]
       }
@@ -61,7 +71,7 @@
     {
       "type": "pubsub",
       "id":  "pubsubsource1",
-      "topic": "p2pout"
+      "topic": "p2pin"
     },
     {
       "type": "bigquery",
@@ -79,12 +89,6 @@
     },
     {
       "type": "transformation",
-      "name": "mapper1",
-      "op": "map",
-      "func": "m => val row = Row[In](m).get('user); row.to[Out]"
-    },
-    {
-      "type": "transformation",
       "name": "filter",
       "op": "filter",
       "func": "m => m.score > 2"
@@ -93,13 +97,7 @@
       "type": "transformation",
       "name": "mapper2",
       "op": "map",
-      "func": "m => BigQueryRow(m._1, m._2, Helper.fmt.print(Instant.now()))"
-    },
-    {
-      "type": "transformation",
-      "name": "sumByKey",
-      "op": "sumByKey",
-      "func": ""
+      "func": "m => BigQueryRow(m.user, m.score, Helper.fmt.print(Instant.now()))"
     },
     {
       "type": "sink",
@@ -111,10 +109,14 @@
   "dag": [
     {
       "from": "in",
-      "to": "mapper1"
+      "to": "filter"
     },
     {
-      "from": "mapper1",
+      "from": "filter",
+      "to": "mapper2"
+    },
+    {
+      "from": "mapper2",
       "to": "out"
     }
   ]

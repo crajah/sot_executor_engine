@@ -89,12 +89,6 @@
     },
     {
       "type": "transformation",
-      "name": "mapper1",
-      "op": "map",
-      "func": "m => (m.teamName, m.score.toInt)"
-    },
-    {
-      "type": "transformation",
       "name": "filter",
       "op": "filter",
       "func": "m => m.score > 2"
@@ -103,13 +97,7 @@
       "type": "transformation",
       "name": "mapper2",
       "op": "map",
-      "func": "m => BigQueryRow(m._1, m._2, Helper.fmt.print(Instant.now()))"
-    },
-    {
-      "type": "transformation",
-      "name": "sumByKey",
-      "op": "sumByKey",
-      "func": ""
+      "func": "m => BigQueryRow(m.user, m.score, Helper.fmt.print(Instant.now()))"
     },
     {
       "type": "sink",
@@ -125,14 +113,6 @@
     },
     {
       "from": "filter",
-      "to": "mapper1"
-    },
-    {
-      "from": "mapper1",
-      "to": "sumByKey"
-    },
-    {
-      "from": "sumByKey",
       "to": "mapper2"
     },
     {
