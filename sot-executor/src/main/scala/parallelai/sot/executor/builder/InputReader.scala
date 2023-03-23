@@ -23,14 +23,14 @@ object Reader {
 
 trait Result {
   type A
-  type R <: A
+  type R
   val res: SCollection[R]
 }
 
 object Result {
-  type Aux[A0, R0 <: A0] = Result {type A = A0; type R = R0}
+  type Aux[A0, R0] = Result {type A = A0; type R = R0}
 
-  implicit def instance[A0, R0 <: A0](l: SCollection[R0]): Result.Aux[A0, R0] = new Result {
+  implicit def instance[A0, R0](l: SCollection[R0]): Result.Aux[A0, R0] = new Result {
     type A = A0
     type R = R0
     val res = l
