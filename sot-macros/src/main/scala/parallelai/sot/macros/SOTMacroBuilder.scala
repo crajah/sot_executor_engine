@@ -5,12 +5,13 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
 import parallelai.sot.executor.model.SOTMacroJsonConfig._
-import parallelai.sot.executor.model.{SOTMacroJsonConfig, Topology}
+import parallelai.sot.executor.model._
 import parallelai.sot.macros.SOTMacroHelper._
 import spray.json._
 
 import scala.collection.immutable.Seq
 import scala.meta._
+
 
 class SOTBuilder extends scala.annotation.StaticAnnotation with EngineConfig {
 
@@ -93,17 +94,24 @@ object SOTMainMacroImpl {
 
     val transformations = geTtransformations(config, dag)
 
-    Seq(
-      q"""
-         implicit def genericTransformation:Transformer[$sourceAnnotation, $sourceTypeName, $sinkAnnotation, $sinkTypeName] = new Transformer[$sourceAnnotation, $sourceTypeName, $sinkAnnotation, $sinkTypeName] {
-           def transform(in: SCollection[$sourceTypeName]): Result.Aux[$sinkAnnotation, $sinkTypeName] = {
-               Result.instance[$sinkAnnotation, $sinkTypeName]({
-                    $transformations
-                }
-               )
-           }
-         }
-       """)
+
+//    implicit def personAvroToJson[IN <: HList, OUTGEN0 <: HList]
+//    (implicit labelledGeneric: LabelledGeneric.Aux[PersonJson, OUTGEN0]): Transformer.Aux[IN, OUTGEN0] = new Transformer[IN] {
+//      type OUTGEN = OUTGEN0
+//      override def transform(in: List[Row[IN]]) = {
+//        List(labelledGeneric.to(new PersonJson("name1")))
+//      }
+//    }
+    Seq()
+//      q"""
+//         implicit def genericTransformation[IN <: HList, OUTGEN0 <: HList](implicit labelledGeneric: LabelledGeneric.Aux[$sinkTypeName, OUTGEN0]):
+//         Transformer.Aux[IN, OUTGEN0] = new Transformer[IN] {
+//           type OUTGEN = OUTGEN0
+//           def transform(in: SCollection[Row[IN]]): SCollection[Row[OUTGEN0]] = {
+//                $transformations
+//           }
+//         }
+//       """)
   }
 
   private def geTtransformations(config: Config, dag: Topology[String, DAGMapping]): Stat = {

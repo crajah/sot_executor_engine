@@ -55,27 +55,37 @@
           },
           {
             "mode": "REQUIRED",
-            "name": "total_score",
+            "name": "teamName",
+            "type": "STRING"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "score",
             "type": "INTEGER"
           },
           {
             "mode": "REQUIRED",
-            "name": "processing_time",
+            "name": "eventTime",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "eventTimeStr",
             "type": "STRING"
           }
         ]
       }
     }
   ],
-  "taps" : [
+  "taps": [
     {
       "type": "pubsub",
-      "id":  "pubsubsource1",
+      "id": "pubsubsource1",
       "topic": "p2pin"
     },
     {
       "type": "bigquery",
-      "id" : "bigquerysource1",
+      "id": "bigquerysource1",
       "dataset": "bigquerytest",
       "table": "streaming_word_extract26"
     }
@@ -91,13 +101,13 @@
       "type": "transformation",
       "name": "filter",
       "op": "filter",
-      "func": "m => m.score > 2"
+      "func": "m => m.get('score) > 2"
     },
     {
       "type": "transformation",
       "name": "mapper2",
       "op": "map",
-      "func": "m => BigQueryRow(m.user, m.score, Helper.fmt.print(Instant.now()))"
+      "func": "m => 'user ->> \"ryadh\"::'teamName ->> \"ryadhteamName\"::'score ->> 10::'eventTime ->> 1111::'eventTimeStr ->> \"1111\"::HNil "
     },
     {
       "type": "sink",
@@ -109,10 +119,6 @@
   "dag": [
     {
       "from": "in",
-      "to": "filter"
-    },
-    {
-      "from": "filter",
       "to": "mapper2"
     },
     {

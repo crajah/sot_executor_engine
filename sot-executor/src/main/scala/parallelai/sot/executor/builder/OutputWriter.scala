@@ -7,6 +7,7 @@ import com.spotify.scio.values.SCollection
 import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, PubSubTapDefinition}
 import parallelai.sot.executor.scio.PaiScioContext._
+import shapeless.{HList, LabelledGeneric}
 trait OutputWriter[T, C, A] {
   def write[Out <: A : Manifest](sCollection: SCollection[Out], tap: T, config: C): Unit
 }
@@ -31,22 +32,22 @@ object OutputWriter {
 
 }
 
-trait Writer[TAP, CONFIG, ANNO, TOUT] {
-  def write(sc: SCollection[TOUT], tap: TAP, config: CONFIG)(implicit m: Manifest[TOUT]): Unit
+trait Writer[TAP, CONFIG, ANNO, TOUT, OUTGEN <: HList] {
+  def write(sc: SCollection[Row[OUTGEN]], tap: TAP, config: CONFIG)(implicit m: Manifest[TOUT]): Unit
 }
 
 object Writer {
-  def apply[TAP, CONFIG, ANNO, TOUT](implicit reader: Writer[TAP, CONFIG, ANNO, TOUT]) = reader
+  def apply[TAP, CONFIG, ANNO, TOUT, OUTGEN <: HList](implicit reader: Writer[TAP, CONFIG, ANNO, TOUT, OUTGEN]) = reader
 
-  implicit def pubSubAvroWrtier[T0 <: HasAvroAnnotation]: Writer[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] = new Writer[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] {
-    def write(sCollection: SCollection[T0], tap: PubSubTapDefinition, config: GcpOptions)(implicit m: Manifest[T0]): Unit = {
-      sCollection.saveAsTypedPubSub(config.getProject, tap.topic)
+  implicit def pubSubAvroWrtier[TOUT <: HasAvroAnnotation, OUTGEN <: HList](implicit lableleGeneric: LabelledGeneric.Aux[TOUT, OUTGEN]): Writer[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, TOUT, OUTGEN] = new Writer[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, TOUT, OUTGEN] {
+    def write(sCollection: SCollection[Row[OUTGEN]], tap: PubSubTapDefinition, config: GcpOptions)(implicit m: Manifest[TOUT]): Unit = {
+      sCollection.map(x => x.to[TOUT]).saveAsTypedPubSub(config.getProject, tap.topic)
     }
   }
 
-  implicit def bigqueryWriter[T0 <: HasAnnotation]: Writer[BigQueryTapDefinition, GcpOptions, HasAnnotation, T0] = new Writer[BigQueryTapDefinition, GcpOptions, HasAnnotation, T0] {
-    def write(sCollection: SCollection[T0], tap: BigQueryTapDefinition, config: GcpOptions)(implicit m: Manifest[T0]): Unit = {
-      sCollection.saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}")
+  implicit def bigqueryWriter[TOUT <: HasAnnotation, OUTGEN <: HList](implicit lableleGeneric: LabelledGeneric.Aux[TOUT, OUTGEN]): Writer[BigQueryTapDefinition, GcpOptions, HasAnnotation, TOUT, OUTGEN] = new Writer[BigQueryTapDefinition, GcpOptions, HasAnnotation, TOUT, OUTGEN] {
+    def write(sCollection: SCollection[Row[OUTGEN]], tap: BigQueryTapDefinition, config: GcpOptions)(implicit m: Manifest[TOUT]): Unit = {
+      sCollection.map(x => x.to[TOUT]).saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}")
     }
   }
 }
