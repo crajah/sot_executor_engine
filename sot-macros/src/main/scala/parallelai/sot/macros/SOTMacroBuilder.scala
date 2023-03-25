@@ -91,22 +91,23 @@ object SOTMainMacroImpl {
     val sinkTypeName = sinkDefName.name.parse[Type].get
     val sinkAnnotation = getSchemaAnnotation(sinkSchema).parse[Type].get
 
-    val transformations = geTtransformations(config, dag)
+    val transformations = geTransformations(config, dag)
+
+    val defTransformations = q"val trans = $transformations"
 
     Seq(
       q"""
          implicit def genericTransformation:Transformer[$sourceAnnotation, $sourceTypeName, $sinkAnnotation, $sinkTypeName] = new Transformer[$sourceAnnotation, $sourceTypeName, $sinkAnnotation, $sinkTypeName] {
-           def transform(in: SCollection[$sourceTypeName]): Result.Aux[$sinkAnnotation, $sinkTypeName] = {
-               Result.instance[$sinkAnnotation, $sinkTypeName]({
-                    $transformations
-                }
-               )
+           def transform(rowIn: SCollection[$sourceTypeName]): SCollection[$sinkTypeName] = {
+                   val in = rowIn.map(r => Row(r))
+                   $defTransformations
+                   trans.map(r => r.to[$sinkTypeName])
            }
          }
        """)
   }
 
-  private def geTtransformations(config: Config, dag: Topology[String, DAGMapping]): Stat = {
+  private def geTransformations(config: Config, dag: Topology[String, DAGMapping]): Term = {
     val sourceOperationName = dag.getSourceVertices().head
     val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
       case s: SourceOp => s

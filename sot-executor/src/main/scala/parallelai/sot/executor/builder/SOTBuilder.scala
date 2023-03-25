@@ -24,7 +24,6 @@ import com.typesafe.config.ConfigFactory
 import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import org.apache.beam.sdk.transforms.windowing.{AfterProcessingTime, Repeatedly}
 import org.slf4j.LoggerFactory
-import parallelai.sot.executor.builder.SOTBuilder.{BigQueryRow, Message}
 import parallelai.sot.executor.model.SOTMacroConfig._
 import parallelai.sot.executor.model.SOTMacroJsonConfig
 import parallelai.sot.executor.utils.AvroUtils
@@ -35,7 +34,7 @@ import scala.meta.Lit
 
 
 /*
-TO RUN THE INCEPTOR
+TO RUN THE INJECTOR
 sbt "sot-executor/runMain parallelai.sot.executor.example.Injector bi-crm-poc p2pin none"
  */
 
@@ -48,24 +47,8 @@ sbt clean compile \
     --zone=europe-west2-a"
 */
 
+@SOTBuilder
 object SOTBuilder {
-
-  @AvroType.fromSchema("{\"type\":\"record\",\"name\":\"Message\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"int\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}]}")
-  class Message
-
-  @BigQueryType.fromSchema("{\"type\":\"bigquerydefinition\",\"name\":\"BigQueryRow\",\"fields\":[{\"mode\":\"REQUIRED\",\"name\":\"user\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"total_score\",\"type\":\"INTEGER\"},{\"mode\":\"REQUIRED\",\"name\":\"processing_time\",\"type\":\"STRING\"}]}")
-  class BigQueryRow
-
-  val inOutSchemaHList = RunnerConfig[parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition, GcpOptions, com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow, parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition](SchemaType[com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message], SchemaType[com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow]) :: HNil
-
-  implicit def genericTransformation: Transformer[com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow] = new Transformer[com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow] {
-    def transform(in: SCollection[Message]): SCollection[BigQueryRow] = {
-      val row = in.map(r => Row(r))
-      val row2 = row.filter{m => m.get('user) == "User"}
-      row2.map(r => BigQueryRow("fdasf", 1, "fdaf"))
-//        .map(m => BigQueryRow(m.user, m.score, Helper.fmt.print(Instant.now())))
-    }
-  }
 
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)

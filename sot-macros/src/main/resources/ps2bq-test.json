@@ -23,7 +23,7 @@
           },
           {
             "name": "score",
-            "type": "int",
+            "type": "long",
             "doc": "User score"
           },
           {
@@ -55,12 +55,32 @@
           },
           {
             "mode": "REQUIRED",
-            "name": "total_score",
+            "name": "teamName",
+            "type": "STRING"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "score",
             "type": "INTEGER"
           },
           {
             "mode": "REQUIRED",
-            "name": "processing_time",
+            "name": "eventTime",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "eventTimeStr",
+            "type": "STRING"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "score2",
+            "type": "FLOAT"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "processingTime",
             "type": "STRING"
           }
         ]
@@ -91,13 +111,19 @@
       "type": "transformation",
       "name": "filter",
       "op": "filter",
-      "func": "m => m.score > 2"
+      "func": "m => m.get('score) > 2"
+    },
+    {
+      "type": "transformation",
+      "name": "mapper1",
+      "op": "map",
+      "func": "m => m.append('score2, m.get('score) * 0.23)"
     },
     {
       "type": "transformation",
       "name": "mapper2",
       "op": "map",
-      "func": "m => BigQueryRow(m.user, m.score, Helper.fmt.print(Instant.now()))"
+      "func": "m => m.append('processingTime, Helper.fmt.print(Instant.now()))"
     },
     {
       "type": "sink",
@@ -112,8 +138,12 @@
       "to": "filter"
     },
     {
-      "from": "filter",
+      "from": "mapper1",
       "to": "mapper2"
+    },
+    {
+      "from": "filter",
+      "to": "mapper1"
     },
     {
       "from": "mapper2",
