@@ -23,7 +23,7 @@
           },
           {
             "name": "score",
-            "type": "int",
+            "type": "long",
             "doc": "User score"
           },
           {
@@ -72,6 +72,16 @@
             "mode": "REQUIRED",
             "name": "eventTimeStr",
             "type": "STRING"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "score2",
+            "type": "FLOAT"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "processingTime",
+            "type": "STRING"
           }
         ]
       }
@@ -105,9 +115,15 @@
     },
     {
       "type": "transformation",
+      "name": "mapper1",
+      "op": "map",
+      "func": "m => m.append('score2, m.get('score) * 0.23)"
+    },
+    {
+      "type": "transformation",
       "name": "mapper2",
       "op": "map",
-      "func": "m => 'user ->> \"ryadh\"::'teamName ->> \"ryadhteamName\"::'score ->> 10::'eventTime ->> 1111::'eventTimeStr ->> \"1111\"::HNil "
+      "func": "m => m.append('processingTime, Helper.fmt.print(Instant.now()))"
     },
     {
       "type": "sink",
@@ -119,7 +135,15 @@
   "dag": [
     {
       "from": "in",
+      "to": "filter"
+    },
+    {
+      "from": "mapper1",
       "to": "mapper2"
+    },
+    {
+      "from": "filter",
+      "to": "mapper1"
     },
     {
       "from": "mapper2",

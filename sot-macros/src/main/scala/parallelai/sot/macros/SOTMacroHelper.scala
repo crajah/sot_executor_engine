@@ -92,7 +92,7 @@ object SOTMacroHelper {
     * Parse expressions from a format List((ex1, a => b), (ex2, b => c))
     * to in.ex1(a => b).ex2(b => c)
     */
-  def parseExpression(ops: List[(Term, Option[Term])], q: Term = q"in"): Stat = {
+  def parseExpression(ops: List[(Term, Option[Term])], q: Term = q"in"): Term = {
     ops match {
       case Nil => q
       case head :: tail => {

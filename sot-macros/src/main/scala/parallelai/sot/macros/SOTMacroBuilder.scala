@@ -92,29 +92,23 @@ object SOTMainMacroImpl {
     val sinkTypeName = sinkDefName.name.parse[Type].get
     val sinkAnnotation = getSchemaAnnotation(sinkSchema).parse[Type].get
 
-    val transformations = geTtransformations(config, dag)
+    val transformations = geTransformations(config, dag)
 
+    val defTransformations = q"val trans = $transformations"
 
-//    implicit def personAvroToJson[IN <: HList, OUTGEN0 <: HList]
-//    (implicit labelledGeneric: LabelledGeneric.Aux[PersonJson, OUTGEN0]): Transformer.Aux[IN, OUTGEN0] = new Transformer[IN] {
-//      type OUTGEN = OUTGEN0
-//      override def transform(in: List[Row[IN]]) = {
-//        List(labelledGeneric.to(new PersonJson("name1")))
-//      }
-//    }
-    Seq()
-//      q"""
-//         implicit def genericTransformation[IN <: HList, OUTGEN0 <: HList](implicit labelledGeneric: LabelledGeneric.Aux[$sinkTypeName, OUTGEN0]):
-//         Transformer.Aux[IN, OUTGEN0] = new Transformer[IN] {
-//           type OUTGEN = OUTGEN0
-//           def transform(in: SCollection[Row[IN]]): SCollection[Row[OUTGEN0]] = {
-//                $transformations
-//           }
-//         }
-//       """)
+    Seq(
+      q"""
+         implicit def genericTransformation:Transformer[$sourceAnnotation, $sourceTypeName, $sinkAnnotation, $sinkTypeName] = new Transformer[$sourceAnnotation, $sourceTypeName, $sinkAnnotation, $sinkTypeName] {
+           def transform(rowIn: SCollection[$sourceTypeName]): SCollection[$sinkTypeName] = {
+                   val in = rowIn.map(r => Row(r))
+                   $defTransformations
+                   trans.map(r => r.to[$sinkTypeName])
+           }
+         }
+       """)
   }
 
-  private def geTtransformations(config: Config, dag: Topology[String, DAGMapping]): Stat = {
+  private def geTransformations(config: Config, dag: Topology[String, DAGMapping]): Term = {
     val sourceOperationName = dag.getSourceVertices().head
     val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
       case s: SourceOp => s

@@ -4,10 +4,8 @@ import com.spotify.scio.values.SCollection
 import shapeless.HList
 
 
-trait Transformer[IN <: HList] {
-  type OUTGEN <: HList
-
-  def transform(sCollection: SCollection[Row[IN]]): SCollection[Row[OUTGEN]]
+trait Transformer[ANNO, TIN <: ANNO, ANNO_OUT, TOUT <: ANNO_OUT] {
+  def transform(sCollection: SCollection[TIN]): SCollection[TOUT]
 }
 
 object Transformer {

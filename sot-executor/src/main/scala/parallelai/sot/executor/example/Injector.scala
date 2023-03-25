@@ -67,7 +67,7 @@ import scala.util.{Failure, Success}
   * </pre>
   */
 
-@AvroType.fromSchema("{\"name\":\"Message\",\"doc\":\"A basic schema for storing user records\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"int\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}],\"type\":\"record\",\"namespace\":\"parallelai.sot.avro\"}")
+@AvroType.fromSchema("{\"name\":\"Message\",\"doc\":\"A basic schema for storing user records\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"long\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}],\"type\":\"record\",\"namespace\":\"parallelai.sot.avro\"}")
 class Message
 
 class Injector(project: String, topicName: Option[String], fileName: Option[String]) {
@@ -177,7 +177,7 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
   /**
     * Add time info to a generated gaming event.
     */
-  def addTimeInfoToEvent(user: String, teamName: String, score: Int, currTime: Long, delayInMillis: Int): GenericRecord = {
+  def addTimeInfoToEvent(user: String, teamName: String, score: Long, currTime: Long, delayInMillis: Int): GenericRecord = {
     val eventTime = (currTime - delayInMillis) / 1000 * 1000
     // Add a (redundant) 'human-readable' date string to make the data semantics more clear.
     val dateString = fmt.print(currTime)

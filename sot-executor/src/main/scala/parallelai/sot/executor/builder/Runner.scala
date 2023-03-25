@@ -29,7 +29,7 @@ object Runner {
     def exec(in: SchemaType.Aux[AIN, IN], out: SchemaType.Aux[AOUT, OUT])(sc: ScioContext, tapIn: TapDefinition, tapOut: TapDefinition, config: CONF): Unit = {
       val typedTapIn = tapIn.asInstanceOf[TAPIN] // oups
       val typedTapOut = tapOut.asInstanceOf[TAPOUT] // oups
-      val read = reader.read(sc, typedTapIn, config)(in.m)
+      val read = reader.read(sc, typedTapIn , config)(in.m)
       val value = transformer.transform(read)
       writer.write(value, typedTapOut, config)(out.m)
     }
