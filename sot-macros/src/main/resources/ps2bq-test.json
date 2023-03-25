@@ -87,15 +87,15 @@
       }
     }
   ],
-  "taps" : [
+  "taps": [
     {
       "type": "pubsub",
-      "id":  "pubsubsource1",
+      "id": "pubsubsource1",
       "topic": "p2pin"
     },
     {
       "type": "bigquery",
-      "id" : "bigquerysource1",
+      "id": "bigquerysource1",
       "dataset": "bigquerytest",
       "table": "streaming_word_extract26"
     }

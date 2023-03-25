@@ -5,12 +5,13 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
 import parallelai.sot.executor.model.SOTMacroJsonConfig._
-import parallelai.sot.executor.model.{SOTMacroJsonConfig, Topology}
+import parallelai.sot.executor.model._
 import parallelai.sot.macros.SOTMacroHelper._
 import spray.json._
 
 import scala.collection.immutable.Seq
 import scala.meta._
+
 
 class SOTBuilder extends scala.annotation.StaticAnnotation with EngineConfig {
 
