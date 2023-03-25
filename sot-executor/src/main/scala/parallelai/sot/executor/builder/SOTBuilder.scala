@@ -48,31 +48,34 @@ sbt clean compile \
     --zone=europe-west2-a"
 */
 
-@SOTBuilder
 object SOTBuilder {
 
-  class Builder extends Serializable {
+  @AvroType.fromSchema("{\"type\":\"record\",\"name\":\"Message\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"int\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}]}")
+  class Message
 
+  @BigQueryType.fromSchema("{\"type\":\"bigquerydefinition\",\"name\":\"BigQueryRow\",\"fields\":[{\"mode\":\"REQUIRED\",\"name\":\"user\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"total_score\",\"type\":\"INTEGER\"},{\"mode\":\"REQUIRED\",\"name\":\"processing_time\",\"type\":\"STRING\"}]}")
+  class BigQueryRow
+
+  val inOutSchemaHList = RunnerConfig[parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition, GcpOptions, com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow, parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition](SchemaType[com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message], SchemaType[com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow]) :: HNil
+
+  implicit def genericTransformation: Transformer[com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow] = new Transformer[com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow] {
+    def transform(in: SCollection[Message]): SCollection[BigQueryRow] = {
+      val row = in.map(r => Row(r))
+      val row2 = row.filter{m => m.get('user) == "User"}
+      row2.map(r => BigQueryRow("fdasf", 1, "fdaf"))
+//        .map(m => BigQueryRow(m.user, m.score, Helper.fmt.print(Instant.now())))
+    }
+  }
+
+  class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
 
     def execute(jobConfig: Config, opts: SOTOptions, args: Args, sotUtils: SOTUtils, sc: ScioContext) = {
-
       val config = opts.as(classOf[GcpOptions])
       val sourceTap = getSource(jobConfig)._2
       val sinkTap = getSink(jobConfig)._2
-
       val runner = inOutSchemaHList.map(Runner1).head
-
-//      val allowedLateness = Duration.standardMinutes(args.int("allowedLateness", 120))
-//      val in = resultIn.res.withGlobalWindow(WindowOptions(trigger = Repeatedly.forever(
-//        AfterProcessingTime.pastFirstElementInPane().
-//          plusDelayOf(Duration.standardMinutes(2))),
-//        accumulationMode = ACCUMULATING_FIRED_PANES,
-//        allowedLateness = allowedLateness)
-//      )
-
       runner(sc, sourceTap, sinkTap, config)
-
       val result = sc.close()
       sotUtils.waitToFinish(result.internal)
     }
@@ -84,7 +87,7 @@ object SOTBuilder {
     SOTMacroJsonConfig(fileName)
   }
 
-  val genericBuilder = new Builder
+  val genericBuilder = new Builder()
 
   def main(cmdArg: Array[String]): Unit = {
     val parsedArgs = ScioContext.parseArguments[SOTOptions](cmdArg)

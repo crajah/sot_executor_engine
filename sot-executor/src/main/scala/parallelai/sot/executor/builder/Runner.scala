@@ -30,8 +30,8 @@ object Runner {
       val typedTapIn = tapIn.asInstanceOf[TAPIN] // oups
       val typedTapOut = tapOut.asInstanceOf[TAPOUT] // oups
       val read = reader.read(sc, typedTapIn , config)(in.m)
-      val value = transformer.transform(read.res)
-      writer.write(value.res, typedTapOut, config)(out.m)
+      val value = transformer.transform(read)
+      writer.write(value, typedTapOut, config)(out.m)
     }
   }
 }
