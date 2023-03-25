@@ -6,7 +6,6 @@ import com.spotify.scio.values.SCollection
 import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition
 import parallelai.sot.executor.scio.PaiScioContext._
-import shapeless.{HList, LabelledGeneric}
 
 trait Reader[TAP, CONFIG, ANNO, TIN <: ANNO] {
   def read(sc: ScioContext, tap: TAP, config: CONFIG)(implicit m: Manifest[TIN]): SCollection[TIN]

@@ -25,17 +25,12 @@ import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import org.apache.beam.sdk.transforms.windowing.{AfterProcessingTime, Repeatedly}
 import org.slf4j.LoggerFactory
 import parallelai.sot.executor.model.SOTMacroConfig._
-import parallelai.sot.executor.model.{Row, SOTMacroJsonConfig, Transformer}
+import parallelai.sot.executor.model.SOTMacroJsonConfig
 import parallelai.sot.executor.utils.AvroUtils
 import parallelai.sot.executor.scio.PaiScioContext._
 import parallelai.sot.macros.SOTMacroHelper._
 
 import scala.meta.Lit
-import shapeless._
-import record._
-import shapeless.labelled.{FieldType, field}
-import syntax.singleton._
-import shapeless.ops.record._
 
 
 /*
@@ -57,7 +52,6 @@ object SOTBuilder {
 
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
-
 
     def execute(jobConfig: Config, opts: SOTOptions, args: Args, sotUtils: SOTUtils, sc: ScioContext) = {
       val config = opts.as(classOf[GcpOptions])

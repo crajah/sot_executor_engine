@@ -98,7 +98,7 @@ object SOTMainMacroImpl {
 
     Seq(
       q"""
-         implicit def genericTransformation:Transformer[$sourceAnnotation, $sourceTypeName, $sinkAnnotation, $sinkTypeName] = new Transformer[$sourceAnnotation, $sourceTypeName, $sinkAnnotation, $sinkTypeName] {
+         implicit def genericTransformation:Transformer[$sourceTypeName, $sinkTypeName] = new Transformer[$sourceTypeName, $sinkTypeName] {
            def transform(rowIn: SCollection[$sourceTypeName]): SCollection[$sinkTypeName] = {
                    val in = rowIn.map(r => Row(r))
                    $defTransformations
