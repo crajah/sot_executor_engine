@@ -22,8 +22,6 @@ class Row[L <: HList](val hl: L) {
 
   def to[Out](implicit gen: LabelledGeneric.Aux[Out, L]): Out = gen.from(hl)
 
-  def apply(k: Witness)(implicit selector: Selector[L, k.T]): selector.Out = selector(hl)
-
   def append[V, Out <: HList](k: Witness, v: V)(implicit updater: Updater.Aux[L, FieldType[k.T, V], Out],
                                                 lk: LacksKey[L, k.T]) : Row[Out] = {
     new Row(updater(hl, field[k.T](v)))
