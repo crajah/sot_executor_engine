@@ -29,13 +29,14 @@ import parallelai.sot.executor.model.SOTMacroJsonConfig
 import parallelai.sot.executor.utils.AvroUtils
 import parallelai.sot.executor.scio.PaiScioContext._
 import parallelai.sot.macros.SOTMacroHelper._
+import parallelai.sot.types.{HasProtoAnnotation, ProtobufType}
 
 import scala.meta.Lit
 
 
 /*
 TO RUN THE INJECTOR
-sbt "sot-executor/runMain parallelai.sot.executor.example.Injector bi-crm-poc p2pin none"
+sbt "sot-executor/runMain parallelai.sot.executor.example.Injector bi-crm-poc p2pin none proto"
  */
 
 /*
