@@ -45,7 +45,7 @@ lazy val `sot-macros` = (project in file("sot-macros"))
     libraryDependencies ++= Seq(
       scalaTest,
       "io.spray" %% "spray-json" % "1.3.3",
-      "parallelai" %% "sot_executor_model" % "0.1.20",
+      "parallelai" %% "sot_executor_model" % "0.1.21",
       "com.typesafe" % "config" % "1.3.1"
     ),
     resolvers ++= Seq[Resolver](
@@ -59,7 +59,8 @@ lazy val `sot-executor` = (project in file("sot-executor"))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(scalaTest),
-    macroSettings
+    macroSettings,
+    resolvers += Resolver.bintrayRepo("beyondthelines", "maven")
   ).dependsOn(`sot-macros`)
 
 lazy val `sot` = (project in file("."))

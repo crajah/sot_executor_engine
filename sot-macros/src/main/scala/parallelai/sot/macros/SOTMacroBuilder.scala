@@ -46,6 +46,11 @@ object SOTMainMacroImpl {
           case av: AvroDefinition => Some(avroSchemaCodeGenerator(av))
           case _ => throw new Exception("Avro does not support this definition")
         }
+      case ps: ProtobufSchema =>
+        ps.definition match {
+          case av: ProtobufDefinition => Some(protoSchemaCodeGenerator(av))
+          case _ => throw new Exception("Protobuf does not support this definition")
+        }
       case ds: DatastoreSchema =>
         ds.definition match {
           case dsd: DatastoreDefinition => Some(datastoreSchemaCodeGeneration(dsd))
@@ -159,6 +164,19 @@ object SOTMainMacroImpl {
     Term.Block.unapply(block).get
   }
 
+  def protoSchemaCodeGenerator(definition: ProtobufDefinition): Seq[Stat] = {
+    val queryString = JsString(definition.toJson.compactPrint).compactPrint
+    val query = queryString.parse[Term].get
+    val className = Type.Name(definition.name)
+
+    val block =
+      q"""
+           `@ProtobufType`.fromSchema($query)
+           class $className
+         """
+    Term.Block.unapply(block).get
+  }
+
   def schemaTypeValDecl(config: Config, dag: Topology[String, DAGMapping]) = {
     val (sourceSchema, sourceTap) = getSource(config)
     val (sinkSchema, sinkTap) = getSink(config)
@@ -187,6 +205,7 @@ object SOTMainMacroImpl {
     case "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
     case "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
     case "datastore" => "parallelai.sot.macros.HasDatastoreAnnotation"
+    case "protobuf" => "parallelai.sot.types.HasProtoAnnotation"
     case _ => throw new Exception("Unsupported Schema Type " + schema.`type`)
   }
 

@@ -68,13 +68,15 @@ import scala.util.{Failure, Success}
   */
 
 @AvroType.fromSchema("{\"name\":\"Message\",\"doc\":\"A basic schema for storing user records\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"long\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}],\"type\":\"record\",\"namespace\":\"parallelai.sot.avro\"}")
-class Message
+class MessageAvro
 
-class Injector(project: String, topicName: Option[String], fileName: Option[String]) {
+case class MessageProto(user: String, teamName: String, score: Long, eventTime: Long, eventTimeStr: String)
+
+class Injector(project: String, topicName: Option[String], fileName: Option[String], serialiser: String) {
 
   require(topicName.isDefined ^ fileName.isDefined)
 
-  val avroT = AvroType[Message]
+  val avroT = AvroType[MessageAvro]
   val schemaStr = avroT.schema.toString
 
   private var pubsub: Pubsub = _
@@ -153,7 +155,7 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
   }
 
   /** Generate a user gaming event. */
-  def generateEvent(currTime: Long, delayInMillis: Int): GenericRecord = {
+  def generateEventProto(currTime: Long, delayInMillis: Int): MessageProto = {
     val team = randomTeam()
 
     val robot = team.robot
@@ -169,7 +171,7 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
         // No robot
         team.getRandomUser
     }
-    val message = addTimeInfoToEvent(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), currTime, delayInMillis)
+    val message = addTimeInfoToEventProto(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), currTime, delayInMillis)
     message
   }
 
@@ -177,22 +179,76 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
   /**
     * Add time info to a generated gaming event.
     */
-  def addTimeInfoToEvent(user: String, teamName: String, score: Long, currTime: Long, delayInMillis: Int): GenericRecord = {
+  def addTimeInfoToEventProto(user: String, teamName: String, score: Long, currTime: Long, delayInMillis: Int): MessageProto = {
     val eventTime = (currTime - delayInMillis) / 1000 * 1000
     // Add a (redundant) 'human-readable' date string to make the data semantics more clear.
     val dateString = fmt.print(currTime)
-    avroT.toGenericRecord(Message(user, teamName, score, eventTime, dateString))
+    MessageProto(user, teamName, score, eventTime, dateString)
+  }
+
+  /** Generate a user gaming event. */
+  def generateEventAvro(currTime: Long, delayInMillis: Int): GenericRecord = {
+    val team = randomTeam()
+
+    val robot = team.robot
+    // If the team has an associated robot team member...
+    val user = robot match {
+      case Some(r) =>
+        // Then use that robot for the message with some probability.
+        // Set this probability to higher than that used to select any of the 'regular' team
+        // members, so that if there is a robot on the team, it has a higher click rate.
+        if (Injector.random.nextInt(team.numMembers / 2) == 0) r
+        else team.getRandomUser
+      case None =>
+        // No robot
+        team.getRandomUser
+    }
+    val message = addTimeInfoToEventAvro(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), currTime, delayInMillis)
+    message
+  }
+
+
+  /**
+    * Add time info to a generated gaming event.
+    */
+  def addTimeInfoToEventAvro(user: String, teamName: String, score: Long, currTime: Long, delayInMillis: Int): GenericRecord = {
+    val eventTime = (currTime - delayInMillis) / 1000 * 1000
+    // Add a (redundant) 'human-readable' date string to make the data semantics more clear.
+    val dateString = fmt.print(currTime)
+    avroT.toGenericRecord(MessageAvro(user, teamName, score, eventTime, dateString))
   }
 
   /**
     * Publish 'numMessages' arbitrary events from live users with the provided delay, to a
     * PubSub topic.
     */
-  def publishData(numMessages: Int, delayInMillis: Int): Unit = {
+  def publishDataAvro(numMessages: Int, delayInMillis: Int): Unit = {
     val pubsubMessages = for (i <- 0 until Math.max(1, numMessages)) yield {
       val currTime = System.currentTimeMillis()
-      val message = generateEvent(currTime, delayInMillis)
+      val message = generateEventAvro(currTime, delayInMillis)
       val pubsubMessage = new PubsubMessage().encodeData(AvroUtils.encodeAvro(message, schemaStr))
+      pubsubMessage.setAttributes(ImmutableMap.of(TIMESTAMP_ATTRIBUTE, ((currTime - delayInMillis) / 1000 * 1000).toString))
+      if (delayInMillis != 0) {
+        println(pubsubMessage.getAttributes())
+        println("late data for: " + message)
+      }
+      pubsubMessage
+    }
+    val publishRequest = new PublishRequest()
+    publishRequest.setMessages(pubsubMessages.asJava)
+    pubsub.projects().topics().publish(topic, publishRequest).execute()
+  }
+
+  def publishDataProto(numMessages: Int, delayInMillis: Int): Unit = {
+
+    import cats.instances.list._
+    import cats.instances.option._
+    import parallelai.sot.executor.protobuf._
+
+    val pubsubMessages = for (i <- 0 until Math.max(1, numMessages)) yield {
+      val currTime = System.currentTimeMillis()
+      val message = generateEventProto(currTime, delayInMillis)
+      val pubsubMessage = new PubsubMessage().encodeData(message.toPB)
       pubsubMessage.setAttributes(ImmutableMap.of(TIMESTAMP_ATTRIBUTE, ((currTime - delayInMillis) / 1000 * 1000).toString))
       if (delayInMillis != 0) {
         println(pubsubMessage.getAttributes())
@@ -214,7 +270,7 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
     try {
       for (i <- 0 until Math.max(1, numMessages)) {
         val currTime = System.currentTimeMillis()
-        val message = generateEvent(currTime, delayInMillis)
+        val message = generateEventAvro(currTime, delayInMillis)
         println(message)
       }
     } catch {
@@ -252,7 +308,11 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
         new Thread() {
           override def run() {
             try {
-              val res = publishData(numMessages, delayInMillis)
+              val res = if (serialiser == "avro") {
+                publishDataAvro(numMessages, delayInMillis)
+              } else if (serialiser == "proto") {
+                publishDataProto(numMessages, delayInMillis)
+              }
             } catch {
               case (e: IOException) => System.err.println(e)
             }
@@ -335,15 +395,16 @@ object Injector {
   def main(args: Array[String]): Unit = {
 
     if (args.length < 3) {
-      println("Usage: Injector project-name (topic-name|none) (filename|none)")
+      println("Usage: Injector project-name (topic-name|none) (filename|none) (avro|proto)")
       System.exit(1)
     }
     val project = args(0)
     val topicName = if (args(1) == "none") None else Some(args(1))
     val fileName = if (args(2) == "none") None else Some(args(2))
+    val serialiser = args(3)
 
     println("Starting Injector")
-    val i = new Injector(project, topicName, fileName)
+    val i = new Injector(project, topicName, fileName, serialiser)
     i.run()
 
   }
