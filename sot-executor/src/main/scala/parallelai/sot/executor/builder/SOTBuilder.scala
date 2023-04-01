@@ -66,8 +66,8 @@ object SOTBuilder {
   }
 
   def loadConfig() = {
-    val configPath = getClass.getResource("/application.conf").getPath
-    val fileName = ConfigFactory.parseFile(new File(configPath)).getString("json.file.name")
+    val configPath = getClass.getResource("/application.conf")
+    val fileName = ConfigFactory.parseURL(configPath).getString("json.file.name")
     SOTMacroJsonConfig(fileName)
   }
 
