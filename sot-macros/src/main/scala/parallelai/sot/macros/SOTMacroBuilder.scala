@@ -13,12 +13,11 @@ import scala.collection.immutable.Seq
 import scala.meta._
 
 
-class SOTBuilder extends scala.annotation.StaticAnnotation with EngineConfig {
+class SOTBuilder extends scala.annotation.StaticAnnotation {
 
   inline def apply(defn: Any): Any = meta {
-    val source = getClass.getResource("/application.conf").getPath
-    val fileName = ConfigFactory.parseFile(new File(source)).getString("json.file.name")
-    val config = SOTMacroJsonConfig(fileName)
+    val filePath = ConfigFactory.parseFile(new File("config/application.conf")).getString("json.file.name")
+    val config = SOTMacroJsonConfig(filePath)
 
     defn match {
       case q"object $name { ..$statements }" =>

@@ -1,0 +1,153 @@
+{
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "id": "avroschema1",
+      "version": "version2",
+      "definition": {
+        "type": "record",
+        "name": "Message",
+        "namespace": "parallelai.sot.avro",
+        "fields": [
+          {
+            "name": "user",
+            "type": "string",
+            "doc": "Name of the user"
+          },
+          {
+            "name": "teamName",
+            "type": "string",
+            "doc": "Name of the team"
+          },
+          {
+            "name": "score",
+            "type": "long",
+            "doc": "User score"
+          },
+          {
+            "name": "eventTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "eventTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "doc": "A basic schema for storing user records"
+      }
+    },
+    {
+      "type": "bigquery",
+      "id": "bigqueryschema1",
+      "version": "version3",
+      "definition": {
+        "type": "bigquerydefinition",
+        "name": "BigQueryRow",
+        "fields": [
+          {
+            "mode": "REQUIRED",
+            "name": "user",
+            "type": "STRING"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "teamName",
+            "type": "STRING"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "score",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "eventTime",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "eventTimeStr",
+            "type": "STRING"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "score2",
+            "type": "FLOAT"
+          },
+          {
+            "mode": "REQUIRED",
+            "name": "processingTime",
+            "type": "STRING"
+          }
+        ]
+      }
+    }
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource1",
+      "topic": "p2pin"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "streaming_word_extract26"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "name": "in",
+      "schema": "avroschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "transformation",
+      "name": "filter",
+      "op": "filter",
+      "func": "m => m.get('score) > 2"
+    },
+    {
+      "type": "transformation",
+      "name": "mapper1",
+      "op": "map",
+      "func": "m => m.append('score2, m.get('score) * 0.23)"
+    },
+    {
+      "type": "transformation",
+      "name": "mapper2",
+      "op": "map",
+      "func": "m => m.append('processingTime, Helper.fmt.print(Instant.now()))"
+    },
+    {
+      "type": "sink",
+      "name": "out",
+      "schema": "bigqueryschema1",
+      "source": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "filter"
+    },
+    {
+      "from": "mapper1",
+      "to": "mapper2"
+    },
+    {
+      "from": "filter",
+      "to": "mapper1"
+    },
+    {
+      "from": "mapper2",
+      "to": "out"
+    }
+  ]
+}
