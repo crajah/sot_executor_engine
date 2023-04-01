@@ -1,6 +1,7 @@
 package parallelai.sot.macros
 
 import java.io.File
+import java.nio.file.FileSystems
 
 import com.typesafe.config.ConfigFactory
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
@@ -13,10 +14,16 @@ import scala.collection.immutable.Seq
 import scala.meta._
 
 
-class SOTBuilder extends scala.annotation.StaticAnnotation {
+class SOTBuilder(resourceName: String) extends scala.annotation.StaticAnnotation {
 
   inline def apply(defn: Any): Any = meta {
-    val filePath = ConfigFactory.parseFile(new File("config/application.conf")).getString("json.file.name")
+
+    val resourcePath = this match {
+      case q"new $_(${Lit.String(resourceName)})" => getClass.getResource("/" + resourceName).getPath
+      case _ => abort("Config path parameter should be a string.")
+    }
+
+    val filePath = ConfigFactory.parseFile(new File(resourcePath)).getString("json.file.name")
     val config = SOTMacroJsonConfig(filePath)
 
     defn match {
@@ -27,7 +34,6 @@ class SOTBuilder extends scala.annotation.StaticAnnotation {
     }
   }
 }
-
 
 
 object SOTMainMacroImpl {
