@@ -1,6 +1,6 @@
 package parallelai.sot.executor.builder
 
-import java.io.File
+import java.io.{File, InputStream}
 import java.util.TimeZone
 
 import com.spotify.scio._
@@ -48,7 +48,7 @@ sbt clean compile \
     --zone=europe-west2-a"
 */
 
-@SOTBuilder
+@SOTBuilder("application.conf")
 object SOTBuilder {
 
   class Builder extends Serializable() {
@@ -66,8 +66,9 @@ object SOTBuilder {
   }
 
   def loadConfig() = {
-    val filePath = ConfigFactory.parseFile(new File("config/application.conf")).getString("json.file.name")
-    SOTMacroJsonConfig(filePath)
+    val configPath = getClass.getResource("/application.conf")
+    val fileName = ConfigFactory.parseURL(configPath).getString("json.file.name")
+    SOTMacroJsonConfig(fileName)
   }
 
   val genericBuilder = new Builder()
