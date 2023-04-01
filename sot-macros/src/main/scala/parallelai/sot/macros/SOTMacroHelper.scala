@@ -1,33 +1,12 @@
 package parallelai.sot.macros
 
-import parallelai.sot.executor.model.SOTMacroConfig.{Source => SOTSource, _}
+import parallelai.sot.executor.model.SOTMacroConfig._
 import parallelai.sot.executor.model.Topology
 
 import scala.meta._
 import scala.meta.Term
 
 object SOTMacroHelper {
-
-  /**
-    * Parse and validate DAG from config file
-    */
-  def validateDag(c: Config) = {
-
-    val dag = c.parseDAG()
-
-    //no in or out-going branches
-    require(dag.findWithOutgoingEdges().isEmpty)
-    require(dag.findWithIncomingEdges().isEmpty)
-
-    //no unconnected vertices
-    require(dag.unconnected == 0)
-
-    //one sink and one source only
-    require(dag.getSourceVertices().size == 1)
-    require(dag.getSinkVertices().size == 1)
-
-    dag
-  }
 
   /**
     * Lookup step for given operation
@@ -45,27 +24,27 @@ object SOTMacroHelper {
   /**
     * Lookup schema for the given name
     */
-  def getSchema(name: String, schemas: List[Schema]): Schema = {
-    require(name.nonEmpty, "Schema name is empty")
+  def getSchema(id: String, schemas: List[Schema]): Schema = {
+    require(id.nonEmpty, "Schema name is empty")
 
-    val schema = schemas.find(_.name == name)
+    val schema = schemas.find(_.id == id)
 
-    require(schema.isDefined, s"Cannot find $name in list of schemas")
+    require(schema.isDefined, s"Cannot find $id in list of schemas")
 
     schema.get
   }
 
   /**
-    * Lookup source for the given name
+    * Lookup tap for the given name
     */
-  def getSource(name: String, sources: List[SOTSource]): SOTSource = {
-    require(name.nonEmpty, "Source name is empty")
+  def getTap(id: String, taps: List[TapDefinition]): TapDefinition = {
+    require(id.nonEmpty, "Source name is empty")
 
-    val source = sources.find(_.name == name)
+    val tap = taps.find(_.id == id)
 
-    require(source.isDefined, s"Cannot find $name in list of sources")
+    require(tap.isDefined, s"Cannot find $id in list of taps")
 
-    source.get
+    tap.get
   }
 
   def parseOperation(operation: OpType, dag: Topology[String, DAGMapping], config: Config): Option[(Term, Option[Term])] = {
@@ -91,14 +70,14 @@ object SOTMacroHelper {
   }
 
   /**
-    * Walk through the dag from the source to the last vertex and look up the
+    * Walk through the dag from the tap to the last vertex and look up the
     */
   //TODO: implement for multiple edges
   def getOps(dag: Topology[String, DAGMapping],
              config: Config,
-             source: String,
+             tap: String,
              ops: List[Option[(Term, Option[Term])]]): List[Option[(Term, Option[Term])]] = {
-    val nextStep = dag.edgeMap.get(source)
+    val nextStep = dag.edgeMap.get(tap)
     nextStep match {
       case Some(ns) =>
         val nextOperation = ns.head.to
@@ -113,7 +92,7 @@ object SOTMacroHelper {
     * Parse expressions from a format List((ex1, a => b), (ex2, b => c))
     * to in.ex1(a => b).ex2(b => c)
     */
-  def parseExpression(ops: List[(Term, Option[Term])], q: Term = q"in"): Stat = {
+  def parseExpression(ops: List[(Term, Option[Term])], q: Term = q"in"): Term = {
     ops match {
       case Nil => q
       case head :: tail => {
@@ -123,6 +102,32 @@ object SOTMacroHelper {
         }
       }
     }
+  }
+
+  def getSource(config: Config): (Schema, TapDefinition) = {
+    val dag = config.parseDAG()
+    val sourceOperationName = dag.getSourceVertices().head
+    val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
+      case s: SourceOp => s
+      case _ => throw new Exception("Unsupported source operation")
+    }
+
+    (SOTMacroHelper.getSchema(sourceOperation.schema, config.schemas), SOTMacroHelper.getTap(sourceOperation.tap, config.taps))
+  }
+
+  def getSink(config: Config): (Schema, TapDefinition) = {
+    val dag = config.parseDAG()
+    val sinkOperationName = dag.getSinkVertices().head
+    val sinkOperation = SOTMacroHelper.getOp(sinkOperationName, config.steps) match {
+      case s: SinkOp => s
+      case _ => throw new Exception("Unsupported sink operation")
+    }
+
+    val sinkOpCode = SOTMacroHelper.parseOperation(sinkOperation, dag, config)
+    val sinkOps = SOTMacroHelper.getOps(dag, config, sinkOperationName, List(sinkOpCode)).flatten
+    val sinkSchema = SOTMacroHelper.getSchema(sinkOperation.schema.get, config.schemas)
+
+    (sinkSchema, SOTMacroHelper.getTap(sinkOperation.tap, config.taps))
   }
 
 }

@@ -23,7 +23,7 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
         )))
 
     val avroDef = AvroDefinition(`type` = "record", name = "MessageExtended", namespace = "parallelai.sot.avro", fields = avroFields)
-    val in = AvroSchema(`type` = "avro", name = "inschema1", version = "", definition = avroDef)
+    val in = AvroSchema(`type` = "avro", id =  "inschema1", version = "", definition = avroDef)
 
     val bqFields = JsArray(JsObject(Map(
       "mode" -> JsString("REQUIRED"),
@@ -37,13 +37,13 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
       )))
 
     val bqDefinition = BigQueryDefinition(`type` = "bigquerydefinition", name = "BigQueryRow", fields = bqFields)
-    val out = BigQuerySchema(`type` = "bigquery", name = "outschema1", version = "", definition = bqDefinition)
+    val out = BigQuerySchema(`type` = "bigquery", id =  "outschema1", version = "", definition = bqDefinition)
 
     val schemas = List(in, out)
 
-    val sources = List(
-      PubSubSource(`type` = "pubsub", name = "insource", topic = "p2pin"),
-      BigQuerySource(`type` = "bigquery", name = "outsource", dataset = "dataset1", table = "table1")
+    val taps = List(
+      PubSubTapDefinition(`type` = "pubsub", id = "insource", topic = "p2pin"),
+      BigQueryTapDefinition(`type` = "bigquery", id =  "outsource", dataset = "dataset1", table = "table1")
     )
 
     val dag = List(
@@ -52,12 +52,12 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
     )
 
     val steps = List(
-      SourceOp(`type` = "source", name = "in", schema = "inschema1", source = "insource"),
+      SourceOp(`type` = "source", name = "in", schema = "inschema1", tap = "insource"),
       TransformationOp(`type` = "transformation", name = "mapper1", op = "map", func = "m => BigQueryRow(m, (m.name, m.count))"),
-      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), source = "outsource")
+      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), tap = "outsource")
     )
 
-    val config = Config(name = "", version = "", schemas = schemas, sources = sources, dag = dag, steps = steps)
+    val config = Config(name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
 
     val expectedBlock =
       q"""
@@ -89,13 +89,13 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
         )))
 
     val avroDef = AvroDefinition(`type` = "record", name = "MessageExtended", namespace = "parallelai.sot.avro", fields = avroFields)
-    val in = AvroSchema(`type` = "avro", name = "inschema1", version = "", definition = avroDef)
+    val in = AvroSchema(`type` = "avro", id =  "inschema1", version = "", definition = avroDef)
 
     val schemas = List(in)
 
-    val sources = List(
-      PubSubSource(`type` = "pubsub", name = "insource", topic = "p2pin"),
-      BigTableSource(`type` = "bigtable", name = "outsource", instanceId = "biBigTablegtable-test", tableId = "bigquerytest", familyName = List("cf"), numNodes = 3)
+    val taps = List(
+      PubSubTapDefinition(`type` = "pubsub", id = "insource", topic = "p2pin"),
+      BigTableTapDefinition(`type` = "bigtable", id =  "outsource", instanceId = "biBigTablegtable-test", tableId = "bigquerytest", familyName = List("cf"), numNodes = 3)
     )
 
     val dag = List(
@@ -103,12 +103,12 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
       DAGMapping(from = "mapper1", to = "out")
     )
     val steps = List(
-      SourceOp(`type` = "source", name = "in", schema = "inschema1", source = "insource"),
+      SourceOp(`type` = "source", name = "in", schema = "inschema1", tap = "insource"),
       TransformationOp(`type` = "transformation", name = "mapper1", op = "map", func = "m => BigTableRecord(m, (\"cf\", \"name\", m.name))"),
-      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), source = "outsource")
+      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), tap = "outsource")
     )
 
-    val config = Config(name = "", version = "", schemas = schemas, sources = sources, dag = dag, steps = steps)
+    val config = Config(name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
 
     val expectedBlock =
       q"""
@@ -136,14 +136,14 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
           "type" -> JsString("in")
         )))
     val avroDef = AvroDefinition(`type` = "record", name = "MessageExtended", namespace = "parallelai.sot.avro", fields = avroFields)
-    val in = AvroSchema(`type` = "PubSub", name = "inschema1", version = "", definition = avroDef)
+    val in = AvroSchema(`type` = "PubSub", id =  "inschema1", version = "", definition = avroDef)
 
 
     val schemas = List(in)
 
-    val sources = List(
-      PubSubSource(`type` = "pubsub", name = "insource", topic = "p2pin"),
-      DatastoreSource(`type` = "datastore", name = "outsource", kind = "kind1")
+    val taps = List(
+      PubSubTapDefinition(`type` = "pubsub", id =  "insource", topic = "p2pin"),
+      DatastoreTapDefinition(`type` = "datastore", id =  "outsource", kind = "kind1")
     )
 
     val dag = List(
@@ -151,12 +151,12 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
       DAGMapping(from = "mapper1", to = "out")
     )
     val steps = List(
-      SourceOp(`type` = "source", name = "in", schema = "inschema1", source = "insource"),
+      SourceOp(`type` = "source", name = "in", schema = "inschema1", tap = "insource"),
       TransformationOp(`type` = "transformation", name = "mapper1", op = "map", func = "m => 'teamscores ->> m._1 :: 'score1 ->> m._2.toString :: 'score2 ->> (m._2 * 2) :: HNil"),
-      SinkOp(`type` = "sink", name = "out", schema = None, source = "outsource")
+      SinkOp(`type` = "sink", name = "out", schema = None, tap = "outsource")
     )
 
-    val config = Config(name = "", version = "", schemas = schemas, sources = sources, dag = dag, steps = steps)
+    val config = Config(name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
 
     val expectedBlock =
       q"""
@@ -185,18 +185,18 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
         )))
     val avroDef = AvroDefinition(`type` = "record", name = "MessageExtended", namespace = "parallelai.sot.avro", fields = avroFields)
 
-    val in = AvroSchema(`type` = "avro", name = "inschema1", version = "", definition = avroDef)
+    val in = AvroSchema(`type` = "avro", id =  "inschema1", version = "", definition = avroDef)
     val dsSchema = DatastoreDefinition(`type` = "datastoredefinition", name = "OutputSchema",
       fields = List(
         DatastoreDefinitionField(name = "key", `type` = "String"),
         DatastoreDefinitionField(name = "value1", `type` = "String"),
         DatastoreDefinitionField(name = "value2", `type` = "Double")))
-    val out = DatastoreSchema(`type` = "datastore", version = "", definition = dsSchema, name = "outschema1")
+    val out = DatastoreSchema(`type` = "datastore", version = "", definition = dsSchema, id =  "outschema1")
     val schemas = List(in, out)
 
-    val sources = List(
-      PubSubSource(`type` = "pubsub", name = "insource", topic = "p2pin"),
-      DatastoreSource(`type` = "datastore", name = "outsource", kind = "kind1")
+    val taps = List(
+      PubSubTapDefinition(`type` = "pubsub", id =  "insource", topic = "p2pin"),
+      DatastoreTapDefinition(`type` = "datastore", id =  "outsource", kind = "kind1")
     )
 
     val dag = List(
@@ -204,12 +204,12 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
       DAGMapping(from = "mapper1", to = "out")
     )
     val steps = List(
-      SourceOp(`type` = "source", name = "in", schema = "inschema1", source = "insource"),
+      SourceOp(`type` = "source", name = "in", schema = "inschema1", tap = "insource"),
       TransformationOp(`type` = "transformation", "mapper1", "map", "m => OutputSchema(m._1, m._2.toString,(m._2 * 2))"),
-      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), source = "outsource")
+      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), tap = "outsource")
     )
 
-    val config = Config(name = "", version = "", schemas = schemas, sources = sources, dag = dag, steps = steps)
+    val config = Config(name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
 
     val expectedBlock =
       q"""
@@ -238,7 +238,7 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
           "type" -> JsString("in")
         )))
     val avroDefIn = AvroDefinition(`type` = "record", name = "Message", namespace = "parallelai.sot.avro", fields = avroFieldsIn)
-    val in = AvroSchema(`type` = "PubSub", name = "inschema1", version = "", definition = avroDefIn)
+    val in = AvroSchema(`type` = "PubSub", id =  "inschema1", version = "", definition = avroDefIn)
 
     val avroFieldsOut =
       JsArray(JsObject(Map(
@@ -250,13 +250,13 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
           "type" -> JsString("in")
         )))
     val avroDefOut = AvroDefinition(`type` = "record", name = "MessageExtended", namespace = "parallelai.sot.avro", fields = avroFieldsOut)
-    val out = AvroSchema(`type` = "PubSub", name = "outschema1", version = "", definition = avroDefOut)
+    val out = AvroSchema(`type` = "PubSub", id =  "outschema1", version = "", definition = avroDefOut)
 
     val schemas = List(in, out)
 
-    val sources = List(
-      PubSubSource(`type` = "pubsub", name = "source1", topic = "p2pin"),
-      PubSubSource(`type` = "pubsub", name = "source2", topic = "p2pout")
+    val taps = List(
+      PubSubTapDefinition(`type` = "pubsub", id =  "source1", topic = "p2pin"),
+      PubSubTapDefinition(`type` = "pubsub", id =  "source2", topic = "p2pout")
     )
 
     val dag = List(
@@ -264,12 +264,12 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
       DAGMapping(from = "mapper1", to = "out")
     )
     val steps = List(
-      SourceOp(`type` = "source", name = "in", schema = "inschema1", source = "source1"),
+      SourceOp(`type` = "source", name = "in", schema = "inschema1", tap = "source1"),
       TransformationOp(`type` = "transformation", "mapper1", "map", "m => MessageExtended(m._1, m._2.toString,(m._2 * 2))"),
-      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), source = "source2")
+      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), tap = "source2")
     )
 
-    val config = Config(name = "", version ="", schemas = schemas, sources = sources, dag = dag, steps = steps)
+    val config = Config(name = "", version ="", schemas = schemas, taps = taps, dag = dag, steps = steps)
 
     val expectedBlock =
       q"""
@@ -291,8 +291,7 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
   def assertEqualStructure(config: Config, expectedBlock: Term.Block): Assertion = {
     val rs = q"object Test { val x =1 }" match {
       case q"object $name { ..$stats }" =>
-        val dag = config.parseDAG()
-        SOTMainMacroImpl.expand(name, stats, config, dag)
+        SOTMainMacroImpl.expand(name, stats, config)
     }
 
     val stats = rs.templ.stats.get

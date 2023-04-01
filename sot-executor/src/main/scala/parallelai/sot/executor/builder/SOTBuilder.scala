@@ -1,26 +1,42 @@
 package parallelai.sot.executor.builder
 
+import java.io.File
 import java.util.TimeZone
 
 import com.spotify.scio._
 import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.bigquery.BigQueryType
-import com.spotify.scio.values.SCollection
+import com.spotify.scio.values.{SCollection, WindowOptions}
 import org.apache.beam.sdk.io.gcp.datastore.DatastoreIO
 import org.apache.beam.sdk.options.StreamingOptions
 import org.joda.time.{DateTimeZone, Duration, Instant}
 import org.joda.time.format.DateTimeFormat
 import parallelai.sot.executor.common.{SOTOptions, SOTUtils}
 import parallelai.sot.executor.templates._
-import parallelai.sot.macros.SOTBuilder
+import parallelai.sot.macros.{SOTBuilder, SOTMacroHelper}
 import shapeless._
 import syntax.singleton._
 import com.google.datastore.v1.{GqlQuery, Query}
+import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
+import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
+import com.spotify.scio.streaming.ACCUMULATING_FIRED_PANES
+import com.typesafe.config.ConfigFactory
+import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
+import org.apache.beam.sdk.transforms.windowing.{AfterProcessingTime, Repeatedly}
+import org.slf4j.LoggerFactory
+import parallelai.sot.executor.model.SOTMacroConfig._
+import parallelai.sot.executor.model.SOTMacroJsonConfig
+import parallelai.sot.executor.utils.AvroUtils
+import parallelai.sot.executor.scio.PaiScioContext._
+import parallelai.sot.macros.SOTMacroHelper._
+import parallelai.sot.types.{HasProtoAnnotation, ProtobufType}
+
+import scala.meta.Lit
 
 
 /*
-TO RUN THE INCEPTOR
-sbt "sot-executor/runMain parallelai.sot.executor.example.Injector bi-crm-poc p2pin none"
+TO RUN THE INJECTOR
+sbt "sot-executor/runMain parallelai.sot.executor.example.Injector bi-crm-poc p2pin none proto"
  */
 
 /*
@@ -32,43 +48,39 @@ sbt clean compile \
     --zone=europe-west2-a"
 */
 
-object Helper {
-  def fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS")
-    .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone("PST")))
-
-}
-
 @SOTBuilder
 object SOTBuilder {
 
-//  @AvroType.fromSchema("{\"name\":\"Message\",\"doc\":\"A basic schema for storing user records\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"int\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}],\"type\":\"record\",\"namespace\":\"parallelai.sot.avro\"}")
-//  class Message
-//
-//  case class OutSchemaTest2(teamscores: String, score1x: Int, time: String)
-//
-//  type In = Message
-//  type Out = OutSchemaTest2
-//
-//  def transform(in: SCollection[In]) = {
-//    in.filter(m => m.score > 2).map(m => (m.teamName, m.score.toInt)).sumByKey.
-//      map(m => OutSchemaTest2(m._1, m._2, Helper.fmt.print(Instant.now())))
-//  }
-//
-//  val keyBuilder = (d: OutSchemaTest2) => Left(d.teamscores)
-//
-//  val inArgs = PubSubArgs(topic = "p2pin")
-//  val outArgs = DatastoreArgs("testkindtest2")
-//  val getBuilder = new ScioBuilderPubSubToDatastoreWithSchema(transform, inArgs, outArgs, keyBuilder)
+  class Builder extends Serializable() {
+    private val logger = LoggerFactory.getLogger(this.getClass)
+
+    def execute(jobConfig: Config, opts: SOTOptions, args: Args, sotUtils: SOTUtils, sc: ScioContext) = {
+      val config = opts.as(classOf[GcpOptions])
+      val sourceTap = getSource(jobConfig)._2
+      val sinkTap = getSink(jobConfig)._2
+      val runner = inOutSchemaHList.map(Runner1).head
+      runner(sc, sourceTap, sinkTap, config)
+      val result = sc.close()
+      sotUtils.waitToFinish(result.internal)
+    }
+  }
+
+  def loadConfig() = {
+    val filePath = ConfigFactory.parseFile(new File("config/application.conf")).getString("json.file.name")
+    SOTMacroJsonConfig(filePath)
+  }
+
+  val genericBuilder = new Builder()
 
   def main(cmdArg: Array[String]): Unit = {
     val parsedArgs = ScioContext.parseArguments[SOTOptions](cmdArg)
     val opts = parsedArgs._1
     val args = parsedArgs._2
     opts.as(classOf[StreamingOptions]).setStreaming(true)
-    val exampleUtils = new SOTUtils(opts)
+    val sotUtils = new SOTUtils(opts)
     val sc = ScioContext(opts)
-    val builder = getBuilder
-    builder.execute(opts, args, exampleUtils, sc)
+    val builder = genericBuilder
+    val jobConfig = loadConfig()
+    builder.execute(jobConfig, opts, args, sotUtils, sc)
   }
 }
-
