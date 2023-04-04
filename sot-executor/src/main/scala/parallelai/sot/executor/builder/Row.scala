@@ -17,14 +17,14 @@ trait LowPriorityToRecord {
 
   type Aux[L <: HList, Out0] = ToRecord[L] {type Out = Out0}
 
-  implicit def hconsToRec1[K <: Symbol, V,
+  implicit def hconsToRec0[K <: Symbol, V,
   T <: HList, TOut <: HList](implicit
-                             toRec: ToRecord.Aux[T, TOut]
+                             toRec: Lazy[ToRecord.Aux[T, TOut]]
                             ): Aux[FieldType[K, V] :: T, FieldType[K, V] :: TOut] = new ToRecord[FieldType[K, V] :: T] {
     type Out = FieldType[K, V] :: TOut
 
     def apply(l: FieldType[K, V] :: T): Out =
-      l.head :: toRec(l.tail)
+      l.head :: toRec.value(l.tail)
   }
 }
 
@@ -39,18 +39,18 @@ object ToRecord extends LowPriorityToRecord {
     def apply(l: HNil): HNil = HNil
   }
 
-  implicit def hconsToRec0[K <: Symbol, V <: Product,
+  implicit def hconsToRec1[K <: Symbol, V <: Product,
   H <: HList, HOut <: HList, T <: HList,
   TOut <: HList](implicit
                  gen: LabelledGeneric.Aux[V, H],
                  toRecH: ToRecord.Aux[H, HOut],
-                 toRecT: ToRecord.Aux[T, TOut]
+                 toRecT: Lazy[ToRecord.Aux[T, TOut]]
                 ): Aux[FieldType[K, V] :: T, FieldType[K, HOut] :: TOut] = new ToRecord[FieldType[K, V] :: T] {
 
     type Out = FieldType[K, HOut] :: TOut
 
     def apply(l: FieldType[K, V] :: T): Out =
-      field[K](toRecH.apply(gen.to(l.head))) :: toRecT(l.tail)
+      field[K](toRecH(gen.to(l.head))) :: toRecT.value(l.tail)
   }
 }
 
