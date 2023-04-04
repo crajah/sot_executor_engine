@@ -4,12 +4,27 @@
   "schemas": [
     {
       "type": "protobuf",
+      "id": "protonested1",
+      "version": "version2",
+      "definition": {
+        "type": "protobufdefinition",
+        "name": "NestedClass",
+        "fields": [
+          {
+            "mode": "required",
+            "type": "Int",
+            "name": "value"
+          }
+        ]
+      }
+    },
+    {
+      "type": "protobuf",
       "id": "protoschema1",
       "version": "version2",
       "definition": {
         "type": "protobufdefinition",
         "name": "Message",
-        "namespace": "parallelai.sot.avro",
         "fields": [
           {
             "mode": "required",
@@ -35,6 +50,11 @@
             "mode": "required",
             "name": "eventTimeStr",
             "type": "String"
+          },
+          {
+            "mode": "required",
+            "type": "NestedClass",
+            "name": "nestedValue"
           }
         ],
         "doc": "A basic schema for storing user records"
@@ -117,7 +137,7 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => m.append('score2, m.get('score) * 0.23)"
+      "func": "m => m.append('score2, m.get('nestedValue).get('value) * 0.23).remove('nestedValue)"
     },
     {
       "type": "transformation",
