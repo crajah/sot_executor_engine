@@ -52,6 +52,20 @@ object FromRecord extends LowPriorityFromRecord {
     def apply(l: FieldType[K, H] :: T): Out =
       field[K](gen.from(fromRecH(l.head))) :: fromRecT(l.tail)
   }
+
+  //Parsing lists
+  implicit def hconsFromRec2[K <: Symbol, V <: Product, H <: HList,
+  HRep <: HList, T <: HList, TRep <: HList](implicit
+                                            gen: LabelledGeneric.Aux[V, HRep],
+                                            fromRecH: FromRecord.Aux[H, HRep],
+                                            fromRecT: FromRecord.Aux[T, TRep]
+                                           ): Aux[FieldType[K, List[H]] :: T, FieldType[K, List[V]] :: TRep] = new FromRecord[FieldType[K, List[H]] :: T] {
+
+    type Out = FieldType[K, List[V]] :: TRep
+
+    def apply(l: FieldType[K, List[H]] :: T): Out =
+      field[K](l.head.map(r => gen.from(fromRecH(r)))) :: fromRecT(l.tail)
+  }
 }
 
 trait ToRecord[L <: HList] {
@@ -98,6 +112,21 @@ object ToRecord extends LowPriorityToRecord {
 
     def apply(l: FieldType[K, V] :: T): Out =
       field[K](toRecH(gen.to(l.head))) :: toRecT.value(l.tail)
+  }
+
+  //Parsing lists
+  implicit def hconsToRec2[K <: Symbol, V <: Product,
+  H <: HList, HOut <: HList, T <: HList,
+  TOut <: HList](implicit
+                 gen: LabelledGeneric.Aux[V, H],
+                 toRecH: ToRecord.Aux[H, HOut],
+                 toRecT: Lazy[ToRecord.Aux[T, TOut]]
+                ): Aux[FieldType[K, List[V]] :: T, FieldType[K, List[HOut]] :: TOut] = new ToRecord[FieldType[K, List[V]] :: T] {
+
+    type Out = FieldType[K, List[HOut]] :: TOut
+
+    def apply(l: FieldType[K, List[V]] :: T): Out =
+      field[K](l.head.map(x => toRecH(gen.to(x)))) :: toRecT.value(l.tail)
   }
 }
 

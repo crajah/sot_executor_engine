@@ -52,7 +52,7 @@
             "type": "String"
           },
           {
-            "mode": "required",
+            "mode": "repeated",
             "type": "NestedClass",
             "name": "nestedValue"
           }
@@ -94,7 +94,7 @@
             "type": "STRING"
           },
           {
-            "mode": "REQUIRED",
+            "mode": "REPEATED",
             "name": "nestedValue",
             "type": "RECORD",
             "fields": [
@@ -149,7 +149,7 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => m.append('score2, m.get('nestedValue).get('value) * 0.23)"
+      "func": "m => m.append('score2, m.get('nestedValue).apply(0).get('value) * 0.23)"
     },
     {
       "type": "transformation",

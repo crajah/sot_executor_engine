@@ -74,7 +74,7 @@ class MessageAvro
 @ProtobufType.fromSchema("{\"type\":\"protobufdefinition\",\"name\":\"NestedClass\",\"fields\":[{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"value\"}]}")
 class NestedClass
 
-@ProtobufType.fromSchema("{\"type\":\"protobufdefinition\",\"name\":\"MessageProto\",\"fields\":[{\"mode\":\"required\",\"type\":\"String\",\"name\":\"user\"},{\"mode\":\"required\",\"type\":\"String\",\"name\":\"teamName\"},{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"score\"},{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"eventTime\"},{\"mode\":\"required\",\"type\":\"String\",\"name\":\"eventTimeStr\"},{\"mode\":\"required\",\"type\":\"NestedClass\",\"name\":\"nestedValue\"}]}")
+@ProtobufType.fromSchema("{\"type\":\"protobufdefinition\",\"name\":\"MessageProto\",\"fields\":[{\"mode\":\"required\",\"type\":\"String\",\"name\":\"user\"},{\"mode\":\"required\",\"type\":\"String\",\"name\":\"teamName\"},{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"score\"},{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"eventTime\"},{\"mode\":\"required\",\"type\":\"String\",\"name\":\"eventTimeStr\"},{\"mode\":\"repeated\",\"type\":\"NestedClass\",\"name\":\"nestedValue\"}]}")
 class MessageProto
 
 class Injector(project: String, topicName: Option[String], fileName: Option[String], serialiser: String) {
@@ -190,8 +190,9 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
     val eventTime = (currTime - delayInMillis) / 1000 * 1000
     // Add a (redundant) 'human-readable' date string to make the data semantics more clear.
     val dateString = fmt.print(currTime)
-    val e = NestedClass(r.nextLong())
-    MessageProto(user, teamName, score, eventTime, dateString, e)
+    val e1 = NestedClass(r.nextLong())
+    val e2 = NestedClass(r.nextLong())
+    MessageProto(user, teamName, score, eventTime, dateString, List(e1, e2))
   }
 
   /** Generate a user gaming event. */
