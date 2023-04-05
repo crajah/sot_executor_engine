@@ -48,7 +48,6 @@ sbt clean compile \
     --zone=europe-west2-a"
 */
 
-@SOTBuilder("application.conf")
 object SOTBuilder {
 
   class Builder extends Serializable() {

@@ -12,7 +12,7 @@
         "fields": [
           {
             "mode": "required",
-            "type": "Int",
+            "type": "Long",
             "name": "value"
           }
         ]
@@ -95,6 +95,18 @@
           },
           {
             "mode": "REQUIRED",
+            "name": "nestedValue",
+            "type": "RECORD",
+            "fields": [
+              {
+                "mode": "REQUIRED",
+                "name": "value",
+                "type": "INTEGER"
+              }
+            ]
+          },
+          {
+            "mode": "REQUIRED",
             "name": "score2",
             "type": "FLOAT"
           },
@@ -137,7 +149,7 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => m.append('score2, m.get('nestedValue).get('value) * 0.23).remove('nestedValue)"
+      "func": "m => m.append('score2, m.get('nestedValue).get('value) * 0.23)"
     },
     {
       "type": "transformation",

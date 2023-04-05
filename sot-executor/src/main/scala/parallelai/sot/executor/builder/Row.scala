@@ -7,6 +7,53 @@ import shapeless.labelled.{FieldType, field}
 import syntax.singleton._
 import shapeless.ops.record.{Modifier, Selector, _}
 
+
+trait FromRecord[L <: HList] {
+  type Out <: HList
+
+  def apply(l: L): Out
+}
+
+trait LowPriorityFromRecord {
+
+  type Aux[L <: HList, Out0] = FromRecord[L] {type Out = Out0}
+
+  implicit def hconsFromRec0[K <: Symbol, V,
+  T <: HList, TOut <: HList](implicit
+                             fromRec: FromRecord.Aux[T, TOut]
+                            ): Aux[FieldType[K, V] :: T, FieldType[K, V] :: TOut] = new FromRecord[FieldType[K, V] :: T] {
+    type Out = FieldType[K, V] :: TOut
+
+    def apply(l: FieldType[K, V] :: T): Out =
+      l.head :: fromRec(l.tail)
+  }
+
+}
+
+object FromRecord extends LowPriorityFromRecord {
+
+  def apply[L <: HList](implicit toM: FromRecord[L]): Aux[L, toM.Out] = toM
+
+  implicit val hnilFromRec: FromRecord.Aux[HNil, HNil] = new FromRecord[HNil] {
+    type Out = HNil
+
+    def apply(l: HNil): HNil = HNil
+  }
+
+  implicit def hconsFromRec1[K <: Symbol, V <: Product, H <: HList,
+  HRep <: HList, T <: HList, TRep <: HList](implicit
+                                            gen: LabelledGeneric.Aux[V, HRep],
+                                            fromRecH: FromRecord.Aux[H, HRep],
+                                            fromRecT: FromRecord.Aux[T, TRep]
+                                           ): Aux[FieldType[K, H] :: T, FieldType[K, V] :: TRep] = new FromRecord[FieldType[K, H] :: T] {
+
+    type Out = FieldType[K, V] :: TRep
+
+    def apply(l: FieldType[K, H] :: T): Out =
+      field[K](gen.from(fromRecH(l.head))) :: fromRecT(l.tail)
+  }
+}
+
 trait ToRecord[L <: HList] {
   type Out <: HList
 
@@ -67,8 +114,6 @@ class Row[L <: HList](val hl: L) {
 
   def get(k: Witness)(implicit selector: Selector[L, k.T]): selector.Out = selector(hl)
 
-  def to[Out](implicit gen: LabelledGeneric.Aux[Out, L]): Out = gen.from(hl)
-
   def append[V, Out <: HList](k: Witness, v: V)(implicit updater: Updater.Aux[L, FieldType[k.T, V], Out],
                                                 lk: LacksKey[L, k.T]): Row[Out] = {
     new Row(updater(hl, field[k.T](v)))
@@ -85,6 +130,12 @@ class Row[L <: HList](val hl: L) {
 }
 
 object Row {
+
+  implicit class RowOps[In <: HList, InRep <: HList](a: Row[In]) {
+    def to[Out](implicit
+                gen: LabelledGeneric.Aux[Out, InRep],
+                fromRec: FromRecord.Aux[In, InRep]): Out = gen.from(fromRec.apply(a.hl))
+  }
 
   def apply[P <: Product, L <: HList](p: P)(implicit gen: LabelledGeneric.Aux[P, L], tmr: ToRecord[L]) = new Row[tmr.Out](tmr(gen.to(p)))
 

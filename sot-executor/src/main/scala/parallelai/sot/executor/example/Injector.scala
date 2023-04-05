@@ -71,13 +71,15 @@ import scala.util.{Failure, Success}
 @AvroType.fromSchema("{\"name\":\"Message\",\"doc\":\"A basic schema for storing user records\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"long\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}],\"type\":\"record\",\"namespace\":\"parallelai.sot.avro\"}")
 class MessageAvro
 
-@ProtobufType.fromSchema("{\"type\":\"protobufdefinition\",\"name\":\"NestedClass\",\"fields\":[{\"mode\":\"required\",\"type\":\"Int\",\"name\":\"value\"}]}")
+@ProtobufType.fromSchema("{\"type\":\"protobufdefinition\",\"name\":\"NestedClass\",\"fields\":[{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"value\"}]}")
 class NestedClass
 
 @ProtobufType.fromSchema("{\"type\":\"protobufdefinition\",\"name\":\"MessageProto\",\"fields\":[{\"mode\":\"required\",\"type\":\"String\",\"name\":\"user\"},{\"mode\":\"required\",\"type\":\"String\",\"name\":\"teamName\"},{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"score\"},{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"eventTime\"},{\"mode\":\"required\",\"type\":\"String\",\"name\":\"eventTimeStr\"},{\"mode\":\"required\",\"type\":\"NestedClass\",\"name\":\"nestedValue\"}]}")
 class MessageProto
 
 class Injector(project: String, topicName: Option[String], fileName: Option[String], serialiser: String) {
+
+  val r = scala.util.Random
 
   require(topicName.isDefined ^ fileName.isDefined)
 
@@ -188,7 +190,7 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
     val eventTime = (currTime - delayInMillis) / 1000 * 1000
     // Add a (redundant) 'human-readable' date string to make the data semantics more clear.
     val dateString = fmt.print(currTime)
-    val e = NestedClass(1)
+    val e = NestedClass(r.nextLong())
     MessageProto(user, teamName, score, eventTime, dateString, e)
   }
 
