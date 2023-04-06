@@ -66,6 +66,25 @@ object FromRecord extends LowPriorityFromRecord {
     def apply(l: FieldType[K, List[H]] :: T): Out =
       field[K](l.head.map(r => gen.from(fromRecH(r)))) :: fromRecT(l.tail)
   }
+
+  implicit def hconsFromRecOptions[K <: Symbol, V <: Product, H <: HList,
+  HRep <: HList, T <: HList, TRep <: HList](implicit
+                                            gen: LabelledGeneric.Aux[V, HRep],
+                                            fromRecH: FromRecord.Aux[H, HRep],
+                                            fromRecT: FromRecord.Aux[T, TRep]
+                                           ): Aux[FieldType[K, Option[H]] :: T, FieldType[K, Option[V]] :: TRep] = new FromRecord[FieldType[K, Option[H]] :: T] {
+
+    type Out = FieldType[K, Option[V]] :: TRep
+
+    def apply(l: FieldType[K, Option[H]] :: T): Out = {
+
+      val value: Option[H] = l.head
+      value match {
+        case Some(v) => field[K](Some(gen.from(fromRecH(v)))) :: fromRecT(l.tail)
+        case None => field[K](None) :: fromRecT(l.tail)
+      }
+    }
+  }
 }
 
 trait ToRecord[L <: HList] {
@@ -127,6 +146,26 @@ object ToRecord extends LowPriorityToRecord {
 
     def apply(l: FieldType[K, List[V]] :: T): Out =
       field[K](l.head.map(x => toRecH(gen.to(x)))) :: toRecT.value(l.tail)
+  }
+
+  //Parsing Options
+  implicit def hconsToRecOptions[K <: Symbol, V <: Product,
+  H <: HList, HOut <: HList, T <: HList,
+  TOut <: HList](implicit
+                 gen: LabelledGeneric.Aux[V, H],
+                 toRecH: ToRecord.Aux[H, HOut],
+                 toRecT: Lazy[ToRecord.Aux[T, TOut]]
+                ): Aux[FieldType[K, Option[V]] :: T, FieldType[K, Option[HOut]] :: TOut] = new ToRecord[FieldType[K, Option[V]] :: T] {
+
+    type Out = FieldType[K, Option[HOut]] :: TOut
+
+    def apply(l: FieldType[K, Option[V]] :: T): Out = {
+      val value: Option[V] = l.head
+      value match {
+        case Some(v) => field[K](Some(toRecH(gen.to(v)))) :: toRecT.value(l.tail)
+        case None => field[K](None) :: toRecT.value(l.tail)
+      }
+    }
   }
 }
 
