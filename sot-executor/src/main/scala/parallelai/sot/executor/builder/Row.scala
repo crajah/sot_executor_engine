@@ -1,4 +1,5 @@
 package parallelai.sot.executor.builder
+
 import shapeless._
 import ops.hlist._
 import record._
@@ -6,6 +7,128 @@ import shapeless.labelled.{FieldType, field}
 import syntax.singleton._
 import shapeless.ops.record.{Modifier, Selector, _}
 
+
+trait FromRecord[L <: HList] {
+  type Out <: HList
+
+  def apply(l: L): Out
+}
+
+trait LowPriorityFromRecord {
+
+  type Aux[L <: HList, Out0] = FromRecord[L] {type Out = Out0}
+
+  implicit def hconsFromRec0[K <: Symbol, V,
+  T <: HList, TOut <: HList](implicit
+                             fromRec: FromRecord.Aux[T, TOut]
+                            ): Aux[FieldType[K, V] :: T, FieldType[K, V] :: TOut] = new FromRecord[FieldType[K, V] :: T] {
+    type Out = FieldType[K, V] :: TOut
+
+    def apply(l: FieldType[K, V] :: T): Out =
+      l.head :: fromRec(l.tail)
+  }
+
+}
+
+object FromRecord extends LowPriorityFromRecord {
+
+  def apply[L <: HList](implicit toM: FromRecord[L]): Aux[L, toM.Out] = toM
+
+  implicit val hnilFromRec: FromRecord.Aux[HNil, HNil] = new FromRecord[HNil] {
+    type Out = HNil
+
+    def apply(l: HNil): HNil = HNil
+  }
+
+  implicit def hconsFromRec1[K <: Symbol, V <: Product, H <: HList,
+  HRep <: HList, T <: HList, TRep <: HList](implicit
+                                            gen: LabelledGeneric.Aux[V, HRep],
+                                            fromRecH: FromRecord.Aux[H, HRep],
+                                            fromRecT: FromRecord.Aux[T, TRep]
+                                           ): Aux[FieldType[K, H] :: T, FieldType[K, V] :: TRep] = new FromRecord[FieldType[K, H] :: T] {
+
+    type Out = FieldType[K, V] :: TRep
+
+    def apply(l: FieldType[K, H] :: T): Out =
+      field[K](gen.from(fromRecH(l.head))) :: fromRecT(l.tail)
+  }
+
+  //Parsing lists
+  implicit def hconsFromRec2[K <: Symbol, V <: Product, H <: HList,
+  HRep <: HList, T <: HList, TRep <: HList](implicit
+                                            gen: LabelledGeneric.Aux[V, HRep],
+                                            fromRecH: FromRecord.Aux[H, HRep],
+                                            fromRecT: FromRecord.Aux[T, TRep]
+                                           ): Aux[FieldType[K, List[H]] :: T, FieldType[K, List[V]] :: TRep] = new FromRecord[FieldType[K, List[H]] :: T] {
+
+    type Out = FieldType[K, List[V]] :: TRep
+
+    def apply(l: FieldType[K, List[H]] :: T): Out =
+      field[K](l.head.map(r => gen.from(fromRecH(r)))) :: fromRecT(l.tail)
+  }
+}
+
+trait ToRecord[L <: HList] {
+  type Out <: HList
+
+  def apply(l: L): Out
+}
+
+trait LowPriorityToRecord {
+
+  type Aux[L <: HList, Out0] = ToRecord[L] {type Out = Out0}
+
+  implicit def hconsToRec0[K <: Symbol, V,
+  T <: HList, TOut <: HList](implicit
+                             toRec: Lazy[ToRecord.Aux[T, TOut]]
+                            ): Aux[FieldType[K, V] :: T, FieldType[K, V] :: TOut] = new ToRecord[FieldType[K, V] :: T] {
+    type Out = FieldType[K, V] :: TOut
+
+    def apply(l: FieldType[K, V] :: T): Out =
+      l.head :: toRec.value(l.tail)
+  }
+}
+
+
+object ToRecord extends LowPriorityToRecord {
+
+  def apply[L <: HList](implicit toM: ToRecord[L]): Aux[L, toM.Out] = toM
+
+  implicit val hnilToRec: ToRecord.Aux[HNil, HNil] = new ToRecord[HNil] {
+    type Out = HNil
+
+    def apply(l: HNil): HNil = HNil
+  }
+
+  implicit def hconsToRec1[K <: Symbol, V <: Product,
+  H <: HList, HOut <: HList, T <: HList,
+  TOut <: HList](implicit
+                 gen: LabelledGeneric.Aux[V, H],
+                 toRecH: ToRecord.Aux[H, HOut],
+                 toRecT: Lazy[ToRecord.Aux[T, TOut]]
+                ): Aux[FieldType[K, V] :: T, FieldType[K, HOut] :: TOut] = new ToRecord[FieldType[K, V] :: T] {
+
+    type Out = FieldType[K, HOut] :: TOut
+
+    def apply(l: FieldType[K, V] :: T): Out =
+      field[K](toRecH(gen.to(l.head))) :: toRecT.value(l.tail)
+  }
+
+  //Parsing lists
+  implicit def hconsToRec2[K <: Symbol, V <: Product,
+  H <: HList, HOut <: HList, T <: HList,
+  TOut <: HList](implicit
+                 gen: LabelledGeneric.Aux[V, H],
+                 toRecH: ToRecord.Aux[H, HOut],
+                 toRecT: Lazy[ToRecord.Aux[T, TOut]]
+                ): Aux[FieldType[K, List[V]] :: T, FieldType[K, List[HOut]] :: TOut] = new ToRecord[FieldType[K, List[V]] :: T] {
+
+    type Out = FieldType[K, List[HOut]] :: TOut
+
+    def apply(l: FieldType[K, List[V]] :: T): Out =
+      field[K](l.head.map(x => toRecH(gen.to(x)))) :: toRecT.value(l.tail)
+  }
+}
 
 class Row[L <: HList](val hl: L) {
 
@@ -18,12 +141,10 @@ class Row[L <: HList](val hl: L) {
 
   def keys(implicit keys: Keys[L]): keys.Out = keys()
 
-  def get(k: Witness)(implicit selector : Selector[L, k.T]): selector.Out = selector(hl)
-
-  def to[Out](implicit gen: LabelledGeneric.Aux[Out, L]): Out = gen.from(hl)
+  def get(k: Witness)(implicit selector: Selector[L, k.T]): selector.Out = selector(hl)
 
   def append[V, Out <: HList](k: Witness, v: V)(implicit updater: Updater.Aux[L, FieldType[k.T, V], Out],
-                                                lk: LacksKey[L, k.T]) : Row[Out] = {
+                                                lk: LacksKey[L, k.T]): Row[Out] = {
     new Row(updater(hl, field[k.T](v)))
   }
 
@@ -33,12 +154,18 @@ class Row[L <: HList](val hl: L) {
   def updateWith[W](k: WitnessWith[FSL])(f: k.instance.Out => W)
                    (implicit modifier: Modifier[L, k.T, k.instance.Out, W]): Row[modifier.Out] = new Row(modifier(hl, f))
 
-  def remove[V, Out <: HList](k: Witness)(implicit remover : Remover.Aux[L, k.T, (V, Out)]): Row[Out] = new Row(remover(hl)._2)
+  def remove[V, Out <: HList](k: Witness)(implicit remover: Remover.Aux[L, k.T, (V, Out)]): Row[Out] = new Row(remover(hl)._2)
 
 }
 
 object Row {
 
-  def apply[P <: Product, L <: HList](p: P)(implicit gen: LabelledGeneric.Aux[P, L]) = new Row[L](gen.to(p))
+  implicit class RowOps[In <: HList, InRep <: HList](a: Row[In]) {
+    def to[Out](implicit
+                gen: LabelledGeneric.Aux[Out, InRep],
+                fromRec: FromRecord.Aux[In, InRep]): Out = gen.from(fromRec.apply(a.hl))
+  }
+
+  def apply[P <: Product, L <: HList](p: P)(implicit gen: LabelledGeneric.Aux[P, L], tmr: ToRecord[L]) = new Row[tmr.Out](tmr(gen.to(p)))
 
 }

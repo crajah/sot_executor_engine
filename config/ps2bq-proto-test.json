@@ -3,38 +3,58 @@
   "version": "version1",
   "schemas": [
     {
-      "type": "avro",
-      "id": "avroschema1",
+      "type": "protobuf",
+      "id": "protonested1",
       "version": "version2",
       "definition": {
-        "type": "record",
-        "name": "Message",
-        "namespace": "parallelai.sot.avro",
+        "type": "protobufdefinition",
+        "name": "NestedClass",
         "fields": [
           {
+            "mode": "required",
+            "type": "Long",
+            "name": "value"
+          }
+        ]
+      }
+    },
+    {
+      "type": "protobuf",
+      "id": "protoschema1",
+      "version": "version2",
+      "definition": {
+        "type": "protobufdefinition",
+        "name": "Message",
+        "fields": [
+          {
+            "mode": "required",
             "name": "user",
-            "type": "string",
-            "doc": "Name of the user"
+            "type": "String"
           },
           {
+            "mode": "required",
             "name": "teamName",
-            "type": "string",
-            "doc": "Name of the team"
+            "type": "String"
           },
           {
+            "mode": "required",
             "name": "score",
-            "type": "long",
-            "doc": "User score"
+            "type": "Long"
           },
           {
+            "mode": "required",
             "name": "eventTime",
-            "type": "long",
-            "doc": "time when event created"
+            "type": "Long"
           },
           {
+            "mode": "required",
             "name": "eventTimeStr",
-            "type": "string",
-            "doc": "event time string for debugging"
+            "type": "String"
+          },
+          {
+            "mode": "repeated",
+            "type": "NestedClass",
+            "name": "nestedValue"
           }
         ],
         "doc": "A basic schema for storing user records"
@@ -74,6 +94,18 @@
             "type": "STRING"
           },
           {
+            "mode": "REPEATED",
+            "name": "nestedValue",
+            "type": "RECORD",
+            "fields": [
+              {
+                "mode": "REQUIRED",
+                "name": "value",
+                "type": "INTEGER"
+              }
+            ]
+          },
+          {
             "mode": "REQUIRED",
             "name": "score2",
             "type": "FLOAT"
@@ -104,7 +136,7 @@
     {
       "type": "source",
       "name": "in",
-      "schema": "avroschema1",
+      "schema": "protoschema1",
       "source": "pubsubsource1"
     },
     {
@@ -117,7 +149,7 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => m.append('score2, m.get('score) * 0.23)"
+      "func": "m => m.append('score2, m.get('nestedValue).apply(0).get('value) * 0.23)"
     },
     {
       "type": "transformation",

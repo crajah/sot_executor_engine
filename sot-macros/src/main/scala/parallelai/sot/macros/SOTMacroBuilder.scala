@@ -1,6 +1,7 @@
 package parallelai.sot.macros
 
 import java.io.File
+import java.nio.file.FileSystems
 
 import com.typesafe.config.ConfigFactory
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
@@ -13,12 +14,17 @@ import scala.collection.immutable.Seq
 import scala.meta._
 
 
-class SOTBuilder extends scala.annotation.StaticAnnotation with EngineConfig {
+class SOTBuilder(resourceName: String) extends scala.annotation.StaticAnnotation {
 
   inline def apply(defn: Any): Any = meta {
-    val source = getClass.getResource("/application.conf").getPath
-    val fileName = ConfigFactory.parseFile(new File(source)).getString("json.file.name")
-    val config = SOTMacroJsonConfig(fileName)
+
+    val resourcePath = this match {
+      case q"new $_(${Lit.String(resourceName)})" => getClass.getResource("/" + resourceName).getPath
+      case _ => abort("Config path parameter should be a string.")
+    }
+
+    val filePath = ConfigFactory.parseFile(new File(resourcePath)).getString("json.file.name")
+    val config = SOTMacroJsonConfig(filePath)
 
     defn match {
       case q"object $name { ..$statements }" =>
@@ -28,7 +34,6 @@ class SOTBuilder extends scala.annotation.StaticAnnotation with EngineConfig {
     }
   }
 }
-
 
 
 object SOTMainMacroImpl {
@@ -45,6 +50,11 @@ object SOTMainMacroImpl {
         ps.definition match {
           case av: AvroDefinition => Some(avroSchemaCodeGenerator(av))
           case _ => throw new Exception("Avro does not support this definition")
+        }
+      case ps: ProtobufSchema =>
+        ps.definition match {
+          case av: ProtobufDefinition => Some(protoSchemaCodeGenerator(av))
+          case _ => throw new Exception("Protobuf does not support this definition")
         }
       case ds: DatastoreSchema =>
         ds.definition match {
@@ -99,6 +109,7 @@ object SOTMainMacroImpl {
     Seq(
       q"""
          implicit def genericTransformation:Transformer[$sourceTypeName, $sinkTypeName] = new Transformer[$sourceTypeName, $sinkTypeName] {
+           import shapeless.record._
            def transform(rowIn: SCollection[$sourceTypeName]): SCollection[$sinkTypeName] = {
                    val in = rowIn.map(r => Row(r))
                    $defTransformations
@@ -159,6 +170,19 @@ object SOTMainMacroImpl {
     Term.Block.unapply(block).get
   }
 
+  def protoSchemaCodeGenerator(definition: ProtobufDefinition): Seq[Stat] = {
+    val queryString = JsString(definition.toJson.compactPrint).compactPrint
+    val query = queryString.parse[Term].get
+    val className = Type.Name(definition.name)
+
+    val block =
+      q"""
+           `@ProtobufType`.fromSchema($query)
+           class $className
+         """
+    Term.Block.unapply(block).get
+  }
+
   def schemaTypeValDecl(config: Config, dag: Topology[String, DAGMapping]) = {
     val (sourceSchema, sourceTap) = getSource(config)
     val (sinkSchema, sinkTap) = getSink(config)
@@ -187,6 +211,7 @@ object SOTMainMacroImpl {
     case "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
     case "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
     case "datastore" => "parallelai.sot.macros.HasDatastoreAnnotation"
+    case "protobuf" => "parallelai.sot.types.HasProtoAnnotation"
     case _ => throw new Exception("Unsupported Schema Type " + schema.`type`)
   }
 

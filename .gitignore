@@ -117,7 +117,3 @@ project/plugins/project/
 .history
 .cache
 .lib/
-
-target/*
-target/**
-*/target/**

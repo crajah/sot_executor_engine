@@ -1,6 +1,6 @@
 package parallelai.sot.executor.builder
 
-import java.io.File
+import java.io.{File, InputStream}
 import java.util.TimeZone
 
 import com.spotify.scio._
@@ -29,13 +29,14 @@ import parallelai.sot.executor.model.SOTMacroJsonConfig
 import parallelai.sot.executor.utils.AvroUtils
 import parallelai.sot.executor.scio.PaiScioContext._
 import parallelai.sot.macros.SOTMacroHelper._
+import parallelai.sot.types.{HasProtoAnnotation, ProtobufType}
 
 import scala.meta.Lit
 
 
 /*
 TO RUN THE INJECTOR
-sbt "sot-executor/runMain parallelai.sot.executor.example.Injector bi-crm-poc p2pin none"
+sbt "sot-executor/runMain parallelai.sot.executor.example.Injector bi-crm-poc p2pin none proto"
  */
 
 /*
@@ -47,7 +48,7 @@ sbt clean compile \
     --zone=europe-west2-a"
 */
 
-@SOTBuilder
+@SOTBuilder("application.conf")
 object SOTBuilder {
 
   class Builder extends Serializable() {
@@ -65,8 +66,8 @@ object SOTBuilder {
   }
 
   def loadConfig() = {
-    val configPath = getClass.getResource("/application.conf").getPath
-    val fileName = ConfigFactory.parseFile(new File(configPath)).getString("json.file.name")
+    val configPath = getClass.getResource("/application.conf")
+    val fileName = ConfigFactory.parseURL(configPath).getString("json.file.name")
     SOTMacroJsonConfig(fileName)
   }
 
