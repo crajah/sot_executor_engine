@@ -1,7 +1,5 @@
 package parallelai.sot.executor.builder
 
-import com.spotify.scio.util.ScioUtil
-
 import shapeless._
 import ops.hlist._
 import record._
