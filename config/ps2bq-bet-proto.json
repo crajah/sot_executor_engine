@@ -4,6 +4,64 @@
   "schemas": [
     {
       "type": "protobuf",
+      "id": "protobet",
+      "version": "version2",
+      "definition": {
+        "type": "protobufdefinition",
+        "name": "Bet",
+        "fields": [
+          {
+            "mode": "required",
+            "type": "String",
+            "name": "id"
+          }
+        ]
+      }
+    },
+    {
+      "type": "protobuf",
+      "id": "protobetslip",
+      "version": "version2",
+      "definition": {
+        "type": "protobufdefinition",
+        "name": "BetSlip",
+        "fields": [
+          {
+            "mode": "required",
+            "type": "String",
+            "name": "id"
+          }
+        ]
+      }
+    },
+    {
+      "type": "protobuf",
+      "id": "protobetstate",
+      "version": "version2",
+      "definition": {
+        "type": "protobufdefinition",
+        "name": "BetState",
+        "fields": [
+          {
+            "mode": "optional",
+            "name": "bet",
+            "type": "Bet"
+          },
+          {
+            "mode": "repeated",
+            "name": "bets",
+            "type": "Bet"
+          },
+          {
+            "mode": "optional",
+            "name": "betSlip",
+            "type": "BetSlip"
+          }
+        ]
+      }
+    },
+    {
+      "type": "protobuf",
       "id": "protoactivitydescriptor",
       "version": "version2",
       "definition": {
@@ -220,6 +278,11 @@
             "mode": "required",
             "name": "header",
             "type": "ActivityHeader"
+          },
+          {
+            "mode": "optional",
+            "name": "state",
+            "type": "BetState"
           }
         ],
         "doc": "A basic schema for storing user records"
@@ -395,6 +458,49 @@
                 "mode": "NULLABLE",
                 "name": "correlationId",
                 "type": "INTEGER"
+              }
+            ]
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "state",
+            "type": "RECORD",
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "bet",
+                "type": "RECORD",
+                "fields": [
+                  {
+                    "mode": "REQUIRED",
+                    "name": "id",
+                    "type": "STRING"
+                  }
+                ]
+              },
+              {
+                "mode": "REPEATED",
+                "name": "bets",
+                "type": "RECORD",
+                "fields": [
+                  {
+                    "mode": "REQUIRED",
+                    "name": "id",
+                    "type": "STRING"
+                  }
+                ]
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "betSlip",
+                "type": "RECORD",
+                "fields": [
+                  {
+                    "mode": "REQUIRED",
+                    "name": "id",
+                    "type": "STRING"
+                  }
+                ]
               }
             ]
           }
