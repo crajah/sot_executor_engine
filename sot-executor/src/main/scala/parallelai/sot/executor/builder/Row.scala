@@ -203,7 +203,7 @@ object ToRecord extends LowPriorityToRecord {
   H <: HList, HOut <: HList, T <: HList,
   TOut <: HList](implicit
                  gen: LabelledGeneric.Aux[V, H],
-                 toRecH: ToRecord.Aux[H, HOut],
+                 toRecH: Lazy[ToRecord.Aux[H, HOut]],
                  toRecT: Lazy[ToRecord.Aux[T, TOut]]
                 ): Aux[FieldType[K, Option[V]] :: T, FieldType[K, Option[HOut]] :: TOut] = new ToRecord[FieldType[K, Option[V]] :: T] {
 
@@ -212,7 +212,7 @@ object ToRecord extends LowPriorityToRecord {
     def apply(l: FieldType[K, Option[V]] :: T): Out = {
       val value: Option[V] = l.head
       value match {
-        case Some(v) => field[K](Some(toRecH(gen.to(v)))) :: toRecT.value(l.tail)
+        case Some(v) => field[K](Some(toRecH.value(gen.to(v)))) :: toRecT.value(l.tail)
         case None => field[K](None) :: toRecT.value(l.tail)
       }
     }
