@@ -1,12 +1,63 @@
 package parallelai.sot.executor.builder
 
+import com.spotify.scio.util.ScioUtil
+
 import shapeless._
 import ops.hlist._
 import record._
 import shapeless.labelled.{FieldType, field}
-import syntax.singleton._
 import shapeless.ops.record.{Modifier, Selector, _}
 
+
+trait MapType[A] {
+  type B
+
+  def apply(v: A): B
+}
+
+trait LowPriorityMapType {
+
+  type Aux[A, B0] = MapType[A] {type B = B0}
+
+  implicit def identityMappable[A]: Aux[A, A] = new MapType[A] {
+    type B = A
+    override def apply(v: A): B = v
+  }
+}
+
+object MapType extends LowPriorityMapType {
+
+  implicit val intToLong: Aux[Int, Long] = new MapType[Int] {
+    type B = Long
+    override def apply(v: Int): Long = v.toLong
+  }
+
+  implicit val intToLongOps: Aux[Option[Int], Option[Long]] = new MapType[Option[Int]] {
+    type B = Option[Long]
+    override def apply(v: Option[Int]): Option[Long] = {
+      v match {
+        case Some(value) => Some(value.toLong)
+        case None => None
+      }
+    }
+  }
+
+  implicit def emumToString[A <: NamedEnum]: Aux[A, String] = new MapType[A] {
+    type B = String
+    override def apply(v: A): String = v.name
+  }
+
+  implicit def emumOpsToString[A <: NamedEnum]: Aux[Option[A], Option[String]] = new MapType[Option[A]] {
+    type B = Option[String]
+    override def apply(v: Option[A]): Option[String] = {
+      v match {
+        case Some(o) => Some(o.name)
+        case None => None
+      }
+    }
+  }
+
+}
 
 trait FromRecord[L <: HList] {
   type Out <: HList
@@ -18,14 +69,15 @@ trait LowPriorityFromRecord {
 
   type Aux[L <: HList, Out0] = FromRecord[L] {type Out = Out0}
 
-  implicit def hconsFromRec0[K <: Symbol, V,
+  implicit def hconsFromRec0[K <: Symbol, V, VMap,
   T <: HList, TOut <: HList](implicit
+                             mappable: MapType.Aux[V, VMap],
                              fromRec: FromRecord.Aux[T, TOut]
-                            ): Aux[FieldType[K, V] :: T, FieldType[K, V] :: TOut] = new FromRecord[FieldType[K, V] :: T] {
-    type Out = FieldType[K, V] :: TOut
+                            ): Aux[FieldType[K, V] :: T, FieldType[K, VMap] :: TOut] = new FromRecord[FieldType[K, V] :: T] {
+    type Out = FieldType[K, VMap] :: TOut
 
     def apply(l: FieldType[K, V] :: T): Out =
-      l.head :: fromRec(l.tail)
+      field[K](mappable(l.head)) :: fromRec(l.tail)
   }
 
 }
@@ -123,14 +175,14 @@ object ToRecord extends LowPriorityToRecord {
   H <: HList, HOut <: HList, T <: HList,
   TOut <: HList](implicit
                  gen: LabelledGeneric.Aux[V, H],
-                 toRecH: ToRecord.Aux[H, HOut],
+                 toRecH: Lazy[ToRecord.Aux[H, HOut]],
                  toRecT: Lazy[ToRecord.Aux[T, TOut]]
                 ): Aux[FieldType[K, V] :: T, FieldType[K, HOut] :: TOut] = new ToRecord[FieldType[K, V] :: T] {
 
     type Out = FieldType[K, HOut] :: TOut
 
     def apply(l: FieldType[K, V] :: T): Out =
-      field[K](toRecH(gen.to(l.head))) :: toRecT.value(l.tail)
+      field[K](toRecH.value(gen.to(l.head))) :: toRecT.value(l.tail)
   }
 
   //Parsing lists
@@ -205,6 +257,7 @@ object Row {
                 fromRec: FromRecord.Aux[In, InRep]): Out = gen.from(fromRec.apply(a.hl))
   }
 
-  def apply[P <: Product, L <: HList](p: P)(implicit gen: LabelledGeneric.Aux[P, L], tmr: ToRecord[L]) = new Row[tmr.Out](tmr(gen.to(p)))
+  def apply[P <: Product, L <: HList](p: P)(implicit gen: LabelledGeneric.Aux[P, L], tmr: ToRecord[L]) =
+    new Row[tmr.Out](tmr(gen.to(p)))
 
 }
