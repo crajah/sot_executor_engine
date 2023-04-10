@@ -58,7 +58,7 @@ trait LowerPriorityPBReaderImplicits {
     new PBReader[A] {
       override def read(index: Int, bytes: Array[Byte]): A = f(index, bytes)
     }
-  //
+
   implicit object CNilReader extends PBReader[List[CNil]] {
     override def read(index: Int, bytes: Array[Byte]): List[CNil] =
       throw new UnsupportedOperationException("Can't read CNil")
