@@ -61,7 +61,9 @@ lazy val `sot-executor` = (project in file("sot-executor"))
     commonSettings,
     libraryDependencies ++= Seq(scalaTest),
     macroSettings,
-    unmanagedResourceDirectories in Compile += globalResources
+    unmanagedResourceDirectories in Compile += globalResources,
+    test in assembly := {},
+    assemblyJarName in assembly := "sot_executor_rule.jar"
   ).dependsOn(`sot-macros`)
 
 lazy val `sot` = (project in file("."))
