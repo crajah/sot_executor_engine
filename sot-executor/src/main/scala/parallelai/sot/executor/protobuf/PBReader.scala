@@ -1,35 +1,52 @@
 package parallelai.sot.executor.protobuf
 
-import com.google.protobuf.CodedInputStream
-import shapeless.{ :+:, ::, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, Lazy }
+import com.google.protobuf.{ByteString, CodedInputStream}
+import shapeless.{:+:, ::, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, Lazy}
 
 import scala.util.Try
 
 trait PBExtractor[A] extends Serializable {
   def extract(input: CodedInputStream): A
 }
+
 object PBExtractor {
+
   implicit object BooleanExtractor extends PBExtractor[Boolean] {
     override def extract(input: CodedInputStream): Boolean = input.readBool()
   }
+
   implicit object IntExtractor extends PBExtractor[Int] {
     override def extract(input: CodedInputStream): Int = input.readInt32()
   }
+
   implicit object LongExtractor extends PBExtractor[Long] {
     override def extract(input: CodedInputStream): Long = input.readInt64()
   }
+
   implicit object FloatExtractor extends PBExtractor[Float] {
     override def extract(input: CodedInputStream): Float = input.readFloat()
   }
+
   implicit object DoubleExtractor extends PBExtractor[Double] {
     override def extract(input: CodedInputStream): Double = input.readDouble()
   }
+
   implicit object StringExtractor extends PBExtractor[String] {
     override def extract(input: CodedInputStream): String = input.readString()
   }
+
+  implicit object ByteExtractor extends PBExtractor[Byte] {
+    override def extract(input: CodedInputStream): Byte = input.readRawByte()
+  }
+
+  implicit object ByteStringExtractor extends PBExtractor[ByteString] {
+    override def extract(input: CodedInputStream): ByteString = input.readBytes()
+  }
+
   implicit object BytesExtractor extends PBExtractor[Array[Byte]] {
     override def extract(input: CodedInputStream): Array[Byte] = input.readByteArray()
   }
+
 }
 
 trait PBReader[A] extends Serializable {
@@ -41,16 +58,21 @@ trait LowerPriorityPBReaderImplicits {
     new PBReader[A] {
       override def read(index: Int, bytes: Array[Byte]): A = f(index, bytes)
     }
+
   implicit object CNilReader extends PBReader[List[CNil]] {
     override def read(index: Int, bytes: Array[Byte]): List[CNil] =
       throw new UnsupportedOperationException("Can't read CNil")
   }
-  implicit def cconsReader[H, T <: Coproduct](implicit
-                                              head: PBReader[List[H]],
-                                              tail: Lazy[PBReader[List[T]]]
-                                             ): PBReader[List[H :+: T]] = instance { (index: Int, bytes: Array[Byte]) =>
-    Try { head.read(index, bytes).map(Inl.apply) }  getOrElse tail.value.read(index, bytes).map(Inr.apply)
+
+  implicit def consReader[H, T <: Coproduct](implicit
+                                             head: PBReader[List[H]],
+                                             tail: Lazy[PBReader[List[T]]]
+                                            ): PBReader[List[H :+: T]] = instance { (index: Int, bytes: Array[Byte]) =>
+    Try {
+      head.read(index, bytes).map(Inl.apply)
+    } getOrElse tail.value.read(index, bytes).map(Inr.apply)
   }
+
   implicit def coprodReader[A, R <: Coproduct](implicit
                                                gen: Generic.Aux[A, R],
                                                parser: Lazy[PBReader[List[R]]]
@@ -60,22 +82,26 @@ trait LowerPriorityPBReaderImplicits {
 }
 
 trait LowPriorityPBReaderImplicits extends LowerPriorityPBReaderImplicits {
+
   implicit object HNilReader extends PBReader[HNil] {
     override def read(index: Int, bytes: Array[Byte]): HNil = HNil
   }
-  implicit def consReader[H, T <: HList](implicit
-                                         head: PBReader[H],
-                                         tail: Lazy[PBReader[T]]
-                                        ): PBReader[H :: T] = instance { (index: Int, bytes: Array[Byte]) =>
+
+  implicit def cconsReader[H, T <: HList](implicit
+                                          head: PBReader[H],
+                                          tail: Lazy[PBReader[T]]
+                                         ): PBReader[H :: T] = instance { (index: Int, bytes: Array[Byte]) =>
     head.read(index, bytes) :: tail.value.read(index + 1, bytes)
   }
+
   implicit def prodReader[A, R <: HList](implicit
                                          gen: Generic.Aux[A, R],
-                                         repr: PBReader[R],
+                                         repr: Lazy[PBReader[R]],
                                          reader: PBReader[List[Array[Byte]]]
                                         ): PBReader[List[A]] = instance { (index: Int, bytes: Array[Byte]) =>
-    reader.read(index, bytes).map { bs => gen.from(repr.read(1, bs)) }
+    reader.read(index, bytes).map { bs => gen.from(repr.value.read(1, bs)) }
   }
+
   implicit def enumReader[A](implicit
                              values: Enum.Values[A],
                              ordering: Ordering[A],
@@ -90,13 +116,16 @@ trait LowPriorityPBReaderImplicits extends LowerPriorityPBReaderImplicits {
     val enum = gen.from(HNil)
     reader.read(index, bytes).map(enum.apply)
   }
+
   implicit def requiredReader[A](implicit reader: PBReader[List[A]]): PBReader[A] =
     instance { (index: Int, bytes: Array[Byte]) =>
       reader.read(index, bytes).last
     }
+
 }
 
 trait PBReaderImplicits extends LowPriorityPBReaderImplicits {
+
   implicit def repeatedReader[A](implicit extractor: PBExtractor[A]): PBReader[List[A]] =
     instance { (index: Int, bytes: Array[Byte]) =>
       val input = CodedInputStream.newInstance(bytes)
@@ -111,10 +140,12 @@ trait PBReaderImplicits extends LowPriorityPBReaderImplicits {
       }
       as.reverse
     }
+
   implicit def optionalReader[A](implicit reader: PBReader[List[A]]): PBReader[Option[A]] =
     instance { (index: Int, bytes: Array[Byte]) =>
       reader.read(index, bytes).lastOption
     }
+
   implicit def mapReader[K, V](implicit reader: PBReader[List[(K, V)]]): PBReader[Map[K, V]] =
     instance { (index: Int, bytes: Array[Byte]) =>
       reader.read(index, bytes).toMap
