@@ -14,6 +14,16 @@
             "mode": "required",
             "type": "String",
             "name": "id"
+          },
+          {
+            "mode": "optional",
+            "type": "String",
+            "name": "creationDate"
+          },
+          {
+            "mode": "optional",
+            "type": "String",
+            "name": "accountRef"
           }
         ]
       }
@@ -475,6 +485,16 @@
                     "mode": "REQUIRED",
                     "name": "id",
                     "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "creationDate",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "accountRef",
+                    "type": "STRING"
                   }
                 ]
               },
@@ -486,6 +506,16 @@
                   {
                     "mode": "REQUIRED",
                     "name": "id",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "creationDate",
+                    "type": "STRING"
+                  },
+                  {
+                    "mode": "NULLABLE",
+                    "name": "accountRef",
                     "type": "STRING"
                   }
                 ]
@@ -518,7 +548,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "bets_prod"
+      "table": "bets_prod_extended"
     }
   ],
   "steps": [
