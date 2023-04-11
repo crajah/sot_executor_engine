@@ -64,7 +64,35 @@ lazy val `sot-executor` = (project in file("sot-executor"))
     unmanagedResourceDirectories in Compile += globalResources
   ).dependsOn(`sot-macros`)
 
+val protobufVersion = "3.4.0"
+val grpcVersion = "1.7.0"
+
+lazy val `proto-compiler-runtime` = (project in file("proto-compiler-runtime"))
+  .settings(
+    commonSettings,
+    name := "proto-compiler-runtime",
+    libraryDependencies ++= Seq(
+      "com.trueaccord.lenses" %% "lenses" % "0.4.12",
+      "com.lihaoyi" %% "fastparse" % "1.0.0",
+      "com.google.protobuf" % "protobuf-java" % protobufVersion,
+      "com.lihaoyi" %% "utest" % "0.5.3" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % "test",
+      "org.scalatest" %% "scalatest" % "3.0.4" % "test"
+    ),
+    testFrameworks += new TestFramework("utest.runner.Framework"),
+    unmanagedResourceDirectories in Compile += baseDirectory.value / "../../protobuf"
+  )
+
+lazy val `proto-compiler-plugin` = (project in file("proto-compiler-plugin"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      "com.trueaccord.scalapb" %% "protoc-bridge" % "0.3.0-M1",
+      "org.scalatest" %% "scalatest" % "3.0.4" % "test"
+    )
+  ).dependsOn(`proto-compiler-runtime`)
+
 lazy val `sot` = (project in file("."))
-  .aggregate(`sot-executor`, `sot-macros`)
+  .aggregate(`sot-executor`, `sot-macros`, `proto-compiler-runtime`, `proto-compiler-plugin`)
 
 
