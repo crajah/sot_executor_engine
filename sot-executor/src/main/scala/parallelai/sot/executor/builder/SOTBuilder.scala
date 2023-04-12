@@ -54,7 +54,7 @@ object SOTBuilder {
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
 
-    def execute(jobConfig: Config, opts: SOTOptions, args: Args, sotUtils: SOTUtils, sc: ScioContext) = {
+    def execute(jobConfig: Config, opts: SOTOptions, sotUtils: SOTUtils, sc: ScioContext) = {
       val config = opts.as(classOf[GcpOptions])
       val sourceTap = getSource(jobConfig)._2
       val sinkTap = getSink(jobConfig)._2
@@ -82,6 +82,6 @@ object SOTBuilder {
     val sc = ScioContext(opts)
     val builder = genericBuilder
     val jobConfig = loadConfig()
-    builder.execute(jobConfig, opts, args, sotUtils, sc)
+    builder.execute(jobConfig, opts, sotUtils, sc)
   }
 }
