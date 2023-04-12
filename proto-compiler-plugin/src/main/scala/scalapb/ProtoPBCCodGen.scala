@@ -4,7 +4,7 @@ import java.io.File
 
 import protocbridge.{JvmGenerator, Target}
 
-object GenMain extends App {
+object ProtoPBCCodGen extends App {
   private[this] def executeProtoc(protocCommand: Seq[String] => Int, schemas: Set[File], includePaths: Seq[File], protocOptions: Seq[String], targets: Seq[Target]): Int =
     try {
       val incPath = includePaths.map("-I" + _.getCanonicalPath)
