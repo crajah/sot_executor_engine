@@ -8,7 +8,7 @@ import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition
 import parallelai.sot.executor.protobuf.PBReader
 import parallelai.sot.executor.scio.PaiScioContext._
-import parallelai.sot.types.HasProtoAnnotation
+import com.trueaccord.scalapb.GeneratedMessage
 
 import scala.reflect.ClassTag
 
@@ -25,7 +25,7 @@ object Reader {
     }
   }
 
-  implicit def pubSubProtobuf[T0 <: HasProtoAnnotation](implicit reader: PBReader[T0]): Reader[PubSubTapDefinition, GcpOptions, HasProtoAnnotation, T0] = new Reader[PubSubTapDefinition, GcpOptions, HasProtoAnnotation, T0] {
+  implicit def pubSubProtobuf[T0 <: GeneratedMessage  with com.trueaccord.scalapb.Message[T0]](implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]): Reader[PubSubTapDefinition, GcpOptions, GeneratedMessage, T0] = new Reader[PubSubTapDefinition, GcpOptions, GeneratedMessage, T0] {
     def read(sc: ScioContext, tap: PubSubTapDefinition, config: GcpOptions)(implicit m: Manifest[T0]): SCollection[T0] = {
       sc.typedPubSubProto[T0](config.getProject, tap.topic)
     }

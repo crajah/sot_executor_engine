@@ -1,7 +1,9 @@
 package parallelai.sot.macros
 
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.nio.file.FileSystems
+import java.util.Base64
 
 import com.typesafe.config.ConfigFactory
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
@@ -12,6 +14,7 @@ import spray.json._
 
 import scala.collection.immutable.Seq
 import scala.meta._
+import org.apache.commons.io.FileUtils
 
 
 class SOTBuilder(resourceName: String) extends scala.annotation.StaticAnnotation {
@@ -171,16 +174,17 @@ object SOTMainMacroImpl {
   }
 
   def protoSchemaCodeGenerator(definition: ProtobufDefinition): Seq[Stat] = {
-    val queryString = JsString(definition.toJson.compactPrint).compactPrint
-    val query = queryString.parse[Term].get
-    val className = Type.Name(definition.name)
-
-    val block =
-      q"""
-           `@ProtobufType`.fromSchema($query)
-           class $className
-         """
-    Term.Block.unapply(block).get
+    val generatedCode = ProtoPBCCodGen.executeAll(definition.schemaBase64)
+    val stats = generatedCode.parse[Source].get.stats
+    stats(0) match {
+      case q"package $name  {..$statements}" =>
+        Seq(
+          q"""
+           object gen { ..$statements}
+         """)
+      case _ =>
+        abort("@main must annotate an object.")
+    }
   }
 
   def schemaTypeValDecl(config: Config, dag: Topology[String, DAGMapping]) = {
@@ -211,7 +215,7 @@ object SOTMainMacroImpl {
     case "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
     case "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
     case "datastore" => "parallelai.sot.macros.HasDatastoreAnnotation"
-    case "protobuf" => "parallelai.sot.types.HasProtoAnnotation"
+    case "protobuf" => "com.trueaccord.scalapb.GeneratedMessage"
     case _ => throw new Exception("Unsupported Schema Type " + schema.`type`)
   }
 

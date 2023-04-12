@@ -29,8 +29,7 @@ import parallelai.sot.executor.model.SOTMacroJsonConfig
 import parallelai.sot.executor.utils.AvroUtils
 import parallelai.sot.executor.scio.PaiScioContext._
 import parallelai.sot.macros.SOTMacroHelper._
-import parallelai.sot.types.{HasProtoAnnotation, ProtobufType}
-
+import com.trueaccord.scalapb.GeneratedMessage
 import scala.meta.Lit
 
 
@@ -47,9 +46,12 @@ sbt clean compile \
     --runner=DataflowRunner \
     --zone=europe-west2-a"
 */
+import SOTBuilder.gen._
+
 
 @SOTBuilder("application.conf")
 object SOTBuilder {
+
 
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)

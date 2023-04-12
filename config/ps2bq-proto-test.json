@@ -4,59 +4,12 @@
   "schemas": [
     {
       "type": "protobuf",
-      "id": "protonested1",
-      "version": "version2",
-      "definition": {
-        "type": "protobufdefinition",
-        "name": "NestedClass",
-        "fields": [
-          {
-            "mode": "required",
-            "type": "Long",
-            "name": "value"
-          }
-        ]
-      }
-    },
-    {
-      "type": "protobuf",
       "id": "protoschema1",
       "version": "version2",
       "definition": {
         "type": "protobufdefinition",
         "name": "Message",
-        "fields": [
-          {
-            "mode": "required",
-            "name": "user",
-            "type": "String"
-          },
-          {
-            "mode": "required",
-            "name": "teamName",
-            "type": "String"
-          },
-          {
-            "mode": "required",
-            "name": "score",
-            "type": "Long"
-          },
-          {
-            "mode": "required",
-            "name": "eventTime",
-            "type": "Long"
-          },
-          {
-            "mode": "required",
-            "name": "eventTimeStr",
-            "type": "String"
-          },
-          {
-            "mode": "repeated",
-            "type": "NestedClass",
-            "name": "nestedValue"
-          }
-        ],
+        "schemaBase64": "cGFja2FnZSBjb3JlOw0KDQpvcHRpb24gamF2YV9wYWNrYWdlID0gInBhcmFsbGVsYWkuc290LmV4ZWN1dG9yLmJ1aWxkZXIuU09UQnVpbGRlciI7DQpvcHRpb24gamF2YV9vdXRlcl9jbGFzc25hbWUgPSAiQ29yZU1vZGVsIjsNCg0KbWVzc2FnZSBNZXNzYWdlIHsNCiAgICANCiAgIA0KICAgIHJlcXVpcmVkIHN0cmluZyB1c2VyID0gMTsNCiAgICByZXF1aXJlZCBzdHJpbmcgdGVhbU5hbWUgPSAyOw0KICAgIHJlcXVpcmVkIGludDY0IHNjb3JlID0gMzsNCiAgICByZXF1aXJlZCBpbnQ2NCBldmVudFRpbWUgPSA0Ow0KICAgIHJlcXVpcmVkIHN0cmluZyBldmVudFRpbWVTdHIgPSA1Ow0KDQp9",
         "doc": "A basic schema for storing user records"
       }
     },
@@ -92,28 +45,6 @@
             "mode": "REQUIRED",
             "name": "eventTimeStr",
             "type": "STRING"
-          },
-          {
-            "mode": "REPEATED",
-            "name": "nestedValue",
-            "type": "RECORD",
-            "fields": [
-              {
-                "mode": "REQUIRED",
-                "name": "value",
-                "type": "INTEGER"
-              }
-            ]
-          },
-          {
-            "mode": "REQUIRED",
-            "name": "score2",
-            "type": "FLOAT"
-          },
-          {
-            "mode": "REQUIRED",
-            "name": "processingTime",
-            "type": "STRING"
           }
         ]
       }
@@ -146,18 +77,6 @@
       "func": "m => m.get('score) > 2"
     },
     {
-      "type": "transformation",
-      "name": "mapper1",
-      "op": "map",
-      "func": "m => m.append('score2, m.get('nestedValue).apply(0).get('value) * 0.23)"
-    },
-    {
-      "type": "transformation",
-      "name": "mapper2",
-      "op": "map",
-      "func": "m => m.append('processingTime, Helper.fmt.print(Instant.now()))"
-    },
-    {
       "type": "sink",
       "name": "out",
       "schema": "bigqueryschema1",
@@ -170,15 +89,7 @@
       "to": "filter"
     },
     {
-      "from": "mapper1",
-      "to": "mapper2"
-    },
-    {
       "from": "filter",
-      "to": "mapper1"
-    },
-    {
-      "from": "mapper2",
       "to": "out"
     }
   ]

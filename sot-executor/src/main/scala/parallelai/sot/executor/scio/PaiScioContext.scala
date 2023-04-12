@@ -5,10 +5,10 @@ import com.spotify.scio.ScioContext
 import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.values.SCollection
+import com.trueaccord.scalapb.GeneratedMessage
 import me.lyh.protobuf.generic.Schema
 import parallelai.sot.executor.protobuf.PBReader
 import parallelai.sot.executor.utils.AvroUtils
-import parallelai.sot.types.HasProtoAnnotation
 
 object PaiScioContext extends Serializable{
 
@@ -23,14 +23,14 @@ object PaiScioContext extends Serializable{
         .map(f => fromGenericRecord(AvroUtils.decodeAvro(f, schemaString)))
     }
 
-    def typedPubSubProto[In <: HasProtoAnnotation : Manifest](project: String, topic: String)(implicit reader: PBReader[In]): SCollection[In] = {
+    def typedPubSubProto[In <: GeneratedMessage  with com.trueaccord.scalapb.Message[In] : Manifest](project: String, topic: String)(implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[In]): SCollection[In] = {
 
       import cats.instances.list._
       import cats.instances.option._
       import parallelai.sot.executor.protobuf._
 
       sc.pubsubTopic[Array[Byte]](s"projects/${project}/topics/${topic}", timestampAttribute = "timestamp_ms")
-        .map(f => f.pbTo[In])
+        .map(f => messageCompanion.parseFrom(f))
     }
   }
 
