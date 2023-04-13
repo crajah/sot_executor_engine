@@ -1,7 +1,9 @@
 package parallelai.sot.executor.builder
 
+import com.google.api.services.bigquery.model.TableFieldSchema
 import shapeless._
 import ops.hlist._
+import parallelai.sot.executor.bigquery.HListSchemaProvider
 import record._
 import shapeless.labelled.{FieldType, field}
 import shapeless.ops.record.{Modifier, Selector, _}
@@ -19,6 +21,7 @@ trait LowPriorityMapType {
 
   implicit def identityMappable[A]: Aux[A, A] = new MapType[A] {
     type B = A
+
     override def apply(v: A): B = v
   }
 }
@@ -27,11 +30,13 @@ object MapType extends LowPriorityMapType {
 
   implicit val intToLong: Aux[Int, Long] = new MapType[Int] {
     type B = Long
+
     override def apply(v: Int): Long = v.toLong
   }
 
   implicit val intToLongOps: Aux[Option[Int], Option[Long]] = new MapType[Option[Int]] {
     type B = Option[Long]
+
     override def apply(v: Option[Int]): Option[Long] = {
       v match {
         case Some(value) => Some(value.toLong)
@@ -242,5 +247,24 @@ object Row {
 
   def apply[P <: Product, L <: HList](p: P)(implicit gen: LabelledGeneric.Aux[P, L], tmr: ToRecord[L]) =
     new Row[tmr.Out](tmr(gen.to(p)))
+
+}
+
+import scala.reflect.runtime.universe._
+
+object Test extends App {
+
+  import shapeless.syntax.singleton._
+
+  val x = 'a ->> 1 :: HNil
+
+  implicit class Convert[A <: HList](a: A) {
+    def convert(implicit hListSchemaProvider: HListSchemaProvider[A]): Iterable[TableFieldSchema] = {
+      hListSchemaProvider.apply(a)
+    }
+  }
+
+  val xx = x.convert
+  println("apply")
 
 }

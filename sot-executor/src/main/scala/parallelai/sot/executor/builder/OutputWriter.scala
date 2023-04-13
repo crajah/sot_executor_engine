@@ -11,11 +11,12 @@ import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import parallelai.sot.executor.bigquery.{BigQueryType, ToTableRow}
 import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, PubSubTapDefinition}
 import parallelai.sot.executor.scio.PaiScioContext._
-import shapeless.HList
+import shapeless.{::, HList, HNil}
 
 import scala.reflect.runtime.universe._
 import scala.collection.JavaConverters._
 import org.joda.time.{Instant, LocalDate, LocalDateTime, LocalTime}
+import shapeless.labelled.FieldType
 
 import scala.reflect.macros.blackbox
 
@@ -71,7 +72,7 @@ private object MacroUtil {
   def p(c: blackbox.Context, code: String): c.Tree = c.parse(code)
 }
 
-private[types] object SchemaProvider {
+object SchemaProvider {
 
   def schemaOf[T: TypeTag]: TableSchema = {
     val fields = typeOf[T].erasure match {
@@ -165,32 +166,38 @@ object OutputWriter {
     }
   }
 
-
-  implicit def bigQueryWriter = new OutputWriter[BigQueryTapDefinition, GcpOptions, HList] {
-    def write[Out <: HList : Manifest]
+  implicit def bigQueryWriter = new OutputWriter[BigQueryTapDefinition, GcpOptions, HasAnnotation] {
+    def write[Out <: HasAnnotation : Manifest]
     (sCollection: SCollection[Out], tap: BigQueryTapDefinition, config: GcpOptions): Unit = {
-
-      val t = BigQueryType[Out]
-      val r = t.toTableRow(City("New York", "NYC", 40.730610, -73.935242))
-      val c = t.fromTableRow(r)
-
-      val bqt = BigQueryType[Out]
-      bqt.schema
-
-      import scala.concurrent.ExecutionContext.Implicits.global
-      sCollection
-        .map(m => m.toTableRowSC)
-        .saveAsBigQuery(
-          "table",
-          bqt.schema,
-          null,
-          bull,
-          bqt.tableDescription.orNull)
-        .map(_.map(bqt.fromTableRow))
-
       sCollection.saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}")
     }
   }
+
+//  implicit def bigQueryWriter = new OutputWriter[BigQueryTapDefinition, GcpOptions, HList] {
+//    def write[Out <: HasAnnotation : Manifest]
+//    (sCollection: SCollection[Out], tap: BigQueryTapDefinition, config: GcpOptions): Unit = {
+
+//      val t = BigQueryType[Out]
+//      val r = t.toTableRow(City("New York", "NYC", 40.730610, -73.935242))
+//      val c = t.fromTableRow(r)
+//
+//      val bqt = BigQueryType[Out]
+//      bqt.schema
+//
+//      import scala.concurrent.ExecutionContext.Implicits.global
+//      sCollection
+//        .map(m => m.toTableRowSC)
+//        .saveAsBigQuery(
+//          "table",
+//          bqt.schema,
+//          null,
+//          bull,
+//          bqt.tableDescription.orNull)
+//        .map(_.map(bqt.fromTableRow))
+
+//      sCollection.saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}")
+//    }
+//  }
 
   implicit def pubSubWriter = new OutputWriter[PubSubTapDefinition, GcpOptions, HasAvroAnnotation] {
     def write[Out <: HasAvroAnnotation : Manifest]
