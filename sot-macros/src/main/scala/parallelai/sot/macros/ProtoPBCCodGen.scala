@@ -18,6 +18,7 @@ object ProtoPBCCodGen {
       |
       |option (scalapb.options) = {
       |  package_name: "parallelai.sot.executor.builder.SOTBuilder"
+      |  collection_type: "List"
       |  flat_package: false
       |  single_file: true
       |};
