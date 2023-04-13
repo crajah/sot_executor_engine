@@ -60,7 +60,6 @@ lazy val `sot-macros` = (project in file("sot-macros"))
       s3resolver.value("Parallel AI S3 Snapshots resolver", s3("snapshot.repo.parallelai.com")) withMavenPatterns
     ),
     unmanagedResourceDirectories in Compile += globalResources,
-    unmanagedSourceDirectories in Compile += new File("/home/ryadh/Dev/workspaces/ladbrokes/sot_executor_engine/sot-macros/target/scala-2.11/src_managed/main"),
     macroSettingWithDepdendency
   )
 
@@ -69,8 +68,7 @@ lazy val `sot-executor` = (project in file("sot-executor"))
     commonSettings,
     libraryDependencies ++= Seq(scalaTest),
     macroSettings,
-    unmanagedResourceDirectories in Compile += globalResources,
-    unmanagedSourceDirectories in Compile += new File("/home/ryadh/Dev/workspaces/ladbrokes/sot_executor_engine/sot-macros/target/scala-2.11/src_managed/main")
+    unmanagedResourceDirectories in Compile += globalResources
 ).dependsOn(`sot-macros`)
 
 lazy val `sot` = (project in file("."))
