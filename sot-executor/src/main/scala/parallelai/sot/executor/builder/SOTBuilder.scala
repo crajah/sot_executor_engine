@@ -46,7 +46,6 @@ sbt clean compile \
     --runner=DataflowRunner \
     --zone=europe-west2-a"
 */
-import SOTBuilder.gen._
 
 
 @SOTBuilder("application.conf")

@@ -176,12 +176,13 @@ object SOTMainMacroImpl {
   def protoSchemaCodeGenerator(definition: ProtobufDefinition): Seq[Stat] = {
     val generatedCode = ProtoPBCCodGen.executeAll(definition.schemaBase64)
     val stats = generatedCode.parse[Source].get.stats
-    stats(0) match {
+    stats.head match {
       case q"package $name  {..$statements}" =>
         Seq(
           q"""
            object gen { ..$statements}
-         """)
+         """,
+          q"import SOTBuilder.gen._")
       case _ =>
         abort("@main must annotate an object.")
     }
