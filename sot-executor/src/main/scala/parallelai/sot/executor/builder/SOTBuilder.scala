@@ -61,7 +61,7 @@ object SOTBuilder {
       val runner = inOutSchemaHList.map(Runner1).head
       runner(sc, sourceTap, sinkTap, config)
       val result = sc.close()
-      sotUtils.waitToFinish(result.internal)
+//      sotUtils.waitToFinish(result.internal)
     }
   }
 
