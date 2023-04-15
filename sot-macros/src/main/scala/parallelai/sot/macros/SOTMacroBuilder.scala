@@ -114,9 +114,10 @@ object SOTMainMacroImpl {
          implicit def genericTransformation:Transformer[$sourceTypeName, $sinkTypeName] = new Transformer[$sourceTypeName, $sinkTypeName] {
            import shapeless.record._
            def transform(rowIn: SCollection[$sourceTypeName]): SCollection[$sinkTypeName] = {
+                   val converter = Row.to[$sinkTypeName]
                    val in = rowIn.map(r => Row(r))
                    $defTransformations
-                   trans.map(r => r.to[$sinkTypeName])
+                   trans.map(r => converter.from(r.hl))
            }
          }
        """)
