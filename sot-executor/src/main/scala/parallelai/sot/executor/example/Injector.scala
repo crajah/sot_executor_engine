@@ -16,7 +16,6 @@ import org.apache.avro.Schema.Parser
 import org.apache.avro.generic.{GenericData, GenericRecord}
 import org.apache.avro.specific.SpecificDatumWriter
 import parallelai.sot.executor.utils.AvroUtils
-import parallelai.sot.types.{ProtobufType, HasProtoAnnotation}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
