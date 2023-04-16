@@ -3,8 +3,10 @@ package parallelai.sot.executor.bigquery
 import com.google.api.services.bigquery.model.TableFieldSchema
 import com.google.protobuf.ByteString
 import org.joda.time.{Instant, LocalDate, LocalDateTime, LocalTime}
-import shapeless.{::, HList, HNil, Witness}
+import shapeless.{::, HList, HNil, Lazy, Witness}
 import shapeless.labelled.FieldType
+
+import scala.collection.JavaConverters._
 
 trait HListSchemaExtractor[A] {
 
@@ -30,34 +32,111 @@ object HListSchemaExtractor {
   implicit val localTimeExtractor = new HListSchemaExtractor[LocalTime] {def apply = "TIME"}
   implicit val localDateTimeExtractor = new HListSchemaExtractor[LocalDateTime] {def apply = "DATETIME"}
 
-  //case t if MacroUtil.isCaseClass(t) => ("RECORD", toFields(t))
-
 }
 
 trait HListSchemaProvider[A <: HList] {
 
-  def apply(a : A): Iterable[TableFieldSchema]
+  def apply: Iterable[TableFieldSchema]
 
 }
 
-object HListSchemaProvider {
+trait LowPrioritySchemaProvider {
 
   def apply[A <: HList](implicit p: HListSchemaProvider[A]): HListSchemaProvider[A] = p
 
-  implicit object hconsNil extends HListSchemaProvider[HNil] {
-    override def apply(a: HNil): Iterable[TableFieldSchema] = Iterable.empty
+  implicit def optionProductParser[K <: Symbol, V <: HList, T <: HList](implicit
+                                                                  hNestedProvider: HListSchemaProvider[V],
+                                                                  witness: Witness.Aux[K],
+                                                                  tSchemaProvider: HListSchemaProvider[T]) =
+    new HListSchemaProvider[FieldType[K, Option[V]] :: T] {
+      def apply: Iterable[TableFieldSchema] = {
+        val name = witness.value.name
+        val nestedFields = hNestedProvider.apply
+        val nestedSchema = new TableFieldSchema()
+          .setMode("NULLABLE")
+          .setName(name)
+          .setType("RECORD")
+          .setFields(nestedFields.toList.asJava)
+        Iterable(nestedSchema) ++ tSchemaProvider.apply
+      }
+    }
+
+  implicit def listProductParser[K <: Symbol, V <: HList, T <: HList](implicit
+                                                                        hNestedProvider: HListSchemaProvider[V],
+                                                                        witness: Witness.Aux[K],
+                                                                        tSchemaProvider: HListSchemaProvider[T]) =
+    new HListSchemaProvider[FieldType[K, List[V]] :: T] {
+      def apply: Iterable[TableFieldSchema] = {
+        val name = witness.value.name
+        val nestedFields = hNestedProvider.apply
+        val nestedSchema = new TableFieldSchema()
+          .setMode("REPEATED")
+          .setName(name)
+          .setType("RECORD")
+          .setFields(nestedFields.toList.asJava)
+        Iterable(nestedSchema) ++ tSchemaProvider.apply
+      }
+    }
+
+  implicit def productParser[K <: Symbol, V <: HList, T <: HList](implicit
+                                                                  hNestedProvider: HListSchemaProvider[V],
+                                                                  witness: Witness.Aux[K],
+                                                                  tSchemaProvider: HListSchemaProvider[T]) =
+    new HListSchemaProvider[FieldType[K, V] :: T] {
+      def apply: Iterable[TableFieldSchema] = {
+        val name = witness.value.name
+        val nestedFields = hNestedProvider.apply
+        val nestedSchema = new TableFieldSchema()
+          .setMode("REQUIRED")
+          .setName(name)
+          .setType("RECORD")
+          .setFields(nestedFields.toList.asJava)
+        Iterable(nestedSchema) ++ tSchemaProvider.apply
+      }
+    }
+
+}
+
+object HListSchemaProvider extends LowPrioritySchemaProvider {
+
+  implicit object hnilParser extends HListSchemaProvider[HNil] {
+    override def apply: Iterable[TableFieldSchema] = Iterable.empty
   }
 
-  implicit def hconsFieldParser[K <: Symbol, V, T <: HList](implicit
-                                                            hExtractor: HListSchemaExtractor[V],
-                                                            witness: Witness.Aux[K],
-                                                            tSchemaProvider: HListSchemaProvider[T]) =
+  implicit def requiredFieldParser[K <: Symbol, V, T <: HList](implicit
+                                                       hExtractor: HListSchemaExtractor[V],
+                                                       witness: Witness.Aux[K],
+                                                       tSchemaProvider: HListSchemaProvider[T]) =
     new HListSchemaProvider[FieldType[K, V] :: T] {
-    def apply(a: FieldType[K, V] :: T): Iterable[TableFieldSchema] = {
-      val name = witness.value.name
-      val tpeParam = hExtractor.apply
-      Iterable(new TableFieldSchema().setMode("REQUIRED").setName(name).setType(tpeParam)) ++ tSchemaProvider(a.tail)
+      def apply: Iterable[TableFieldSchema] = {
+        val name = witness.value.name
+        val tpeParam = hExtractor.apply
+        Iterable(new TableFieldSchema().setMode("REQUIRED").setName(name).setType(tpeParam)) ++ tSchemaProvider.apply
+      }
     }
-  }
+
+  implicit def listFieldParser[K <: Symbol, V, T <: HList](implicit
+                                                               hExtractor: HListSchemaExtractor[V],
+                                                               witness: Witness.Aux[K],
+                                                               tSchemaProvider: HListSchemaProvider[T]) =
+    new HListSchemaProvider[FieldType[K, List[V]] :: T] {
+      def apply: Iterable[TableFieldSchema] = {
+        val name = witness.value.name
+        val tpeParam = hExtractor.apply
+        Iterable(new TableFieldSchema().setMode("REPEATED").setName(name).setType(tpeParam)) ++ tSchemaProvider.apply
+      }
+    }
+
+  implicit def optionalFieldParser[K <: Symbol, V, T <: HList](implicit
+                                                           hExtractor: HListSchemaExtractor[V],
+                                                           witness: Witness.Aux[K],
+                                                           tSchemaProvider: HListSchemaProvider[T]) =
+    new HListSchemaProvider[FieldType[K, Option[V]] :: T] {
+      def apply: Iterable[TableFieldSchema] = {
+        val name = witness.value.name
+        val tpeParam = hExtractor.apply
+        Iterable(new TableFieldSchema().setMode("NULLABLE").setName(name).setType(tpeParam)) ++ tSchemaProvider.apply
+      }
+    }
 
 }
