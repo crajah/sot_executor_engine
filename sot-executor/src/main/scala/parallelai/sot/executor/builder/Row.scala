@@ -82,3 +82,25 @@ object Row {
     new Row[rdr.Out](rdr(gen.to(a)))
 
 }
+
+import scala.reflect.runtime.universe._
+import parallelai.sot.executor.bigquery.HListSchemaProvider
+import com.google.api.services.bigquery.model.TableFieldSchema
+
+
+object Test extends App {
+
+  import shapeless.syntax.singleton._
+
+  val x = 'a ->> 1 :: HNil
+
+  implicit class Convert[A <: HList](a: A) {
+    def convert(implicit hListSchemaProvider: HListSchemaProvider[A]): Iterable[TableFieldSchema] = {
+      hListSchemaProvider.apply(a)
+    }
+  }
+
+  val xx = x.convert
+  println("apply")
+
+}

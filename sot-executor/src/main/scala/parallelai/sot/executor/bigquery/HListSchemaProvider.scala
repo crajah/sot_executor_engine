@@ -1,6 +1,8 @@
 package parallelai.sot.executor.bigquery
 
 import com.google.api.services.bigquery.model.TableFieldSchema
+import com.google.protobuf.ByteString
+import org.joda.time.{Instant, LocalDate, LocalDateTime, LocalTime}
 import shapeless.{::, HList, HNil, Witness}
 import shapeless.labelled.FieldType
 
@@ -9,23 +11,6 @@ trait HListSchemaExtractor[A] {
   def apply: String
 
 }
-
-case t if t =:= typeOf[Boolean] => ("BOOLEAN", Iterable.empty)
-case t if t =:= typeOf[Int] => ("INTEGER", Iterable.empty)
-case t if t =:= typeOf[Long] => ("INTEGER", Iterable.empty)
-case t if t =:= typeOf[Float] => ("FLOAT", Iterable.empty)
-case t if t =:= typeOf[Double]  => ("FLOAT", Iterable.empty)
-case t if t =:= typeOf[String] => ("STRING", Iterable.empty)
-
-case t if t =:= typeOf[ByteString] => ("BYTES", Iterable.empty)
-case t if t =:= typeOf[Array[Byte]] => ("BYTES", Iterable.empty)
-
-case t if t =:= typeOf[Instant] => ("TIMESTAMP", Iterable.empty)
-case t if t =:= typeOf[LocalDate] => ("DATE", Iterable.empty)
-case t if t =:= typeOf[LocalTime] => ("TIME", Iterable.empty)
-case t if t =:= typeOf[LocalDateTime] => ("DATETIME", Iterable.empty)
-
-case t if MacroUtil.isCaseClass(t) => ("RECORD", toFields(t))
 
 
 object HListSchemaExtractor {
@@ -40,8 +25,12 @@ object HListSchemaExtractor {
   implicit val byteStringExtractor = new HListSchemaExtractor[ByteString] {def apply = "BYTES"}
   implicit val byteArrayExtractor = new HListSchemaExtractor[Array[Byte]] {def apply = "BYTES"}
 
-  implicit val instantExtractor = new HListSchemaExtractor[Instant] {def apply = "BYTES"}
+  implicit val instantExtractor = new HListSchemaExtractor[Instant] {def apply = "TIMESTAMP"}
+  implicit val localDateExtractor = new HListSchemaExtractor[LocalDate] {def apply = "DATE"}
+  implicit val localTimeExtractor = new HListSchemaExtractor[LocalTime] {def apply = "TIME"}
+  implicit val localDateTimeExtractor = new HListSchemaExtractor[LocalDateTime] {def apply = "DATETIME"}
 
+  //case t if MacroUtil.isCaseClass(t) => ("RECORD", toFields(t))
 
 }
 
@@ -62,7 +51,8 @@ object HListSchemaProvider {
   implicit def hconsFieldParser[K <: Symbol, V, T <: HList](implicit
                                                             hExtractor: HListSchemaExtractor[V],
                                                             witness: Witness.Aux[K],
-                                                            tSchemaProvider: HListSchemaProvider[T]) = new HListSchemaProvider[FieldType[K, V] :: T] {
+                                                            tSchemaProvider: HListSchemaProvider[T]) =
+    new HListSchemaProvider[FieldType[K, V] :: T] {
     def apply(a: FieldType[K, V] :: T): Iterable[TableFieldSchema] = {
       val name = witness.value.name
       val tpeParam = hExtractor.apply
