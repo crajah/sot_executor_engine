@@ -58,15 +58,15 @@ object ProtoPBCCodGen {
       (args: Seq[String]) => com.github.os72.protocjar.Protoc.runProtoc(protocVersion +: args.toArray)
     val protocOptions = Seq()
     val result = executeProtoc(protocCommand, schemas, includePath, protocOptions, target)
-    print(result)
-    result
+    if (result == 0) result
+    else throw new Exception("Unable to parse proto schema")
   }
 
   def main(args: Array[String]): Unit = {
     executeAll("cGFja2FnZSBjb3JlOw0KDQpvcHRpb24gamF2YV9wYWNrYWdlID0gInBhcmFsbGVsYWkuc290LmV4ZWN1dG9yLmJ1aWxkZXIuU09UQnVpbGRlciI7DQpvcHRpb24gamF2YV9vdXRlcl9jbGFzc25hbWUgPSAiQ29yZU1vZGVsIjsNCg0KbWVzc2FnZSBNZXNzYWdlIHsNCiAgICANCiAgIA0KICAgIHJlcXVpcmVkIHN0cmluZyB1c2VyID0gMTsNCiAgICByZXF1aXJlZCBzdHJpbmcgdGVhbU5hbWUgPSAyOw0KICAgIHJlcXVpcmVkIGludDY0IHNjb3JlID0gMzsNCiAgICByZXF1aXJlZCBpbnQ2NCBldmVudFRpbWUgPSA0Ow0KICAgIHJlcXVpcmVkIHN0cmluZyBldmVudFRpbWVTdHIgPSA1Ow0KDQp9")
   }
 
-  def executeAll(schemaBase6: String): String =  {
+  def executeAll(schemaBase6: String): String = {
     val srcTarget = new File("/tmp/scalapb")
     if (!srcTarget.exists()) srcTarget.mkdirs()
 
@@ -84,7 +84,7 @@ object ProtoPBCCodGen {
     val result = ProtoPBCCodGen.execute(srcTarget, Set(protoFile), List(protoPath, scalapbPath, thridPartyPath))
     if (result != 0) throw new IllegalArgumentException(s"Failed to generate proto case classes, return code $result")
     val generatedCode = FileUtils.readFileToString(new File(srcTarget, "parallelai/sot/executor/builder/SOTBuilder/gen/GenProto.scala"), UTF_8)
-//    println(generatedCode)
+    //    println(generatedCode)
     generatedCode
   }
 
