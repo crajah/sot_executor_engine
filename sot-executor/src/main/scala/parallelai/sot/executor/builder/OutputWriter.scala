@@ -7,6 +7,7 @@ import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.bigquery.types.BigQueryType
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.values.SCollection
+import com.trueaccord.scalapb.GeneratedMessage
 import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import parallelai.sot.executor.bigquery.{BigQueryType, ToTableRow}
 import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, PubSubTapDefinition}
@@ -199,7 +200,7 @@ object OutputWriter {
 //    }
 //  }
 
-  implicit def pubSubWriter = new OutputWriter[PubSubTapDefinition, GcpOptions, HasAvroAnnotation] {
+  implicit def pubSubWriterAvro = new OutputWriter[PubSubTapDefinition, GcpOptions, HasAvroAnnotation] {
     def write[Out <: HasAvroAnnotation : Manifest]
     (sCollection: SCollection[Out], tap: PubSubTapDefinition, config: GcpOptions): Unit = {
       sCollection.saveAsPubsub(tap.topic)
@@ -215,9 +216,14 @@ trait Writer[TAP, CONFIG, ANNO, TOUT] {
 object Writer {
   def apply[TAP, CONFIG, ANNO, TOUT](implicit reader: Writer[TAP, CONFIG, ANNO, TOUT]) = reader
 
-  implicit def pubSubAvroWrtier[T0 <: HasAvroAnnotation]: Writer[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] = new Writer[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] {
+  implicit def pubSubWriterAvro[T0 <: HasAvroAnnotation]: Writer[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] = new Writer[PubSubTapDefinition, GcpOptions, HasAvroAnnotation, T0] {
     def write(sCollection: SCollection[T0], tap: PubSubTapDefinition, config: GcpOptions)(implicit m: Manifest[T0]): Unit = {
-      sCollection.saveAsTypedPubSub(config.getProject, tap.topic)
+      sCollection.saveAsTypedPubSubAvro(config.getProject, tap.topic)
+    }
+  }
+  implicit def pubSubWriterProto[T0 <: GeneratedMessage  with com.trueaccord.scalapb.Message[T0]](implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]): Writer[PubSubTapDefinition, GcpOptions, GeneratedMessage, T0] = new Writer[PubSubTapDefinition, GcpOptions, GeneratedMessage, T0] {
+    def write(sCollection: SCollection[T0], tap: PubSubTapDefinition, config: GcpOptions)(implicit m: Manifest[T0]): Unit = {
+      sCollection.saveAsTypedPubSubProto(config.getProject, tap.topic)
     }
   }
 

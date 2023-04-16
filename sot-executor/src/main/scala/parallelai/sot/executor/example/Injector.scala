@@ -71,9 +71,11 @@ import scala.util.{Failure, Success}
 @AvroType.fromSchema("{\"name\":\"Message\",\"doc\":\"A basic schema for storing user records\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"long\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}],\"type\":\"record\",\"namespace\":\"parallelai.sot.avro\"}")
 class MessageAvro
 
-case class NestedClass(value: Long) extends HasProtoAnnotation
+@ProtobufType.fromSchema("{\"type\":\"protobufdefinition\",\"name\":\"NestedClass\",\"fields\":[{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"value\"}]}")
+class NestedClass
 
-case class MessageProto(user: String, teamName: String, score: Long, eventTime: Long, eventTimeStr: String, nestedValue: List[NestedClass]) extends HasProtoAnnotation
+@ProtobufType.fromSchema("{\"type\":\"protobufdefinition\",\"name\":\"MessageProto\",\"fields\":[{\"mode\":\"required\",\"type\":\"String\",\"name\":\"user\"},{\"mode\":\"required\",\"type\":\"String\",\"name\":\"teamName\"},{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"score\"},{\"mode\":\"required\",\"type\":\"Long\",\"name\":\"eventTime\"},{\"mode\":\"required\",\"type\":\"String\",\"name\":\"eventTimeStr\"},{\"mode\":\"repeated\",\"type\":\"NestedClass\",\"name\":\"nestedValue\"}]}")
+class MessageProto
 
 class Injector(project: String, topicName: Option[String], fileName: Option[String], serialiser: String) {
 
