@@ -3,7 +3,9 @@ package parallelai.sot.executor.bigquery
 import com.google.common.io.BaseEncoding
 import org.joda.time._
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder}
-import shapeless.datatype.mappable.{BaseMappableType, MappableType}
+import shapeless.{::, HList, LabelledGeneric, Lazy, Witness}
+import shapeless.datatype.mappable.{BaseMappableType, MappableType, ToMappable}
+import shapeless.labelled.FieldType
 
 import scala.collection.JavaConverters._
 
@@ -34,6 +36,36 @@ trait BaseBigQueryMappableType[V] extends MappableType[BigQueryMap, V] {
 }
 
 trait BigQueryMappableType {
+
+  implicit def nestedHListToMappable[K <: Symbol, H <: HList, T <: HList, M]
+  (implicit wit: Witness.Aux[K], mbt: BaseMappableType[M],
+   toH: Lazy[ToMappable[H, M]], toT: Lazy[ToMappable[T, M]])
+  : ToMappable[FieldType[K, H] :: T, M] = new ToMappable[FieldType[K, H] :: T, M] {
+    override def apply(l: FieldType[K, H] :: T): M =
+      mbt.put(wit.value.name, toH.value(l.head), toT.value(l.tail))
+  }
+
+  implicit def nestedHListOptionToMappable[K <: Symbol, H <: HList, T <: HList, M]
+  (implicit wit: Witness.Aux[K], mbt: BaseMappableType[M],
+   toH: Lazy[ToMappable[H, M]], toT: Lazy[ToMappable[T, M]])
+  : ToMappable[FieldType[K, Option[H]] :: T, M] = new ToMappable[FieldType[K, Option[H]] :: T, M] {
+    override def apply(l: FieldType[K, Option[H]] :: T): M = {
+      val optionH: Option[H] = l.head
+      optionH match {
+        case Some(v) => mbt.put(wit.value.name, toH.value(v), toT.value(l.tail))
+        case None => mbt.put(wit.value.name, None, toT.value(l.tail))
+      }
+    }
+  }
+
+  implicit def nestedHListListToMappable[K <: Symbol, H <: HList, T <: HList, M]
+  (implicit wit: Witness.Aux[K], mbt: BaseMappableType[M],
+   toH: Lazy[ToMappable[H, M]], toT: Lazy[ToMappable[T, M]])
+  : ToMappable[FieldType[K, List[H]] :: T, M] = new ToMappable[FieldType[K, List[H]] :: T, M] {
+    override def apply(l: FieldType[K, List[H]] :: T): M =
+      mbt.put(wit.value.name, l.head.map(v => toH.value(v)), toT.value(l.tail))
+  }
+
   implicit val bigQueryBaseMappableType = new BaseMappableType[BigQueryMap] {
     override def base: BigQueryMap = new java.util.LinkedHashMap[String, Any]()
 

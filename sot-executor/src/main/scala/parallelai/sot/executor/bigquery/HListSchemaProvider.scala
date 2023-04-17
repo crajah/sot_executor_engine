@@ -36,7 +36,7 @@ object HListSchemaExtractor {
 
 trait HListSchemaProvider[A <: HList] {
 
-  def apply: Iterable[TableFieldSchema]
+  def getSchema: Iterable[TableFieldSchema]
 
 }
 
@@ -49,15 +49,15 @@ trait LowPrioritySchemaProvider {
                                                                   witness: Witness.Aux[K],
                                                                   tSchemaProvider: HListSchemaProvider[T]) =
     new HListSchemaProvider[FieldType[K, Option[V]] :: T] {
-      def apply: Iterable[TableFieldSchema] = {
+      def getSchema: Iterable[TableFieldSchema] = {
         val name = witness.value.name
-        val nestedFields = hNestedProvider.apply
+        val nestedFields = hNestedProvider.getSchema
         val nestedSchema = new TableFieldSchema()
           .setMode("NULLABLE")
           .setName(name)
           .setType("RECORD")
           .setFields(nestedFields.toList.asJava)
-        Iterable(nestedSchema) ++ tSchemaProvider.apply
+        Iterable(nestedSchema) ++ tSchemaProvider.getSchema
       }
     }
 
@@ -66,15 +66,15 @@ trait LowPrioritySchemaProvider {
                                                                         witness: Witness.Aux[K],
                                                                         tSchemaProvider: HListSchemaProvider[T]) =
     new HListSchemaProvider[FieldType[K, List[V]] :: T] {
-      def apply: Iterable[TableFieldSchema] = {
+      def getSchema: Iterable[TableFieldSchema] = {
         val name = witness.value.name
-        val nestedFields = hNestedProvider.apply
+        val nestedFields = hNestedProvider.getSchema
         val nestedSchema = new TableFieldSchema()
           .setMode("REPEATED")
           .setName(name)
           .setType("RECORD")
           .setFields(nestedFields.toList.asJava)
-        Iterable(nestedSchema) ++ tSchemaProvider.apply
+        Iterable(nestedSchema) ++ tSchemaProvider.getSchema
       }
     }
 
@@ -83,15 +83,15 @@ trait LowPrioritySchemaProvider {
                                                                   witness: Witness.Aux[K],
                                                                   tSchemaProvider: HListSchemaProvider[T]) =
     new HListSchemaProvider[FieldType[K, V] :: T] {
-      def apply: Iterable[TableFieldSchema] = {
+      def getSchema: Iterable[TableFieldSchema] = {
         val name = witness.value.name
-        val nestedFields = hNestedProvider.apply
+        val nestedFields = hNestedProvider.getSchema
         val nestedSchema = new TableFieldSchema()
           .setMode("REQUIRED")
           .setName(name)
           .setType("RECORD")
           .setFields(nestedFields.toList.asJava)
-        Iterable(nestedSchema) ++ tSchemaProvider.apply
+        Iterable(nestedSchema) ++ tSchemaProvider.getSchema
       }
     }
 
@@ -100,7 +100,7 @@ trait LowPrioritySchemaProvider {
 object HListSchemaProvider extends LowPrioritySchemaProvider {
 
   implicit object hnilParser extends HListSchemaProvider[HNil] {
-    override def apply: Iterable[TableFieldSchema] = Iterable.empty
+    override def getSchema: Iterable[TableFieldSchema] = Iterable.empty
   }
 
   implicit def requiredFieldParser[K <: Symbol, V, T <: HList](implicit
@@ -108,10 +108,10 @@ object HListSchemaProvider extends LowPrioritySchemaProvider {
                                                        witness: Witness.Aux[K],
                                                        tSchemaProvider: HListSchemaProvider[T]) =
     new HListSchemaProvider[FieldType[K, V] :: T] {
-      def apply: Iterable[TableFieldSchema] = {
+      def getSchema: Iterable[TableFieldSchema] = {
         val name = witness.value.name
         val tpeParam = hExtractor.apply
-        Iterable(new TableFieldSchema().setMode("REQUIRED").setName(name).setType(tpeParam)) ++ tSchemaProvider.apply
+        Iterable(new TableFieldSchema().setMode("REQUIRED").setName(name).setType(tpeParam)) ++ tSchemaProvider.getSchema
       }
     }
 
@@ -120,10 +120,10 @@ object HListSchemaProvider extends LowPrioritySchemaProvider {
                                                                witness: Witness.Aux[K],
                                                                tSchemaProvider: HListSchemaProvider[T]) =
     new HListSchemaProvider[FieldType[K, List[V]] :: T] {
-      def apply: Iterable[TableFieldSchema] = {
+      def getSchema: Iterable[TableFieldSchema] = {
         val name = witness.value.name
         val tpeParam = hExtractor.apply
-        Iterable(new TableFieldSchema().setMode("REPEATED").setName(name).setType(tpeParam)) ++ tSchemaProvider.apply
+        Iterable(new TableFieldSchema().setMode("REPEATED").setName(name).setType(tpeParam)) ++ tSchemaProvider.getSchema
       }
     }
 
@@ -132,10 +132,10 @@ object HListSchemaProvider extends LowPrioritySchemaProvider {
                                                            witness: Witness.Aux[K],
                                                            tSchemaProvider: HListSchemaProvider[T]) =
     new HListSchemaProvider[FieldType[K, Option[V]] :: T] {
-      def apply: Iterable[TableFieldSchema] = {
+      def getSchema: Iterable[TableFieldSchema] = {
         val name = witness.value.name
         val tpeParam = hExtractor.apply
-        Iterable(new TableFieldSchema().setMode("NULLABLE").setName(name).setType(tpeParam)) ++ tSchemaProvider.apply
+        Iterable(new TableFieldSchema().setMode("NULLABLE").setName(name).setType(tpeParam)) ++ tSchemaProvider.getSchema
       }
     }
 
