@@ -1,22 +1,25 @@
 package parallelai.sot.executor.bigquery
 
-import com.google.api.services.bigquery.model.TableRow
+import com.google.api.services.bigquery.model.{TableRow, TableSchema}
 import shapeless._
+import scala.collection.JavaConverters._
 
-class BigQueryType[A] extends Serializable {
-  def fromTableRow[L <: HList](m: TableRow)
-                              (implicit gen: LabelledGeneric.Aux[A, L], fromL: FromTableRow[L])
-  : Option[A] = fromL(m.asInstanceOf[BigQueryMap]).map(gen.from)
-  def toTableRow[L <: HList](a: A)
-                            (implicit gen: LabelledGeneric.Aux[A, L], toL: ToTableRow[L])
+class BigQueryType extends Serializable {
+  def toTableRow[L <: HList](a: L)
+                            (implicit toL: ToTableRow[L])
   : TableRow = {
     val tr = new TableRow()
-    tr.putAll(toL(gen.to(a)))
+    tr.putAll(toL(a))
     tr
   }
 }
 
-object BigQueryType {
-  def apply[A]: BigQueryType[A] = new BigQueryType[A]
+class BigQuerySchemaProvider[A <: HList] {
+  def getSchema(implicit hListSchemaProvider: HListSchemaProvider[A]): TableSchema = {
+    new TableSchema().setFields(hListSchemaProvider.getSchema.toList.asJava)
+  }
+}
 
+object BigQuerySchemaProvider {
+  def apply[A <: HList]: BigQuerySchemaProvider[A] = new BigQuerySchemaProvider[A]
 }

@@ -21,9 +21,10 @@
       "topic": "bets-prod"
     },
     {
-      "type": "pubsub",
-      "id": "pubsubout1",
-      "topic": "p2pout"
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "streaming_word_extract30"
     }
   ],
   "steps": [
@@ -36,8 +37,7 @@
     {
       "type": "sink",
       "name": "out",
-      "schema": "protoschema1",
-      "source": "pubsubout1"
+      "source": "bigquerysource1"
     }
   ],
   "dag": [

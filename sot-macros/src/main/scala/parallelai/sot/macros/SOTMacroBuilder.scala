@@ -95,32 +95,51 @@ object SOTMainMacroImpl {
 
     //there should be only one source
     val sourceSchema = getSource(config)._1
-    val sourceDefName = sourceSchema.definition
+    val sourceDefName = sourceSchema.get.definition
     val sourceTypeName = sourceDefName.name.parse[Type].get
-    val sourceAnnotation = getSchemaAnnotation(sourceSchema).parse[Type].get
-
 
     val sinkSchema = getSink(config)._1
-    val sinkDefName = sinkSchema.definition
-    val sinkTypeName = sinkDefName.name.parse[Type].get
-    val sinkAnnotation = getSchemaAnnotation(sinkSchema).parse[Type].get
 
-    val transformations = geTransformations(config, dag)
+    if (sinkSchema.isDefined) {
+      val sinkDefName = sinkSchema.get.definition
+      val sinkTypeName = sinkDefName.name.parse[Type].get
 
-    val defTransformations = q"val trans = $transformations"
+      val transformations = geTransformations(config, dag)
 
-    Seq(
-      q"""
+      val defTransformations = q"val trans = $transformations"
+
+      Seq(
+        q"""
          implicit def genericTransformation:Transformer[$sourceTypeName, $sinkTypeName] = new Transformer[$sourceTypeName, $sinkTypeName] {
            import shapeless.record._
+           type Out = (Option[Nothing], SCollection[com.google.api.services.bigquery.model.TableSchema])
            def transform(rowIn: SCollection[$sourceTypeName]): SCollection[$sinkTypeName] = {
                    val converter = Row.to[$sinkTypeName]
                    val in = rowIn.map(r => Row(r))
                    $defTransformations
-                   trans.map(r => converter.from(r.hl))
+                   (None, trans.map(r => converter.from(r.hl)))
            }
          }
        """)
+    } else {
+      val transformations = geTransformations(config, dag)
+
+      val defTransformations = q"val trans = $transformations"
+
+      Seq(
+        q"""
+         implicit def genericTransformation:Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] = new Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] {
+           import shapeless.record._
+           type Out = (Option[com.google.api.services.bigquery.model.TableSchema], SCollection[com.google.api.services.bigquery.model.TableRow])
+           def transform(rowIn: SCollection[$sourceTypeName]): Out = {
+                   def getSchema[A <: HList](a: SCollection[Row[A]])(implicit hListSchemaProvider: HListSchemaProvider[A]) = BigQuerySchemaProvider[A].getSchema
+                   val in = rowIn.map(r => Row(r))
+                   $defTransformations
+                   (Some(getSchema(trans)), trans.map(m => m.hl.toTableRow))
+           }
+         }
+       """)
+    }
   }
 
   private def geTransformations(config: Config, dag: Topology[String, DAGMapping]): Term = {
@@ -193,17 +212,19 @@ object SOTMainMacroImpl {
     val (sourceSchema, sourceTap) = getSource(config)
     val (sinkSchema, sinkTap) = getSink(config)
 
-    val args = List(sourceSchema, sinkSchema).map(sch => (sch.definition.name, getSchemaAnnotation(sch)))
-      .map {
+    val args = List(sourceSchema, sinkSchema).map{
+      schema => (getSchemaName(schema), getSchemaAnnotation(schema))
+    }.map {
         case (definitionName, annotation) => Term.ApplyType(Term.Name("SchemaType"), List(Type.Name(annotation), Type.Name(definitionName)))
       }
+
     val configApply = Term.Apply(Term.ApplyType(Term.Name("RunnerConfig"),
       List(Type.Name(getTapType(sourceTap)),
         Type.Name("GcpOptions"),
         Type.Name(getSchemaAnnotation(sourceSchema)),
-        Type.Name(sourceSchema.definition.name),
+        Type.Name(sourceSchema.get.definition.name),
         Type.Name(getSchemaAnnotation(sinkSchema)),
-        Type.Name(sinkSchema.definition.name),
+        Type.Name(getSchemaName(sinkSchema)),
         Type.Name(getTapType(sinkTap)))), args)
     val schemaMapName = Pat.Var.Term(Term.Name("inOutSchemaHList"))
     Seq(q" val ${schemaMapName} = ${configApply}::HNil")
@@ -213,12 +234,18 @@ object SOTMainMacroImpl {
     q"${Lit.String(definitionName)} -> ${Term.ApplyType(Term.Name("SchemaType"), List(Type.Name(annotation), Type.Name(definitionName)))}"
   }
 
-  def getSchemaAnnotation(schema: Schema) = schema.`type` match {
-    case "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
-    case "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
-    case "datastore" => "parallelai.sot.macros.HasDatastoreAnnotation"
-    case "protobuf" => "com.trueaccord.scalapb.GeneratedMessage"
-    case _ => throw new Exception("Unsupported Schema Type " + schema.`type`)
+  def getSchemaAnnotation(schema: Option[Schema]) = schema match {
+    case Some(s) if s.`type` == "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
+    case Some(s) if s.`type` == "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
+    case Some(s) if s.`type` == "datastore" => "parallelai.sot.macros.HasDatastoreAnnotation"
+    case Some(s) if s.`type` == "protobuf" => "com.trueaccord.scalapb.GeneratedMessage"
+    case None => "com.google.api.client.json.GenericJson"
+    case Some(s) => throw new Exception("Unsupported Schema Type " + s.`type`)
+  }
+
+  def getSchemaName(schema: Option[Schema]) = schema match {
+    case Some(s) => s.definition.name
+    case None => "com.google.api.services.bigquery.model.TableRow"
   }
 
   private def getTapType(tapDefinition: TapDefinition) = tapDefinition.getClass.getCanonicalName

@@ -2,6 +2,7 @@ package parallelai.sot.executor.bigquery
 
 import com.google.api.services.bigquery.model.TableFieldSchema
 import com.google.protobuf.ByteString
+import com.trueaccord.scalapb.GeneratedEnum
 import org.joda.time.{Instant, LocalDate, LocalDateTime, LocalTime}
 import shapeless.{::, HList, HNil, Lazy, Witness}
 import shapeless.labelled.FieldType
@@ -31,6 +32,8 @@ object HListSchemaExtractor {
   implicit val localDateExtractor = new HListSchemaExtractor[LocalDate] {def apply = "DATE"}
   implicit val localTimeExtractor = new HListSchemaExtractor[LocalTime] {def apply = "TIME"}
   implicit val localDateTimeExtractor = new HListSchemaExtractor[LocalDateTime] {def apply = "DATETIME"}
+
+  implicit def emunExtractor[A <: GeneratedEnum] = new HListSchemaExtractor[A] {def apply = "STRING"}
 
 }
 

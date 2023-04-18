@@ -22,16 +22,16 @@ object Runner {
   def apply[TAPIN, CONF, AIN, IN <: AIN, AOUT, OUT <: AOUT, TAPOUT](implicit runner: Runner[TAPIN, CONF, AIN, IN, AOUT, OUT, TAPOUT]):
   Runner[TAPIN, CONF, AIN, IN, AOUT, OUT, TAPOUT] = runner
 
-  implicit def genericRunner[TAPIN, CONF, SIN, AIN, IN <: AIN, AOUT, OUT <: AOUT, TAPOUT](
+  implicit def genericRunner[TAPIN, CONF, SIN, AIN, IN <: AIN, AOUT, OUT <: AOUT, TAPOUT, SCHEMA](
                                                                                            implicit reader: Reader[TAPIN, CONF, AIN, IN],
-                                                                                           transformer: Transformer[IN, OUT],
-                                                                                           writer: Writer[TAPOUT, CONF, AOUT, OUT]): Runner[TAPIN, CONF, AIN, IN, AOUT, OUT, TAPOUT] = new Runner[TAPIN, CONF, AIN, IN, AOUT, OUT, TAPOUT] {
+                                                                                           transformer: Transformer[IN, OUT, SCHEMA],
+                                                                                           writer: Writer[TAPOUT, CONF, AOUT, OUT, SCHEMA]): Runner[TAPIN, CONF, AIN, IN, AOUT, OUT, TAPOUT] = new Runner[TAPIN, CONF, AIN, IN, AOUT, OUT, TAPOUT] {
     def exec(in: SchemaType.Aux[AIN, IN], out: SchemaType.Aux[AOUT, OUT])(sc: ScioContext, tapIn: TapDefinition, tapOut: TapDefinition, config:CONF): Unit = {
       val typedTapIn = tapIn.asInstanceOf[TAPIN] // oups
       val typedTapOut = tapOut.asInstanceOf[TAPOUT] // oups
       val read = reader.read(sc, typedTapIn , config)(in.m)
-      val value = transformer.transform(read)
-      writer.write(value, typedTapOut, config)(out.m)
+      val (schema, value) = transformer.transform(read)
+      writer.write(value, typedTapOut, config, schema)(out.m)
     }
   }
 }

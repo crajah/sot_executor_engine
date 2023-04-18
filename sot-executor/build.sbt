@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
 
 scalacOptions in Compile ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
-  "-feature",  // Emit warning and location for usages of features that should be imported explicitly.
+  "-feature", // Emit warning and location for usages of features that should be imported explicitly.
   "-unchecked", // Enable additional warnings where generated code depends on assumptions.
   "-Xlint", // Enable recommended additional warnings.
   "-Ywarn-adapted-args", // Warn if an argument list is modified to match the receiver.

@@ -13,7 +13,7 @@ import org.joda.time.{DateTimeZone, Duration, Instant}
 import org.joda.time.format.DateTimeFormat
 import parallelai.sot.executor.common.{SOTOptions, SOTUtils}
 import parallelai.sot.executor.templates._
-import parallelai.sot.macros.{SOTBuilder, SOTMacroHelper}
+import parallelai.sot.macros.SOTBuilder
 import shapeless._
 import syntax.singleton._
 import com.google.datastore.v1.{GqlQuery, Query}
@@ -30,6 +30,7 @@ import parallelai.sot.executor.utils.AvroUtils
 import parallelai.sot.executor.scio.PaiScioContext._
 import parallelai.sot.macros.SOTMacroHelper._
 import com.trueaccord.scalapb.GeneratedMessage
+
 import scala.meta.Lit
 
 
@@ -47,6 +48,7 @@ sbt clean compile \
     --zone=europe-west2-a"
 */
 
+import parallelai.sot.executor.bigquery._
 
 @SOTBuilder("application.conf")
 object SOTBuilder {
@@ -54,7 +56,6 @@ object SOTBuilder {
 
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
-
     def execute(jobConfig: Config, opts: SOTOptions, sotUtils: SOTUtils, sc: ScioContext) = {
       val config = opts.as(classOf[GcpOptions])
       val sourceTap = getSource(jobConfig)._2
@@ -65,15 +66,12 @@ object SOTBuilder {
       sotUtils.waitToFinish(result.internal)
     }
   }
-
   def loadConfig() = {
     val configPath = getClass.getResource("/application.conf")
     val fileName = ConfigFactory.parseURL(configPath).getString("json.file.name")
     SOTMacroJsonConfig(fileName)
   }
-
   val genericBuilder = new Builder()
-
   def main(cmdArg: Array[String]): Unit = {
     val parsedArgs = ScioContext.parseArguments[SOTOptions](cmdArg)
     val opts = parsedArgs._1
