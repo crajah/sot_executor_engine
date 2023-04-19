@@ -48,8 +48,6 @@ sbt clean compile \
     --zone=europe-west2-a"
 */
 
-import parallelai.sot.executor.bigquery._
-
 @SOTBuilder("application.conf")
 object SOTBuilder {
 

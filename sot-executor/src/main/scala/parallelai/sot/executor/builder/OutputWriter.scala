@@ -9,6 +9,7 @@ import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.values.SCollection
 import com.trueaccord.scalapb.GeneratedMessage
 import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
+import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.{CreateDisposition, WriteDisposition}
 import parallelai.sot.executor.bigquery.{BigQueryType, ToTableRow}
 import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, PubSubTapDefinition}
 import parallelai.sot.executor.scio.PaiScioContext._
@@ -42,7 +43,19 @@ object Writer {
 
   implicit def bigQuerySchemalessWriter = new Writer[BigQueryTapDefinition, GcpOptions, com.google.api.client.json.GenericJson, TableRow, TableSchema] {
     override def write(sc: SCollection[TableRow], tap: BigQueryTapDefinition, config: GcpOptions, schema: Option[TableSchema])(implicit m: Manifest[TableRow]): Unit = {
-      sc.saveAsBigQuery(s"${tap.dataset}.${tap.table}", schema.get, null, null, null)
+      val createDisposition = tap.createDisposition match {
+        case Some(cd) if cd == "CREATE_IF_NEEDED" => CreateDisposition.CREATE_IF_NEEDED
+        case Some(cd) if cd == "CREATE_NEVER" => CreateDisposition.CREATE_NEVER
+        case None => CreateDisposition.CREATE_IF_NEEDED
+      }
+      val writeDisposition = tap.writeDisposition match {
+        case Some(wd) if wd == "WRITE_TRUNCATE" => WriteDisposition.WRITE_TRUNCATE
+        case Some(wd) if wd == "WRITE_EMPTY" => WriteDisposition.WRITE_EMPTY
+        case Some(wd) if wd == "WRITE_APPEND" => WriteDisposition.WRITE_APPEND
+        case None => WriteDisposition.WRITE_EMPTY
+      }
+
+      sc.saveAsBigQuery(s"${tap.dataset}.${tap.table}", schema.get, writeDisposition, createDisposition, null)
     }
   }
 

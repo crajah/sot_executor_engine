@@ -24,7 +24,9 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "streaming_word_extract30"
+      "table": "bets_prod_full",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
     }
   ],
   "steps": [
@@ -35,6 +37,12 @@
       "source": "pubsubsource1"
     },
     {
+      "type": "transformation",
+      "name": "mapper",
+      "op": "map",
+      "func": "m => m.append('ts, Helper.fmt.print(Instant.now()))"
+    },
+    {
       "type": "sink",
       "name": "out",
       "source": "bigquerysource1"
@@ -43,6 +51,10 @@
   "dag": [
     {
       "from": "in",
+      "to": "mapper"
+    },
+    {
+      "from": "mapper",
       "to": "out"
     }
   ]

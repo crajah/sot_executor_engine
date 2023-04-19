@@ -130,6 +130,7 @@ object SOTMainMacroImpl {
         q"""
          implicit def genericTransformation:Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] = new Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] {
            import shapeless.record._
+           import parallelai.sot.executor.bigquery._
            type Out = (Option[com.google.api.services.bigquery.model.TableSchema], SCollection[com.google.api.services.bigquery.model.TableRow])
            def transform(rowIn: SCollection[$sourceTypeName]): Out = {
                    def getSchema[A <: HList](a: SCollection[Row[A]])(implicit hListSchemaProvider: HListSchemaProvider[A]) = BigQuerySchemaProvider[A].getSchema
