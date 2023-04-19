@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(
   "com.spotify" %% "scio-bigtable" % "0.4.3",
   "com.spotify" %% "scio-extra" % "0.4.3",
   "org.apache.avro"  %  "avro"  %  "1.7.7",
+  "me.lyh" %% "shapeless-datatype-bigquery" % "0.1.7",
   "me.lyh" %% "shapeless-datatype-core" % "0.1.7",
   "me.lyh" %% "shapeless-datatype-datastore_1.3" % "0.1.7",
   "com.google.cloud" % "google-cloud-datastore" % "1.6.0",
@@ -53,4 +54,6 @@ assemblyMergeStrategy in assembly := {
   case x =>
     val oldStrategy = (assemblyMergeStrategy in assembly).value
     oldStrategy(x)
+
+
 }

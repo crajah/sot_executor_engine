@@ -5,6 +5,7 @@ import shapeless._
 import scala.collection.JavaConverters._
 
 class BigQueryType extends Serializable {
+
   def toTableRow[L <: HList](a: L)
                             (implicit toL: ToTableRow[L])
   : TableRow = {
@@ -12,6 +13,7 @@ class BigQueryType extends Serializable {
     tr.putAll(toL(a))
     tr
   }
+
 }
 
 class BigQuerySchemaProvider[A <: HList] {
