@@ -45,7 +45,8 @@ sbt clean compile \
    "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder \
     --project=bi-crm-poc \
     --runner=DataflowRunner \
-    --zone=europe-west2-a"
+    --zone=europe-west2-a \
+    --withShutdownHook=false"
 */
 
 @SOTBuilder("application.conf")
@@ -54,14 +55,14 @@ object SOTBuilder {
 
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
-    def execute(jobConfig: Config, opts: SOTOptions, sotUtils: SOTUtils, sc: ScioContext) = {
+    def execute(jobConfig: Config, opts: SOTOptions, sotUtils: SOTUtils, sc: ScioContext, withShutdownHook: Boolean) = {
       val config = opts.as(classOf[GcpOptions])
       val sourceTap = getSource(jobConfig)._2
       val sinkTap = getSink(jobConfig)._2
       val runner = inOutSchemaHList.map(Runner1).head
       runner(sc, sourceTap, sinkTap, config)
       val result = sc.close()
-      sotUtils.waitToFinish(result.internal)
+      sotUtils.waitToFinish(result.internal, withShutdownHook)
     }
   }
   def loadConfig() = {
@@ -79,6 +80,6 @@ object SOTBuilder {
     val sc = ScioContext(opts)
     val builder = genericBuilder
     val jobConfig = loadConfig()
-    builder.execute(jobConfig, opts, sotUtils, sc)
+    builder.execute(jobConfig, opts, sotUtils, sc, args.boolean("withShutdownHook"))
   }
 }

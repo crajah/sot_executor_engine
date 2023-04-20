@@ -84,7 +84,7 @@ class ScioBuilderPubSubToBigTable[In <: HasAvroAnnotation : Manifest, K <: Any, 
     }.saveAsBigtable(project, outArgs.instanceId, outArgs.tableId)
 
     val result = sc.close()
-    exampleUtils.waitToFinish(result.internal)
+    exampleUtils.waitToFinish(result.internal, true)
 
     // Bring down the number of nodes after the job ends.
     // There is no need to wait after bumping the nodes down.

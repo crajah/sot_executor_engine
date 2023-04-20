@@ -78,7 +78,7 @@ class ScioBuilderPubSubToDatastoreWithSchema[In <: HasAvroAnnotation : Manifest,
     }.saveAsDatastore(projectId)
 
     val result = sc.close()
-    exampleUtils.waitToFinish(result.internal)
+    exampleUtils.waitToFinish(result.internal, true)
 
   }
 
