@@ -110,10 +110,10 @@ object SOTMainMacroImpl {
 
       Seq(
         q"""
-         implicit def genericTransformation:Transformer[$sourceTypeName, $sinkTypeName] = new Transformer[$sourceTypeName, $sinkTypeName] {
+         implicit def genericTransformation:Transformer[$sourceTypeName, $sinkTypeName, Nothing] = new Transformer[$sourceTypeName, $sinkTypeName, Nothing] {
            import shapeless.record._
-           type Out = (Option[Nothing], SCollection[com.google.api.services.bigquery.model.TableSchema])
-           def transform(rowIn: SCollection[$sourceTypeName]): SCollection[$sinkTypeName] = {
+           type Out = (Option[Nothing], SCollection[$sinkTypeName])
+           def transform(rowIn: SCollection[$sourceTypeName]): Out = {
                    val converter = Row.to[$sinkTypeName]
                    val in = rowIn.map(r => Row(r))
                    $defTransformations

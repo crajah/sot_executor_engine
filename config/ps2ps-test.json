@@ -107,7 +107,7 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => MessageExtended(m.user, m.teamName, m.score, m.eventTime, m.eventTimeStr, 1)"
+      "func": "m => m.append('count, 1)"
     },
     {
       "type": "sink",
