@@ -24,7 +24,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "rule1",
+      "table": "rule1v2",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -52,13 +52,13 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => {val winnings = m.get('state).get('bets).apply(0).get('payout).get('winnings);val accNum = m.get('supportingState).get('customer).get('accountNumber);val outComeName = m.get('supportingState).get('outcome).apply(0).get('outcomeName);val marketName = m.get('supportingState).get('outcome).apply(0).get('marketName);val eventName = m.get('supportingState).get('outcome).apply(0).get('eventName);val catRef = m.get('supportingState).get('outcome).apply(0).get('categoryRef);val stateBetsId = m.get('state).get('bets).apply(0).get('id);new Row('accountNumber ->> accNum :: 'winnings ->> winnings :: 'outComeName ->> outComeName :: 'marketName ->> marketName :: 'eventName ->> eventName :: 'categoryRef ->> catRef :: 'stateBetsId ->> stateBetsId :: HNil)}"
+      "func": "m => {val winnings = m.get('state).get('bets).apply(0).get('payout).get('winnings);val accNum = m.get('supportingState).get('customer).get('accountNumber);val outComeName = m.get('supportingState).get('outcome).apply(0).get('outcomeName);val marketName = m.get('supportingState).get('outcome).apply(0).get('marketName);val eventName = m.get('supportingState).get('outcome).apply(0).get('eventName);val catRef = m.get('supportingState).get('outcome).apply(0).get('categoryRef);val stateBetsId = m.get('state).get('bets).apply(0).get('id);val currency = m.get('state).get('bets).apply(0).get('stake).get('currencyRef);new Row('accountNumber ->> accNum :: 'winnings ->> winnings :: 'outComeName ->> outComeName :: 'marketName ->> marketName :: 'eventName ->> eventName :: 'categoryRef ->> catRef :: 'stateBetsId ->> stateBetsId :: 'currency ->> currency :: HNil)}"
     },
     {
       "type": "transformation",
       "name": "mapper2",
       "op": "map",
-      "func": "m => {val message = \"Congratulations. You won \" + m.get('winnings).get + \".On a bet placed on \" + m.get('eventName).get + \" for \" + m.get('outComeName).get + \" to \" + m.get('marketName).get + \".\";m.append('message, message).append('ts, Helper.fmt.print(Instant.now()))}"
+      "func": "m => {val message = \"Congratulations. You won \" + m.get('winnings).get + \" \" + m.get('currency).get + \". On a bet placed on \" + m.get('eventName).get + \" for \" + m.get('outComeName).get + \" to \" + m.get('marketName).get + \".\";m.append('message, message).append('ts, Helper.fmt.print(Instant.now()))}"
 
     },
     {
