@@ -7,6 +7,6 @@ import org.joda.time.format.DateTimeFormat
 
 object Helper {
   def fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS")
-    .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone("PST")))
+    .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone("UTC")))
 
 }
