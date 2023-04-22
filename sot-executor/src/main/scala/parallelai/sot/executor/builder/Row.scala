@@ -39,22 +39,6 @@ object MapType extends LowPriorityMapType {
       }
     }
   }
-
-  implicit def emumToString[A <: NamedEnum]: Aux[A, String] = new MapType[A] {
-    type B = String
-    override def apply(v: A): String = v.name
-  }
-
-  implicit def emumOpsToString[A <: NamedEnum]: Aux[Option[A], Option[String]] = new MapType[Option[A]] {
-    type B = Option[String]
-    override def apply(v: Option[A]): Option[String] = {
-      v match {
-        case Some(o) => Some(o.name)
-        case None => None
-      }
-    }
-  }
-
 }
 
 trait FromRecord[L <: HList] {
