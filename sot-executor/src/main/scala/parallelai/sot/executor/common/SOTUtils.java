@@ -311,9 +311,9 @@ public class SOTUtils {
   /**
    * Waits for the pipeline to finish and cancels it before the program exists.
    */
-  public void waitToFinish(PipelineResult result) {
+  public void waitToFinish(PipelineResult result, Boolean shutdownHook) {
     pipelinesToCancel.add(result);
-    if (!options.as(SOTOptions.class).getKeepJobsRunning()) {
+    if (!options.as(SOTOptions.class).getKeepJobsRunning() && shutdownHook) {
       addShutdownHook(pipelinesToCancel);
     }
     try {

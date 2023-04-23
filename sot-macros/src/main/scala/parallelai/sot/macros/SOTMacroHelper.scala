@@ -104,7 +104,7 @@ object SOTMacroHelper {
     }
   }
 
-  def getSource(config: Config): (Schema, TapDefinition) = {
+  def getSource(config: Config): (Option[Schema], TapDefinition) = {
     val dag = config.parseDAG()
     val sourceOperationName = dag.getSourceVertices().head
     val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
@@ -112,10 +112,10 @@ object SOTMacroHelper {
       case _ => throw new Exception("Unsupported source operation")
     }
 
-    (SOTMacroHelper.getSchema(sourceOperation.schema, config.schemas), SOTMacroHelper.getTap(sourceOperation.tap, config.taps))
+    (Some(SOTMacroHelper.getSchema(sourceOperation.schema, config.schemas)), SOTMacroHelper.getTap(sourceOperation.tap, config.taps))
   }
 
-  def getSink(config: Config): (Schema, TapDefinition) = {
+  def getSink(config: Config): (Option[Schema], TapDefinition) = {
     val dag = config.parseDAG()
     val sinkOperationName = dag.getSinkVertices().head
     val sinkOperation = SOTMacroHelper.getOp(sinkOperationName, config.steps) match {
@@ -123,10 +123,10 @@ object SOTMacroHelper {
       case _ => throw new Exception("Unsupported sink operation")
     }
 
-    val sinkOpCode = SOTMacroHelper.parseOperation(sinkOperation, dag, config)
-    val sinkOps = SOTMacroHelper.getOps(dag, config, sinkOperationName, List(sinkOpCode)).flatten
-    val sinkSchema = SOTMacroHelper.getSchema(sinkOperation.schema.get, config.schemas)
-
+    val sinkSchema = sinkOperation.schema match {
+      case Some(schemaName) =>  Some(SOTMacroHelper.getSchema (schemaName, config.schemas))
+      case None => None
+    }
     (sinkSchema, SOTMacroHelper.getTap(sinkOperation.tap, config.taps))
   }
 

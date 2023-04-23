@@ -23,7 +23,7 @@
           },
           {
             "name": "score",
-            "type": "int",
+            "type": "long",
             "doc": "User score"
           },
           {
@@ -35,49 +35,6 @@
             "name": "eventTimeStr",
             "type": "string",
             "doc": "event time string for debugging"
-          }
-        ],
-        "doc": "A basic schema for storing user records"
-      }
-    },
-    {
-      "type": "avro",
-      "id": "avroschema2",
-      "version": "version2",
-      "definition": {
-        "type": "record",
-        "name": "MessageExtended",
-        "namespace": "parallelai.sot.avro",
-        "fields": [
-          {
-            "name": "user",
-            "type": "string",
-            "doc": "Name of the user"
-          },
-          {
-            "name": "teamName",
-            "type": "string",
-            "doc": "Name of the team"
-          },
-          {
-            "name": "score",
-            "type": "int",
-            "doc": "User score"
-          },
-          {
-            "name": "eventTime",
-            "type": "long",
-            "doc": "time when event created"
-          },
-          {
-            "name": "eventTimeStr",
-            "type": "string",
-            "doc": "event time string for debugging"
-          },
-          {
-            "name": "count",
-            "type": "int",
-            "doc": "example count"
           }
         ],
         "doc": "A basic schema for storing user records"
@@ -91,9 +48,10 @@
       "topic": "p2pin"
     },
     {
-      "type": "pubsub",
-      "id": "pubsubsource2",
-      "topic": "p2pout"
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "streaming_word_extract28"
     }
   ],
   "steps": [
@@ -105,24 +63,43 @@
     },
     {
       "type": "transformation",
+      "name": "filter",
+      "op": "filter",
+      "func": "m => m.get('score) > 2"
+    },
+    {
+      "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => m.append('count, 1)"
+      "func": "m => m.append('score2, m.get('score) * 0.23)"
+    },
+    {
+      "type": "transformation",
+      "name": "mapper2",
+      "op": "map",
+      "func": "m => m.append('processingTime, Helper.fmt.print(Instant.now()))"
     },
     {
       "type": "sink",
       "name": "out",
-      "schema": "avroschema2",
-      "source": "pubsubsource2"
+      "source": "bigquerysource1"
     }
   ],
   "dag": [
     {
       "from": "in",
-      "to": "mapper1"
+      "to": "filter"
     },
     {
       "from": "mapper1",
+      "to": "mapper2"
+    },
+    {
+      "from": "filter",
+      "to": "mapper1"
+    },
+    {
+      "from": "mapper2",
       "to": "out"
     }
   ]

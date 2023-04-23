@@ -39,13 +39,21 @@ lazy val macroSettings = Seq(
 // Macro setting is any module that has macros, or manipulates meta trees
 lazy val macroSettingWithDepdendency = macroSettings ++ Seq(libraryDependencies += scalameta)
 
+val protobufVersion = "3.4.0"
+val grpcVersion = "1.7.0"
+
 lazy val `sot-macros` = (project in file("sot-macros"))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
       scalaTest,
       "io.spray" %% "spray-json" % "1.3.3",
-      "parallelai" %% "sot_executor_model" % "0.1.24",
+      "parallelai" %% "sot_executor_model" % "0.1.30",
+      "com.trueaccord.scalapb" %% "compilerplugin" % "0.6.6",
+      "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % "0.6.6",
+      "com.chuusai" %% "shapeless" % "2.3.2",
+      "com.github.os72" % "protoc-jar" % "3.4.0",
+      "commons-io" % "commons-io" % "2.5",
       "com.typesafe" % "config" % "1.3.1"
     ),
     resolvers ++= Seq[Resolver](
@@ -62,7 +70,7 @@ lazy val `sot-executor` = (project in file("sot-executor"))
     libraryDependencies ++= Seq(scalaTest),
     macroSettings,
     unmanagedResourceDirectories in Compile += globalResources
-  ).dependsOn(`sot-macros`)
+).dependsOn(`sot-macros`)
 
 lazy val `sot` = (project in file("."))
   .aggregate(`sot-executor`, `sot-macros`)

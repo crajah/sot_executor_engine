@@ -16,7 +16,6 @@ import org.apache.avro.Schema.Parser
 import org.apache.avro.generic.{GenericData, GenericRecord}
 import org.apache.avro.specific.SpecificDatumWriter
 import parallelai.sot.executor.utils.AvroUtils
-import parallelai.sot.types.{ProtobufType, HasProtoAnnotation}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -71,9 +70,9 @@ import scala.util.{Failure, Success}
 @AvroType.fromSchema("{\"name\":\"Message\",\"doc\":\"A basic schema for storing user records\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"long\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}],\"type\":\"record\",\"namespace\":\"parallelai.sot.avro\"}")
 class MessageAvro
 
-case class NestedClass(value: Long) extends HasProtoAnnotation
+case class NestedClass(value: Long)
 
-case class MessageProto(user: String, teamName: String, score: Long, eventTime: Long, eventTimeStr: String, nestedValue: List[NestedClass]) extends HasProtoAnnotation
+case class MessageProto(user: String, teamName: String, score: Long, eventTime: Long, eventTimeStr: String, nestedValue: List[NestedClass])
 
 class Injector(project: String, topicName: Option[String], fileName: Option[String], serialiser: String) {
 

@@ -2,6 +2,7 @@ package parallelai.sot.executor.builder
 
 import shapeless._
 import ops.hlist._
+import parallelai.sot.executor.builder.DeepRec.ToCcPartiallyApplied
 import record._
 import shapeless.labelled.{FieldType, field}
 import shapeless.ops.record.{Modifier, Selector, _}
@@ -233,13 +234,12 @@ class Row[L <: HList](val hl: L) {
 
 object Row {
 
-  implicit class RowOps[In <: HList, InRep <: HList](a: Row[In]) {
-    def to[Out](implicit
-                gen: LabelledGeneric.Aux[Out, InRep],
-                fromRec: FromRecord.Aux[In, InRep]): Out = gen.from(fromRec.apply(a.hl))
-  }
+  def to[Out](implicit gen: LabelledGeneric[Out]): ToCcPartiallyApplied[Out, gen.Repr] =
+    new ToCcPartiallyApplied[Out, gen.Repr](gen)
 
-  def apply[P <: Product, L <: HList](p: P)(implicit gen: LabelledGeneric.Aux[P, L], tmr: ToRecord[L]) =
-    new Row[tmr.Out](tmr(gen.to(p)))
+  def apply[A <: Product, Repr <: HList](a: A)(implicit
+                                               gen: LabelledGeneric.Aux[A, Repr],
+                                               rdr: DeepRec[Repr]): Row[rdr.Out] =
+    new Row[rdr.Out](rdr(gen.to(a)))
 
 }
