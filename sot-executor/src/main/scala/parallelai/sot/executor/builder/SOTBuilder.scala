@@ -55,11 +55,10 @@ object SOTBuilder {
 
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
-    def execute(jobConfig: Config, opts: SOTOptions, sotUtils: SOTUtils, sc: ScioContext, withShutdownHook: Boolean) = {
-      val config = opts.as(classOf[GcpOptions])
+    def execute(jobConfig: Config, sotUtils: SOTUtils, sc: ScioContext, withShutdownHook: Boolean) = {
       val sourceTap = getSource(jobConfig)._2
       val sinkTap = getSink(jobConfig)._2
-      val runner = inOutSchemaHList.exec(sc, sourceTap, sinkTap, config)
+      val runner = inOutSchemaHList.exec(sc, sourceTap, sinkTap, sotUtils)
       val result = sc.close()
       sotUtils.waitToFinish(result.internal, withShutdownHook)
     }
@@ -74,11 +73,10 @@ object SOTBuilder {
     val parsedArgs = ScioContext.parseArguments[SOTOptions](cmdArg)
     val opts = parsedArgs._1
     val args = parsedArgs._2
-    opts.as(classOf[StreamingOptions]).setStreaming(true)
     val sotUtils = new SOTUtils(opts)
     val sc = ScioContext(opts)
     val builder = genericBuilder
     val jobConfig = loadConfig()
-    builder.execute(jobConfig, opts, sotUtils, sc, args.boolean("withShutdownHook"))
+    builder.execute(jobConfig, sotUtils, sc, args.boolean("withShutdownHook"))
   }
 }

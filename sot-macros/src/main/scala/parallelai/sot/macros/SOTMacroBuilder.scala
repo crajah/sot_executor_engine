@@ -215,7 +215,7 @@ object SOTMainMacroImpl {
 
     val configApply = Term.ApplyType(Term.Name("Runner"),
       List(Type.Name(getTapType(sourceTap)),
-        Type.Name("GcpOptions"),
+        Type.Name("parallelai.sot.executor.common.SOTUtils"),
         Type.Name(getSchemaAnnotation(sourceSchema)),
         Type.Name(sourceSchema.get.definition.name),
         Type.Name(getSchemaAnnotation(sinkSchema)),
