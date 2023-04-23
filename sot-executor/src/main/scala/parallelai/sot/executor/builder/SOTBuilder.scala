@@ -45,7 +45,9 @@ sbt clean compile \
    "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder \
     --project=bi-crm-poc \
     --runner=DataflowRunner \
+    --region=europe-west1 \
     --zone=europe-west2-a \
+    --workerMachineType=n1-standard-1 \
     --withShutdownHook=false"
 */
 

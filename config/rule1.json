@@ -23,8 +23,8 @@
     {
       "type": "bigquery",
       "id": "bigquerysource1",
-      "dataset": "bigquerytest",
-      "table": "rule1v2",
+      "dataset": "bi_crm_poc",
+      "table": "cdig_prod_winnotice_sf",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
