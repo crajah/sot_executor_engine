@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.extensions.gcp.auth.NullCredentialInitializer;
+import org.apache.beam.sdk.extensions.gcp.options.GcpOptions;
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryOptions;
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubOptions;
 import org.apache.beam.sdk.options.PipelineOptions;
@@ -43,19 +44,10 @@ import org.joda.time.Duration;
  * The utility class that sets up and tears down external resources,
  * and cancels the streaming pipelines once the program terminates.
  *
- * <p>It is used to run Beam examples.
  */
 public class SOTUtils {
 
   private static final int SC_NOT_FOUND = 404;
-
-  /**
-   * \p{L} denotes the category of Unicode letters,
-   * so this pattern will match on everything that is not a letter.
-   *
-   * <p>It is used for tokenizing strings in the wordcount examples.
-   */
-  public static final String TOKENIZER_PATTERN = "[^\\p{L}]+";
 
   private final PipelineOptions options;
   private Bigquery bigQueryClient = null;
@@ -85,7 +77,7 @@ public class SOTUtils {
     try {
       do {
         try {
-          setupPubsub();
+          setupPubsubWithSubscription();
           setupBigQueryTable();
           return;
         } catch (GoogleJsonResponseException e) {
@@ -100,28 +92,54 @@ public class SOTUtils {
   }
 
   /**
-   * Sets up the Google Cloud Pub/Sub topic.
+   * Sets up the Google Cloud Pub/Sub topic only.
    *
    * <p>If the topic doesn't exist, a new topic with the given name will be created.
    *
    * @throws IOException if there is a problem setting up the Pub/Sub topic
    */
-  public void setupPubsub() throws IOException {
+  public void setupPubsubTopic() throws IOException {
     SOTPubsubTopicAndSubscriptionOptions pubsubOptions =
             options.as(SOTPubsubTopicAndSubscriptionOptions.class);
     if (!pubsubOptions.getPubsubTopic().isEmpty()) {
       pendingMessages.add("**********************Set Up Pubsub************************");
       setupPubsubTopic(pubsubOptions.getPubsubTopic());
-      pendingMessages.add("The Pub/Sub topic has been set up for this example: "
+      pendingMessages.add("The Pub/Sub topic has been set up: "
+              + pubsubOptions.getPubsubTopic());
+    }
+  }
+
+  /**
+   * Sets up the Google Cloud Pub/Sub topic and subscription.
+   *
+   * <p>If the topic doesn't exist, a new topic with the given name will be created.
+   *
+   * @throws IOException if there is a problem setting up the Pub/Sub topic
+   */
+  public void setupPubsubWithSubscription() throws IOException {
+    SOTPubsubTopicAndSubscriptionOptions pubsubOptions =
+            options.as(SOTPubsubTopicAndSubscriptionOptions.class);
+    if (!pubsubOptions.getPubsubTopic().isEmpty()) {
+      pendingMessages.add("**********************Set Up Pubsub************************");
+      setupPubsubTopic(pubsubOptions.getPubsubTopic());
+      pendingMessages.add("The Pub/Sub topic has been set up: "
               + pubsubOptions.getPubsubTopic());
 
       if (!pubsubOptions.getPubsubSubscription().isEmpty()) {
         setupPubsubSubscription(
                 pubsubOptions.getPubsubTopic(), pubsubOptions.getPubsubSubscription());
-        pendingMessages.add("The Pub/Sub subscription has been set up for this example: "
+        pendingMessages.add("The Pub/Sub subscription has been set up: "
                 + pubsubOptions.getPubsubSubscription());
       }
     }
+  }
+
+  public String getProject() {
+    return options.as(GcpOptions.class).getProject();
+  }
+
+  public void setPubsubTopic(String topic) {
+    options.as(SOTPubsubTopicAndSubscriptionOptions.class).setPubsubTopic(topic);
   }
 
   /**
@@ -144,7 +162,7 @@ public class SOTUtils {
               bigQueryTableOptions.getBigQueryDataset(),
               bigQueryTableOptions.getBigQueryTable(),
               bigQueryTableOptions.getBigQuerySchema());
-      pendingMessages.add("The BigQuery table has been set up for this example: "
+      pendingMessages.add("The BigQuery table has been set up: "
               + bigQueryTableOptions.getProject()
               + ":" + bigQueryTableOptions.getBigQueryDataset()
               + "." + bigQueryTableOptions.getBigQueryTable());
@@ -351,7 +369,7 @@ public class SOTUtils {
               break;
             } else {
               System.out.println(
-                      "The example pipeline is still running. Verifying the cancellation.");
+                      "The pipeline is still running. Verifying the cancellation.");
             }
             Uninterruptibles.sleepUninterruptibly(10, TimeUnit.SECONDS);
           }
