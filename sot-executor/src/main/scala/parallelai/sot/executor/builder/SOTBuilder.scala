@@ -59,8 +59,7 @@ object SOTBuilder {
       val config = opts.as(classOf[GcpOptions])
       val sourceTap = getSource(jobConfig)._2
       val sinkTap = getSink(jobConfig)._2
-      val runner = inOutSchemaHList.map(Runner1).head
-      runner(sc, sourceTap, sinkTap, config)
+      val runner = inOutSchemaHList.exec(sc, sourceTap, sinkTap, config)
       val result = sc.close()
       sotUtils.waitToFinish(result.internal, withShutdownHook)
     }

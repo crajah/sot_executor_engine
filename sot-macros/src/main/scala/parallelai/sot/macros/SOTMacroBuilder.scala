@@ -213,22 +213,16 @@ object SOTMainMacroImpl {
     val (sourceSchema, sourceTap) = getSource(config)
     val (sinkSchema, sinkTap) = getSink(config)
 
-    val args = List(sourceSchema, sinkSchema).map{
-      schema => (getSchemaName(schema), getSchemaAnnotation(schema))
-    }.map {
-        case (definitionName, annotation) => Term.ApplyType(Term.Name("SchemaType"), List(Type.Name(annotation), Type.Name(definitionName)))
-      }
-
-    val configApply = Term.Apply(Term.ApplyType(Term.Name("RunnerConfig"),
+    val configApply = Term.ApplyType(Term.Name("Runner"),
       List(Type.Name(getTapType(sourceTap)),
         Type.Name("GcpOptions"),
         Type.Name(getSchemaAnnotation(sourceSchema)),
         Type.Name(sourceSchema.get.definition.name),
         Type.Name(getSchemaAnnotation(sinkSchema)),
         Type.Name(getSchemaName(sinkSchema)),
-        Type.Name(getTapType(sinkTap)))), args)
+        Type.Name(getTapType(sinkTap))))
     val schemaMapName = Pat.Var.Term(Term.Name("inOutSchemaHList"))
-    Seq(q" val ${schemaMapName} = ${configApply}::HNil")
+    Seq(q" val ${schemaMapName} = ${configApply}")
   }
 
   def buildSchemaType(definitionName: String, annotation: String): Term.ApplyInfix = {

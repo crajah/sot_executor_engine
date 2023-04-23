@@ -37,7 +37,19 @@ object Writer {
 
   implicit def bigqueryWriter[T0 <: HasAnnotation]: Writer[BigQueryTapDefinition, GcpOptions, HasAnnotation, T0, Nothing] = new Writer[BigQueryTapDefinition, GcpOptions, HasAnnotation, T0, Nothing] {
     def write(sCollection: SCollection[T0], tap: BigQueryTapDefinition, config: GcpOptions, schema: Option[Nothing])(implicit m: Manifest[T0]): Unit = {
-      sCollection.saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}")
+      val createDisposition = tap.createDisposition match {
+        case Some(cd) if cd == "CREATE_IF_NEEDED" => CreateDisposition.CREATE_IF_NEEDED
+        case Some(cd) if cd == "CREATE_NEVER" => CreateDisposition.CREATE_NEVER
+        case None => CreateDisposition.CREATE_IF_NEEDED
+      }
+      val writeDisposition = tap.writeDisposition match {
+        case Some(wd) if wd == "WRITE_TRUNCATE" => WriteDisposition.WRITE_TRUNCATE
+        case Some(wd) if wd == "WRITE_EMPTY" => WriteDisposition.WRITE_EMPTY
+        case Some(wd) if wd == "WRITE_APPEND" => WriteDisposition.WRITE_APPEND
+        case None => WriteDisposition.WRITE_EMPTY
+      }
+
+      sCollection.saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}", writeDisposition, createDisposition)
     }
   }
 
