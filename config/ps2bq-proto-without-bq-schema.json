@@ -18,13 +18,13 @@
     {
       "type": "pubsub",
       "id": "pubsubsource1",
-      "topic": "bets-prod"
+      "topic": "cdig-prod-bets"
     },
     {
       "type": "bigquery",
       "id": "bigquerysource1",
-      "dataset": "bigquerytest",
-      "table": "bets_prod_full",
+      "dataset": "bi_crm_poc",
+      "table": "cdig_prod_bets",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
