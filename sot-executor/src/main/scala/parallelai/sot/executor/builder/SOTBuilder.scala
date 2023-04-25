@@ -8,7 +8,7 @@ import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.bigquery.BigQueryType
 import com.spotify.scio.values.{SCollection, WindowOptions}
 import org.apache.beam.sdk.io.gcp.datastore.DatastoreIO
-import org.apache.beam.sdk.options.StreamingOptions
+import org.apache.beam.sdk.options.{PipelineOptions, StreamingOptions}
 import org.joda.time.{DateTimeZone, Duration, Instant}
 import org.joda.time.format.DateTimeFormat
 import parallelai.sot.executor.common.{SOTOptions, SOTUtils}
@@ -48,7 +48,9 @@ sbt clean compile \
     --region=europe-west1 \
     --zone=europe-west2-a \
     --workerMachineType=n1-standard-1 \
-    --withShutdownHook=false"
+    --maxNumWorkers=3 \
+    --withShutdownHook=false \
+    --waitToFinish=false"
 */
 
 @SOTBuilder("application.conf")
@@ -57,12 +59,14 @@ object SOTBuilder {
 
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
-    def execute(jobConfig: Config, sotUtils: SOTUtils, sc: ScioContext, withShutdownHook: Boolean) = {
+    def execute(jobConfig: Config, sotUtils: SOTUtils, sc: ScioContext, args: Args) = {
       val sourceTap = getSource(jobConfig)._2
       val sinkTap = getSink(jobConfig)._2
       val runner = inOutSchemaHList.exec(sc, sourceTap, sinkTap, sotUtils)
       val result = sc.close()
-      sotUtils.waitToFinish(result.internal, withShutdownHook)
+      if (args.getOrElse("waitToFinish", "true").toBoolean) {
+        sotUtils.waitToFinish(result.internal, args.getOrElse("withShutdownHook", "true").toBoolean)
+      }
     }
   }
   def loadConfig() = {
@@ -79,6 +83,6 @@ object SOTBuilder {
     val sc = ScioContext(opts)
     val builder = genericBuilder
     val jobConfig = loadConfig()
-    builder.execute(jobConfig, sotUtils, sc, args.boolean("withShutdownHook"))
+    builder.execute(jobConfig, sotUtils, sc, args)
   }
 }
