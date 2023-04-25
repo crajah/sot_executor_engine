@@ -42,7 +42,7 @@ lazy val macroSettingWithDepdendency = macroSettings ++ Seq(libraryDependencies 
 val protobufVersion = "3.4.0"
 val grpcVersion = "1.7.0"
 
-lazy val `sot-macros` = (project in file("sot-macros"))
+lazy val `sot-engine-core` = (project in file("sot-engine-core"))
   .settings(
     commonSettings,
     libraryDependencies ++= Seq(
@@ -53,7 +53,6 @@ lazy val `sot-macros` = (project in file("sot-macros"))
       "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % "0.6.6",
       "com.chuusai" %% "shapeless" % "2.3.2",
       "com.github.os72" % "protoc-jar" % "3.4.0",
-      "commons-io" % "commons-io" % "2.5",
       "com.typesafe" % "config" % "1.3.1"
     ),
     resolvers ++= Seq[Resolver](
@@ -63,6 +62,24 @@ lazy val `sot-macros` = (project in file("sot-macros"))
     unmanagedResourceDirectories in Compile += globalResources,
     macroSettingWithDepdendency
   )
+lazy val `sot-macros` = (project in file("sot-macros"))
+  .settings(
+    commonSettings,
+    libraryDependencies ++= Seq(
+      scalaTest,
+      "io.spray" %% "spray-json" % "1.3.3",
+      "parallelai" %% "sot_executor_model" % "0.1.30",
+      "com.chuusai" %% "shapeless" % "2.3.2",
+      "com.github.os72" % "protoc-jar" % "3.4.0",
+      "com.typesafe" % "config" % "1.3.1"
+    ),
+    resolvers ++= Seq[Resolver](
+      s3resolver.value("Parallel AI S3 Releases resolver", s3("release.repo.parallelai.com")) withMavenPatterns,
+      s3resolver.value("Parallel AI S3 Snapshots resolver", s3("snapshot.repo.parallelai.com")) withMavenPatterns
+    ),
+    unmanagedResourceDirectories in Compile += globalResources,
+    macroSettingWithDepdendency
+).dependsOn(`sot-engine-core`)
 
 lazy val `sot-executor` = (project in file("sot-executor"))
   .settings(
