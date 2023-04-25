@@ -1,17 +1,12 @@
 package parallelai.sot.executor.builder
 
-import com.google.protobuf.Message
 import com.spotify.scio.ScioContext
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.values.SCollection
-import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
-import parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition
-import parallelai.sot.executor.protobuf.PBReader
-import parallelai.sot.executor.scio.PaiScioContext._
 import com.trueaccord.scalapb.GeneratedMessage
 import parallelai.sot.executor.common.SOTUtils
-
-import scala.reflect.ClassTag
+import parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition
+import parallelai.sot.executor.scio.PaiScioContext._
 
 trait Reader[TAP, UTIL, ANNO, TIN <: ANNO] {
   def read(sc: ScioContext, tap: TAP, utils: UTIL)(implicit m: Manifest[TIN]): SCollection[TIN]

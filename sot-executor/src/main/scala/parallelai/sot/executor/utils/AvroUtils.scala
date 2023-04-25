@@ -2,15 +2,11 @@ package parallelai.sot.executor.utils
 
 import java.io.ByteArrayOutputStream
 
-import com.google.common.base.Throwables
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 import org.apache.avro.generic.GenericRecord
 import org.apache.avro.io._
 import org.apache.avro.specific.{SpecificDatumReader, SpecificDatumWriter}
-import parallelai.sot.executor.example.Injector
-
-import scala.util.{Failure, Success}
 
 object AvroUtils {
 

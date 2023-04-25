@@ -53,6 +53,9 @@ lazy val `sot-engine-core` = (project in file("sot-engine-core"))
       "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % "0.6.6",
       "com.chuusai" %% "shapeless" % "2.3.2",
       "com.github.os72" % "protoc-jar" % "3.4.0",
+      "com.spotify" %% "scio-core" % "0.4.3",
+      "com.spotify" %% "scio-bigtable" % "0.4.3",
+      "com.spotify" %% "scio-extra" % "0.4.3",
       "com.typesafe" % "config" % "1.3.1"
     ),
     resolvers ++= Seq[Resolver](

@@ -12,7 +12,6 @@ import org.apache.beam.sdk.options.{PipelineOptions, StreamingOptions}
 import org.joda.time.{DateTimeZone, Duration, Instant}
 import org.joda.time.format.DateTimeFormat
 import parallelai.sot.executor.common.{SOTOptions, SOTUtils}
-import parallelai.sot.executor.templates._
 import parallelai.sot.macros.SOTBuilder
 import shapeless._
 import syntax.singleton._

@@ -1,13 +1,10 @@
 package parallelai.sot.executor.scio
 
-import com.google.protobuf.Message
 import com.spotify.scio.ScioContext
 import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.values.SCollection
 import com.trueaccord.scalapb.GeneratedMessage
-import me.lyh.protobuf.generic.Schema
-import parallelai.sot.executor.protobuf.PBReader
 import parallelai.sot.executor.utils.AvroUtils
 
 object PaiScioContext extends Serializable {

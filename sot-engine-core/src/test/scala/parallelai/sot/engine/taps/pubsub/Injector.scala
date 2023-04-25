@@ -1,4 +1,4 @@
-package parallelai.sot.executor.example
+package parallelai.sot.engine.taps.pubsub
 
 import com.google.api.services.pubsub.Pubsub
 import com.google.api.services.pubsub.model.PublishRequest
