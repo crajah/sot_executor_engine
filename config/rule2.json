@@ -71,7 +71,7 @@
     {
       "type": "pubsub",
       "id": "pubsubsource1",
-      "topic": "bets-prod"
+      "topic": "cdig-prod-bets"
     },
     {
       "type": "pubsub",

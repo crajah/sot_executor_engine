@@ -36,7 +36,7 @@ import scala.meta.Lit
 
 /*
 TO RUN THE INJECTOR
-sbt "sot-executor/runMain parallelai.sot.executor.example.Injector bi-crm-poc p2pin none proto"
+sbt "sot-executor/runMain parallelai.sot.executor.example.Injector bi-crm-poc p2pin none avro"
  */
 
 /*
@@ -49,7 +49,6 @@ sbt clean compile \
     --zone=europe-west2-a \
     --workerMachineType=n1-standard-1 \
     --maxNumWorkers=3 \
-    --withShutdownHook=false \
     --waitToFinish=false"
 */
 
@@ -65,7 +64,7 @@ object SOTBuilder {
       val runner = inOutSchemaHList.exec(sc, sourceTap, sinkTap, sotUtils)
       val result = sc.close()
       if (args.getOrElse("waitToFinish", "true").toBoolean) {
-        sotUtils.waitToFinish(result.internal, args.getOrElse("withShutdownHook", "true").toBoolean)
+        sotUtils.waitToFinish(result.internal)
       }
     }
   }
