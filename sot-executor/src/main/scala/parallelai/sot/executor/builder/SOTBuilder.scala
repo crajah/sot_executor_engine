@@ -11,7 +11,7 @@ import org.apache.beam.sdk.io.gcp.datastore.DatastoreIO
 import org.apache.beam.sdk.options.{PipelineOptions, StreamingOptions}
 import org.joda.time.{DateTimeZone, Duration, Instant}
 import org.joda.time.format.DateTimeFormat
-import parallelai.sot.executor.common.{SOTOptions, SOTUtils}
+import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.macros.SOTBuilder
 import shapeless._
 import syntax.singleton._
@@ -25,11 +25,21 @@ import org.apache.beam.sdk.transforms.windowing.{AfterProcessingTime, Repeatedly
 import org.slf4j.LoggerFactory
 import parallelai.sot.executor.model.SOTMacroConfig._
 import parallelai.sot.executor.model.SOTMacroJsonConfig
-import parallelai.sot.executor.utils.AvroUtils
-import parallelai.sot.executor.scio.PaiScioContext._
+import parallelai.sot.engine.runner.scio.PaiScioContext._
 import parallelai.sot.macros.SOTMacroHelper._
 import com.trueaccord.scalapb.GeneratedMessage
-
+import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
+import parallelai.sot.engine.serialization.avro.AvroUtils
+import parallelai.sot.engine.runner.Reader
+import parallelai.sot.engine.runner.Transformer
+import parallelai.sot.engine.runner.Writer
+import parallelai.sot.engine.runner.Runner
+import parallelai.sot.engine.generic.row.Row
+import parallelai.sot.engine.generic.row.Row._
+import parallelai.sot.engine.generic.row.DeepRec._
+import parallelai.sot.engine.generic.row.DeepRec
+import parallelai.sot.engine.generic.row.DeepRec.ToCcPartiallyApplied
+import parallelai.sot.engine.generic.helper.Helper
 import scala.meta.Lit
 
 
@@ -47,14 +57,27 @@ sbt clean compile \
     --region=europe-west1 \
     --zone=europe-west2-a \
     --workerMachineType=n1-standard-1 \
-    --maxNumWorkers=3 \
-    --waitToFinish=false"
+    --diskSizeGb=150 \
+    --maxNumWorkers=1 \
+    --waitToFinish=true"
 */
-
-@SOTBuilder("application.conf")
 object SOTBuilder {
-
-
+  @AvroType.fromSchema("{\"type\":\"record\",\"name\":\"Message\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"long\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}]}")
+  class Message
+  @BigQueryType.fromSchema("{\"type\":\"bigquerydefinition\",\"name\":\"BigQueryRow\",\"fields\":[{\"mode\":\"REQUIRED\",\"name\":\"user\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"teamName\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"score\",\"type\":\"INTEGER\"},{\"mode\":\"REQUIRED\",\"name\":\"eventTime\",\"type\":\"INTEGER\"},{\"mode\":\"REQUIRED\",\"name\":\"eventTimeStr\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"score2\",\"type\":\"FLOAT\"},{\"mode\":\"REQUIRED\",\"name\":\"processingTime\",\"type\":\"STRING\"}]}")
+  class BigQueryRow
+  val inOutSchemaHList = Runner[parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow, parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition]
+  implicit def genericTransformation: Transformer[Message, BigQueryRow, Nothing] = new Transformer[Message, BigQueryRow, Nothing] {
+    import shapeless.record._
+    import parallelai.sot.engine.generic.row.DeepRec._
+    type Out = (Option[Nothing], SCollection[BigQueryRow])
+    def transform(rowIn: SCollection[Message]): Out = {
+      val converter = Row.to[BigQueryRow]
+      val in = rowIn.map(r => Row(r))
+      val trans = in.filter(m => m.get('score) > 2).map(m => m.append('score2, m.get('score) * 0.23d)).map(m => m.append('processingTime, Helper.fmt.print(Instant.now())))
+      (None, trans.map(r => converter.from(r.hl)))
+    }
+  }
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
     def execute(jobConfig: Config, sotUtils: SOTUtils, sc: ScioContext, args: Args) = {
@@ -62,9 +85,7 @@ object SOTBuilder {
       val sinkTap = getSink(jobConfig)._2
       val runner = inOutSchemaHList.exec(sc, sourceTap, sinkTap, sotUtils)
       val result = sc.close()
-      if (args.getOrElse("waitToFinish", "true").toBoolean) {
-        sotUtils.waitToFinish(result.internal)
-      }
+      if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
     }
   }
   def loadConfig() = {

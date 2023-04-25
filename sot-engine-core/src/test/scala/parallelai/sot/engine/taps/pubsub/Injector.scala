@@ -15,7 +15,7 @@ import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 import org.apache.avro.generic.{GenericData, GenericRecord}
 import org.apache.avro.specific.SpecificDatumWriter
-import parallelai.sot.executor.utils.AvroUtils
+import parallelai.sot.engine.serialization.avro.AvroUtils
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -246,25 +246,25 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
   }
 
   def publishDataProto(numMessages: Int, delayInMillis: Int): Unit = {
-
-    import cats.instances.list._
-    import cats.instances.option._
-    import parallelai.sot.executor.protobuf._
-
-    val pubsubMessages = for (i <- 0 until Math.max(1, numMessages)) yield {
-      val currTime = System.currentTimeMillis()
-      val message = generateEventProto(currTime, delayInMillis)
-      val pubsubMessage = new PubsubMessage().encodeData(message.toPB)
-      pubsubMessage.setAttributes(ImmutableMap.of(TIMESTAMP_ATTRIBUTE, ((currTime - delayInMillis) / 1000 * 1000).toString))
-      if (delayInMillis != 0) {
-        println(pubsubMessage.getAttributes())
-        println("late data for: " + message)
-      }
-      pubsubMessage
-    }
-    val publishRequest = new PublishRequest()
-    publishRequest.setMessages(pubsubMessages.asJava)
-    pubsub.projects().topics().publish(topic, publishRequest).execute()
+//
+//    import cats.instances.list._
+//    import cats.instances.option._
+//    import parallelai.sot.executor.protobuf._
+//
+//    val pubsubMessages = for (i <- 0 until Math.max(1, numMessages)) yield {
+//      val currTime = System.currentTimeMillis()
+//      val message = generateEventProto(currTime, delayInMillis)
+//      val pubsubMessage = new PubsubMessage().encodeData(message.toPB)
+//      pubsubMessage.setAttributes(ImmutableMap.of(TIMESTAMP_ATTRIBUTE, ((currTime - delayInMillis) / 1000 * 1000).toString))
+//      if (delayInMillis != 0) {
+//        println(pubsubMessage.getAttributes())
+//        println("late data for: " + message)
+//      }
+//      pubsubMessage
+//    }
+//    val publishRequest = new PublishRequest()
+//    publishRequest.setMessages(pubsubMessages.asJava)
+//    pubsub.projects().topics().publish(topic, publishRequest).execute()
   }
 
   /**

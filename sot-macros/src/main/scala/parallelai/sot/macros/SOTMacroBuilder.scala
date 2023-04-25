@@ -109,6 +109,7 @@ object SOTMainMacroImpl {
         q"""
          implicit def genericTransformation:Transformer[$sourceTypeName, $sinkTypeName, Nothing] = new Transformer[$sourceTypeName, $sinkTypeName, Nothing] {
            import shapeless.record._
+
            type Out = (Option[Nothing], SCollection[$sinkTypeName])
            def transform(rowIn: SCollection[$sourceTypeName]): Out = {
                    val converter = Row.to[$sinkTypeName]
@@ -127,7 +128,7 @@ object SOTMainMacroImpl {
         q"""
          implicit def genericTransformation:Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] = new Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] {
            import shapeless.record._
-           import parallelai.sot.executor.bigquery._
+           import parallelai.sot.engine.io.bigquery._
            type Out = (Option[com.google.api.services.bigquery.model.TableSchema], SCollection[com.google.api.services.bigquery.model.TableRow])
            def transform(rowIn: SCollection[$sourceTypeName]): Out = {
                    def getSchema[A <: HList](a: SCollection[Row[A]])(implicit hListSchemaProvider: HListSchemaProvider[A]) = BigQuerySchemaProvider[A].getSchema
@@ -212,7 +213,7 @@ object SOTMainMacroImpl {
 
     val configApply = Term.ApplyType(Term.Name("Runner"),
       List(Type.Name(getTapType(sourceTap)),
-        Type.Name("parallelai.sot.executor.common.SOTUtils"),
+        Type.Name("parallelai.sot.engine.config.gcp.SOTUtils"),
         Type.Name(getSchemaAnnotation(sourceSchema)),
         Type.Name(sourceSchema.get.definition.name),
         Type.Name(getSchemaAnnotation(sinkSchema)),
@@ -229,7 +230,7 @@ object SOTMainMacroImpl {
   def getSchemaAnnotation(schema: Option[Schema]) = schema match {
     case Some(s) if s.`type` == "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
     case Some(s) if s.`type` == "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
-    case Some(s) if s.`type` == "datastore" => "parallelai.sot.macros.HasDatastoreAnnotation"
+    case Some(s) if s.`type` == "datastore" => "parallelai.sot.engine.io.datastore.HasDatastoreAnnotation"
     case Some(s) if s.`type` == "protobuf" => "com.trueaccord.scalapb.GeneratedMessage"
     case None => "com.google.api.client.json.GenericJson"
     case Some(s) => throw new Exception("Unsupported Schema Type " + s.`type`)
@@ -250,5 +251,3 @@ object SOTMainMacroImpl {
     SOTMacroHelper.getSchema(sinkOp.schema.get, config.schemas).definition.name.parse[Type].get
   }
 }
-
-trait HasDatastoreAnnotation
