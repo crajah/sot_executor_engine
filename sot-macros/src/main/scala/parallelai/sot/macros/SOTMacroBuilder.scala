@@ -1,11 +1,9 @@
 package parallelai.sot.macros
 
 import java.io.File
-import java.nio.charset.StandardCharsets
-import java.nio.file.FileSystems
-import java.util.Base64
 
 import com.typesafe.config.ConfigFactory
+import parallelai.sot.engine.serialization.protobuf.ProtoPBCCodeGen
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
 import parallelai.sot.executor.model.SOTMacroJsonConfig._
 import parallelai.sot.executor.model._
@@ -14,7 +12,6 @@ import spray.json._
 
 import scala.collection.immutable.Seq
 import scala.meta._
-import org.apache.commons.io.FileUtils
 
 
 class SOTBuilder(resourceName: String) extends scala.annotation.StaticAnnotation {
@@ -195,7 +192,7 @@ object SOTMainMacroImpl {
   }
 
   def protoSchemaCodeGenerator(definition: ProtobufDefinition): Seq[Stat] = {
-    val generatedCode = ProtoPBCCodGen.executeAll(definition.schemaBase64)
+    val generatedCode = ProtoPBCCodeGen.executeAll(definition.schemaBase64)
     val stats = generatedCode.parse[Source].get.stats
     stats.head match {
       case q"package $name  {..$statements}" =>
