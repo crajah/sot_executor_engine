@@ -45,7 +45,7 @@ class ScioBuilderPubSubToBigQuery[In <: HasAvroAnnotation : Manifest, Out <: Has
     val out = transform(in).saveAsTypedBigQuery(s"${outArgs.dataset}.${outArgs.table}")
 
     val result = sc.close()
-    exampleUtils.waitToFinish(result.internal, true)
+    exampleUtils.waitToFinish(result.internal)
   }
 
 }

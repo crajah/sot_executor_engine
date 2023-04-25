@@ -40,7 +40,7 @@ class ScioBuilderPubSubToPubSub[In <: HasAvroAnnotation : Manifest, Out <: HasAv
     val out = transform(scIn).map(r => AvroUtils.encodeAvro(toGenericRecordOut(r), schemaStringOut)).saveAsPubsub(s"projects/${project}/topics/${outArgs.topic}")
 
     val result = sc.close()
-    exampleUtils.waitToFinish(result.internal, true)
+    exampleUtils.waitToFinish(result.internal)
   }
 
 }

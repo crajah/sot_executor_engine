@@ -44,7 +44,7 @@ class ScioBuilderBigQueryToPubSub[In <: HasAnnotation : Manifest, Out <: HasAvro
     val out = transform(in).map(r => AvroUtils.encodeAvro(toGenericRecord(r), schemaString)).saveAsPubsub(s"projects/${project}/topics/${outArgs.topic}")
 
     val result = sc.close()
-    exampleUtils.waitToFinish(result.internal, true)
+    exampleUtils.waitToFinish(result.internal)
   }
 
 }
