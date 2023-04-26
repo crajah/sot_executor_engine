@@ -56,22 +56,10 @@ sbt clean compile \
     --maxNumWorkers=1 \
     --waitToFinish=true"
 */
+
+@SOTBuilder("application.conf")
 object SOTBuilder {
-  @AvroType.fromSchema("{\"type\":\"record\",\"name\":\"Message\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"long\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}]}")
-  class Message
-  @BigQueryType.fromSchema("{\"type\":\"bigquerydefinition\",\"name\":\"BigQueryRow\",\"fields\":[{\"mode\":\"REQUIRED\",\"name\":\"user\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"teamName\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"score\",\"type\":\"INTEGER\"},{\"mode\":\"REQUIRED\",\"name\":\"eventTime\",\"type\":\"INTEGER\"},{\"mode\":\"REQUIRED\",\"name\":\"eventTimeStr\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"score2\",\"type\":\"FLOAT\"},{\"mode\":\"REQUIRED\",\"name\":\"processingTime\",\"type\":\"STRING\"}]}")
-  class BigQueryRow
-  val inOutSchemaHList = Runner[parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow, parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition]
-  implicit def genericTransformation: Transformer[Message, BigQueryRow, Nothing] = new Transformer[Message, BigQueryRow, Nothing] {
-    import shapeless.record._
-    type Out = (Option[Nothing], SCollection[BigQueryRow])
-    def transform(rowIn: SCollection[Message]): Out = {
-      val converter = Row.to[BigQueryRow]
-      val in = rowIn.map(r => Row(r))
-      val trans = in.filter(m => m.get('score) > 2).map(m => m.append('score2, m.get('score) * 0.23d)).map(m => m.append('processingTime, Helper.fmt.print(Instant.now())))
-      (None, trans.map(r => converter.from(r.hl)))
-    }
-  }
+
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
     def execute(jobConfig: Config, sotUtils: SOTUtils, sc: ScioContext, args: Args) = {
