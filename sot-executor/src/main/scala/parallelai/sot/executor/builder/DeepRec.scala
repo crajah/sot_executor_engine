@@ -1,8 +1,7 @@
 package parallelai.sot.executor.builder
 
-import shapeless._
 import shapeless.labelled.{FieldType, field}
-import shapeless.{DepFn1, LabelledGeneric}
+import shapeless.{DepFn1, LabelledGeneric, _}
 
 trait DeepRec[L] extends DepFn1[L] with Serializable {
   type Out <: HList

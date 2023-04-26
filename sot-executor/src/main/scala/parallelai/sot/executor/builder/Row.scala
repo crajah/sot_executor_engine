@@ -1,5 +1,6 @@
 package parallelai.sot.executor.builder
 
+
 import shapeless._
 import ops.hlist._
 import parallelai.sot.executor.builder.DeepRec.ToCcPartiallyApplied

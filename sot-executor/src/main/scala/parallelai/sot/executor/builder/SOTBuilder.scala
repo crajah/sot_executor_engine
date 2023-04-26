@@ -11,7 +11,7 @@ import org.apache.beam.sdk.io.gcp.datastore.DatastoreIO
 import org.apache.beam.sdk.options.{PipelineOptions, StreamingOptions}
 import org.joda.time.{DateTimeZone, Duration, Instant}
 import org.joda.time.format.DateTimeFormat
-import parallelai.sot.executor.common.{SOTOptions, SOTUtils}
+import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.macros.SOTBuilder
 import shapeless._
 import syntax.singleton._
@@ -25,11 +25,16 @@ import org.apache.beam.sdk.transforms.windowing.{AfterProcessingTime, Repeatedly
 import org.slf4j.LoggerFactory
 import parallelai.sot.executor.model.SOTMacroConfig._
 import parallelai.sot.executor.model.SOTMacroJsonConfig
-import parallelai.sot.executor.utils.AvroUtils
-import parallelai.sot.executor.scio.PaiScioContext._
+import parallelai.sot.engine.runner.scio.PaiScioContext._
 import parallelai.sot.macros.SOTMacroHelper._
 import com.trueaccord.scalapb.GeneratedMessage
-
+import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
+import parallelai.sot.engine.serialization.avro.AvroUtils
+import parallelai.sot.engine.runner.Reader
+import parallelai.sot.engine.runner.Transformer
+import parallelai.sot.engine.runner.Writer
+import parallelai.sot.engine.runner.Runner
+import parallelai.sot.engine.generic.helper.Helper
 import scala.meta.Lit
 
 
@@ -47,13 +52,13 @@ sbt clean compile \
     --region=europe-west1 \
     --zone=europe-west2-a \
     --workerMachineType=n1-standard-1 \
-    --maxNumWorkers=3 \
-    --waitToFinish=false"
+    --diskSizeGb=150 \
+    --maxNumWorkers=1 \
+    --waitToFinish=true"
 */
 
 @SOTBuilder("application.conf")
 object SOTBuilder {
-
 
   class Builder extends Serializable() {
     private val logger = LoggerFactory.getLogger(this.getClass)
@@ -62,9 +67,7 @@ object SOTBuilder {
       val sinkTap = getSink(jobConfig)._2
       val runner = inOutSchemaHList.exec(sc, sourceTap, sinkTap, sotUtils)
       val result = sc.close()
-      if (args.getOrElse("waitToFinish", "true").toBoolean) {
-        sotUtils.waitToFinish(result.internal)
-      }
+      if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
     }
   }
   def loadConfig() = {
