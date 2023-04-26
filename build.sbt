@@ -113,6 +113,6 @@ lazy val `sot-executor` = (project in file("sot-executor"))
 ).dependsOn(`sot-macros`)
 
 lazy val `sot` = (project in file("."))
-  .aggregate(`sot-executor`, `sot-macros`)
+  .aggregate(`sot-executor`, `sot-macros`, `sot-engine-core`)
 
 

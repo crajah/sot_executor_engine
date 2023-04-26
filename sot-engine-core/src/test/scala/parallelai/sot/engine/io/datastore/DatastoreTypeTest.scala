@@ -12,8 +12,7 @@ import shapeless._
 import shapeless.datatype.record._
 
 object DatastoreTypeSpec extends Properties("DatastoreType") {
-
-  Records
+  
   import parallelai.sot.engine.io.datastore.Records._
   import parallelai.sot.engine.io.utils.SerializableUtils._
 
