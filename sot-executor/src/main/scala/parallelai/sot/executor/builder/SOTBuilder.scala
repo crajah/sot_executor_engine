@@ -34,11 +34,6 @@ import parallelai.sot.engine.runner.Reader
 import parallelai.sot.engine.runner.Transformer
 import parallelai.sot.engine.runner.Writer
 import parallelai.sot.engine.runner.Runner
-import parallelai.sot.engine.generic.row.Row
-import parallelai.sot.engine.generic.row.Row._
-import parallelai.sot.engine.generic.row.DeepRec._
-import parallelai.sot.engine.generic.row.DeepRec
-import parallelai.sot.engine.generic.row.DeepRec.ToCcPartiallyApplied
 import parallelai.sot.engine.generic.helper.Helper
 import scala.meta.Lit
 
@@ -69,7 +64,6 @@ object SOTBuilder {
   val inOutSchemaHList = Runner[parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Message, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow, parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition]
   implicit def genericTransformation: Transformer[Message, BigQueryRow, Nothing] = new Transformer[Message, BigQueryRow, Nothing] {
     import shapeless.record._
-    import parallelai.sot.engine.generic.row.DeepRec._
     type Out = (Option[Nothing], SCollection[BigQueryRow])
     def transform(rowIn: SCollection[Message]): Out = {
       val converter = Row.to[BigQueryRow]
