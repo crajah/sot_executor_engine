@@ -1,4 +1,5 @@
-package parallelai.sot.executor.builder
+package parallelai.sot.engine.generic.row
+
 
 import shapeless.labelled.{FieldType, field}
 import shapeless.{DepFn1, LabelledGeneric, _}
@@ -14,7 +15,7 @@ trait LowPriorityDeepRec {
 
   implicit def hconsDeepRec0[H, T <: HList](implicit
                                             tdr: Lazy[DeepRec[T]]
-                                           ): Aux[H :: T, H :: tdr.value.Out] = new DeepRec[H :: T] {
+                                           ): DeepRec.Aux[H :: T, H :: tdr.value.Out] = new DeepRec[H :: T] {
     type Out = H :: tdr.value.Out
     def apply(in: H :: T): H :: tdr.value.Out = in.head :: tdr.value(in.tail)
     def fromRec(out: H :: tdr.value.Out): H :: T =
@@ -25,14 +26,14 @@ trait LowPriorityDeepRec {
 object DeepRec extends LowPriorityDeepRec {
 
   class ToCcPartiallyApplied[A, Repr](val gen: LabelledGeneric.Aux[A, Repr]) extends Serializable {
-    type Repr = gen.Repr
+
     def from[Out0, Out1](out: Out0)(implicit
-                                    rdr: Aux[Repr, Out1],
+                                    rdr: DeepRec.Aux[Repr, Out1],
                                     eqv: Out0 =:= Out1
     ): A = gen.from(rdr.fromRec(eqv(out)))
   }
 
-  implicit val hnilDeepRec: Aux[HNil, HNil] = new DeepRec[HNil] {
+  implicit val hnilDeepRec: DeepRec.Aux[HNil, HNil] = new DeepRec[HNil] {
     type Out = HNil
     def apply(in: HNil): HNil = in
     def fromRec(out: HNil): HNil = out
@@ -42,7 +43,7 @@ object DeepRec extends LowPriorityDeepRec {
                                                                         gen: LabelledGeneric.Aux[V, Repr],
                                                                         hdr: Lazy[DeepRec[Repr]],
                                                                         tdr: Lazy[DeepRec[T]]
-                                                                       ): Aux[FieldType[K, V] :: T, FieldType[K, hdr.value.Out] :: tdr.value.Out] =
+                                                                       ): DeepRec.Aux[FieldType[K, V] :: T, FieldType[K, hdr.value.Out] :: tdr.value.Out] =
     new DeepRec[FieldType[K, V] :: T] {
       type Out = FieldType[K, hdr.value.Out] :: tdr.value.Out
       def apply(
@@ -61,7 +62,7 @@ object DeepRec extends LowPriorityDeepRec {
                                                                         gen: LabelledGeneric.Aux[V, Repr],
                                                                         hdr: Lazy[DeepRec[Repr]],
                                                                         tdr: Lazy[DeepRec[T]]
-                                                                       ): Aux[FieldType[K, Option[V]] :: T, FieldType[K, Option[hdr.value.Out]] :: tdr.value.Out] =
+                                                                       ): DeepRec.Aux[FieldType[K, Option[V]] :: T, FieldType[K, Option[hdr.value.Out]] :: tdr.value.Out] =
     new DeepRec[FieldType[K, Option[V]] :: T] {
       type Out = FieldType[K, Option[hdr.value.Out]] :: tdr.value.Out
       def apply(
@@ -88,7 +89,7 @@ object DeepRec extends LowPriorityDeepRec {
                                                                         gen: LabelledGeneric.Aux[V, Repr],
                                                                         hdr: Lazy[DeepRec[Repr]],
                                                                         tdr: Lazy[DeepRec[T]]
-                                                                       ): Aux[FieldType[K, List[V]] :: T, FieldType[K, List[hdr.value.Out]] :: tdr.value.Out] =
+                                                                       ): DeepRec.Aux[FieldType[K, List[V]] :: T, FieldType[K, List[hdr.value.Out]] :: tdr.value.Out] =
     new DeepRec[FieldType[K, List[V]] :: T] {
       type Out = FieldType[K, List[hdr.value.Out]] :: tdr.value.Out
       def apply(

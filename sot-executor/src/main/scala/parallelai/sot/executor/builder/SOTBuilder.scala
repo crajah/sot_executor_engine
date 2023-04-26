@@ -35,6 +35,8 @@ import parallelai.sot.engine.runner.Transformer
 import parallelai.sot.engine.runner.Writer
 import parallelai.sot.engine.runner.Runner
 import parallelai.sot.engine.generic.helper.Helper
+import parallelai.sot.engine.generic.row.Row
+
 import scala.meta.Lit
 
 

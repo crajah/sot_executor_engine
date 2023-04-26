@@ -110,7 +110,7 @@ lazy val `sot-executor` = (project in file("sot-executor"))
     libraryDependencies ++= Seq(scalaTest),
     macroSettings,
     unmanagedResourceDirectories in Compile += globalResources
-).dependsOn(`sot-macros`)
+).dependsOn(`sot-macros`, `sot-engine-core`)
 
 lazy val `sot` = (project in file("."))
   .aggregate(`sot-executor`, `sot-macros`, `sot-engine-core`)

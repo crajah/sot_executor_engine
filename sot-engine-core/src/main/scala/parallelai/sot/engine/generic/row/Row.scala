@@ -1,11 +1,9 @@
-package parallelai.sot.executor.builder
+package parallelai.sot.engine.generic.row
 
-
+import parallelai.sot.engine.generic.row.DeepRec.ToCcPartiallyApplied
 import shapeless._
-import ops.hlist._
-import parallelai.sot.executor.builder.DeepRec.ToCcPartiallyApplied
-import record._
 import shapeless.labelled.{FieldType, field}
+import shapeless.ops.hlist._
 import shapeless.ops.record.{Modifier, Selector, _}
 
 class Row[L <: HList](val hl: L) {
