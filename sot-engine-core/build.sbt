@@ -8,9 +8,11 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= Seq(
   typesafeConfig,
   grizzledLogging,
+  sprayJson,
+  trueAccordCompiler,
+  trueAccordRuntime,
+  protoc,
   kafka,
-  twitterBijectionCore,
-  twitterBijectionAvro,
   spotifyCore,
   spotifyBigTable,
   spotifyExtra,
