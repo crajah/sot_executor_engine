@@ -55,6 +55,10 @@
           "type": "string"
         },
         {
+          "name": "stake",
+          "type": "string"
+        },
+        {
           "name": "message",
           "type": "string"
         },
@@ -102,7 +106,13 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => {val winnings = m.get('state).get('bets).apply(0).get('payout).get('winnings).get;val customerRef = m.get('state).get('bets).apply(0).get('customerRef).get;val outComeName = m.get('supportingState).get('outcome).apply(0).get('outcomeName).get;val marketName = m.get('supportingState).get('outcome).apply(0).get('marketName).get;val eventName = m.get('supportingState).get('outcome).apply(0).get('eventName).get;val catRef = m.get('supportingState).get('outcome).apply(0).get('categoryRef).get;val stateBetsId = m.get('state).get('bets).apply(0).get('id);val currency = m.get('state).get('bets).apply(0).get('stake).get('currencyRef).get;new Row('customerRef ->> customerRef :: 'winnings ->> winnings :: 'outComeName ->> outComeName :: 'marketName ->> marketName :: 'eventName ->> eventName :: 'categoryRef ->> catRef :: 'stateBetsId ->> stateBetsId :: 'currency ->> currency :: HNil)}"
+      "func": "m => {val winnings = m.get('state).get('bets).apply(0).get('payout).get('winnings).get;val customerRef = m.get('state).get('bets).apply(0).get('customerRef).get;val outComeName = m.get('supportingState).get('outcome).apply(0).get('outcomeName).get;val marketName = m.get('supportingState).get('outcome).apply(0).get('marketName).get;val eventName = m.get('supportingState).get('outcome).apply(0).get('eventName).get;val catRef = m.get('supportingState).get('outcome).apply(0).get('categoryRef).get;val stateBetsId = m.get('state).get('bets).apply(0).get('id);val currency = m.get('state).get('bets).apply(0).get('stake).get('currencyRef).get;val stake = m.get('state).get('bets).apply(0).get('stake).get('amount).get;new Row('customerRef ->> customerRef :: 'winnings ->> winnings :: 'outComeName ->> outComeName :: 'marketName ->> marketName :: 'eventName ->> eventName :: 'categoryRef ->> catRef :: 'stateBetsId ->> stateBetsId :: 'currency ->> currency :: 'stake ->> stake :: HNil)}"
+    },
+    {
+      "type": "transformation",
+      "name": "filter3",
+      "op": "filter",
+      "func": "m => m.get('winnings).get.toDouble > m.get('stake).get.toDouble * 1.30"
     },
     {
       "type": "transformation",
@@ -133,6 +143,10 @@
     },
     {
       "from": "mapper1",
+      "to": "filter3"
+    },
+    {
+      "from": "filter3",
       "to": "mapper2"
     },
     {
