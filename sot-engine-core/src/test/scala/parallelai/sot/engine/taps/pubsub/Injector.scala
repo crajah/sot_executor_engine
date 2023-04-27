@@ -20,10 +20,11 @@ import parallelai.sot.engine.serialization.avro.AvroUtils
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 import scala.util.{Failure, Success}
+import com.typesafe.config.{Config, ConfigFactory}
 
 /**
   * This is a generator that simulates usage data from a mobile game, and either publishes the data
-  * to a pubsub topic or writes it to a file.
+  * to a pubsub topic in avro or protobuf format using nested or flat structure.
   *
   * <p>The general model used by the generator is the following. There is a set of teams with team
   * members. Each member is scoring points for their team. After some period, a team will dissolve
@@ -36,9 +37,9 @@ import scala.util.{Failure, Success}
   * e.g.:
   * user2_AsparagusPig,AsparagusPig,10,1445230923951,2015-11-02 09:09:28.224
   *
-  * <p>The Injector writes either to a PubSub topic, or a file. It will use the PubSub topic if
+  * <p>The Injector writes to a PubSub topic. It will use the PubSub topic if
   * specified. It takes the following arguments:
-  * {@code Injector project-name (topic-name|none) (filename|none)}.
+  * {@code Injector project-name topic-name (avro|proto) (false|true)}.
   *
   * <p>To run the Injector in the mode where it publishes to PubSub, you will need to authenticate
   * locally using project-based service account credentials to avoid running over PubSub
@@ -67,20 +68,13 @@ import scala.util.{Failure, Success}
   * </pre>
   */
 
-@AvroType.fromSchema("{\"name\":\"Message\",\"doc\":\"A basic schema for storing user records\",\"fields\":[{\"name\":\"user\",\"type\":\"string\",\"doc\":\"Name of the user\"},{\"name\":\"teamName\",\"type\":\"string\",\"doc\":\"Name of the team\"},{\"name\":\"score\",\"type\":\"long\",\"doc\":\"User score\"},{\"name\":\"eventTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"eventTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}],\"type\":\"record\",\"namespace\":\"parallelai.sot.avro\"}")
-class MessageAvro
 
-case class NestedClass(value: Long)
-
-case class MessageProto(user: String, teamName: String, score: Long, eventTime: Long, eventTimeStr: String, nestedValue: List[NestedClass])
-
-class Injector(project: String, topicName: Option[String], fileName: Option[String], serialiser: String) {
+class Injector(project: String, topicName: String, serialiser: String, nested: Boolean) {
 
   val r = scala.util.Random
 
-  require(topicName.isDefined ^ fileName.isDefined)
-
-  val avroT = AvroType[MessageAvro]
+  val avroT = AvroType[AvroSchema.MessageAvro]
+  val avroTNested = AvroType[AvroSchema.MessageAvroNested]
   val schemaStr = avroT.schema.toString
 
   private var pubsub: Pubsub = _
@@ -98,16 +92,12 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
 
   private val fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss.SSS").withZone(DateTimeZone.forTimeZone(java.util.TimeZone.getTimeZone("PST")))
 
-  if (topicName.isDefined) {
-    // Create the PubSub client.
-    pubsub = InjectorUtils.getClient()
-    // Create the PubSub topic as necessary.
-    topic = InjectorUtils.getFullyQualifiedTopicName(project, topicName.get)
-    InjectorUtils.createTopic(pubsub, topic)
-    println("Injecting to topic: " + topic)
-  } else {
-    println("Writing to file: " + fileName)
-  }
+  // Create the PubSub client.
+  pubsub = InjectorUtils.getClient()
+  // Create the PubSub topic as necessary.
+  topic = InjectorUtils.getFullyQualifiedTopicName(project, topicName)
+  InjectorUtils.createTopic(pubsub, topic)
+  println("Injecting to topic: " + topic)
 
   // Start off with some random live teams.
   while (liveTeams.length < Injector.NUM_LIVE_TEAMS) {
@@ -159,9 +149,8 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
   }
 
   /** Generate a user gaming event. */
-  def generateEventProto(currTime: Long, delayInMillis: Int): MessageProto = {
+  def generateEventProtoNested(currTime: Long, delayInMillis: Int): Array[Byte] = {
     val team = randomTeam()
-
     val robot = team.robot
     // If the team has an associated robot team member...
     val user = robot match {
@@ -175,21 +164,16 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
         // No robot
         team.getRandomUser
     }
-    val message = addTimeInfoToEventProto(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), currTime, delayInMillis)
-    message
-  }
 
-
-  /**
-    * Add time info to a generated gaming event.
-    */
-  def addTimeInfoToEventProto(user: String, teamName: String, score: Long, currTime: Long, delayInMillis: Int): MessageProto = {
     val eventTime = (currTime - delayInMillis) / 1000 * 1000
     // Add a (redundant) 'human-readable' date string to make the data semantics more clear.
     val dateString = fmt.print(currTime)
-    val e1 = NestedClass(r.nextLong())
-    val e2 = NestedClass(r.nextLong())
-    MessageProto(user, teamName, score, eventTime, dateString, List(e1, e2))
+    nested match {
+      case false => MessageProto(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString).toByteArray
+      case true =>
+        val nestedData = (for (_ <- 1 to r.nextInt(10) + 1) yield MessageProtoNested.NestedClass(r.nextLong())).toList
+        MessageProtoNested(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString, nestedData).toByteArray
+    }
   }
 
   /** Generate a user gaming event. */
@@ -209,19 +193,17 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
         // No robot
         team.getRandomUser
     }
-    val message = addTimeInfoToEventAvro(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), currTime, delayInMillis)
-    message
-  }
-
-
-  /**
-    * Add time info to a generated gaming event.
-    */
-  def addTimeInfoToEventAvro(user: String, teamName: String, score: Long, currTime: Long, delayInMillis: Int): GenericRecord = {
     val eventTime = (currTime - delayInMillis) / 1000 * 1000
     // Add a (redundant) 'human-readable' date string to make the data semantics more clear.
     val dateString = fmt.print(currTime)
-    avroT.toGenericRecord(MessageAvro(user, teamName, score, eventTime, dateString))
+
+    nested match {
+      case false => avroT.toGenericRecord(AvroSchema.MessageAvro(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString))
+      case true => {
+        val nestedData = (for (_ <- 1 to r.nextInt(10) + 1) yield AvroSchema.MessageAvroNested$NestedClass(r.nextLong())).toList
+        avroTNested.toGenericRecord(AvroSchema.MessageAvroNested(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString, nestedData))
+      }
+    }
   }
 
   /**
@@ -246,47 +228,21 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
   }
 
   def publishDataProto(numMessages: Int, delayInMillis: Int): Unit = {
-//
-//    import cats.instances.list._
-//    import cats.instances.option._
-//    import parallelai.sot.executor.protobuf._
-//
-//    val pubsubMessages = for (i <- 0 until Math.max(1, numMessages)) yield {
-//      val currTime = System.currentTimeMillis()
-//      val message = generateEventProto(currTime, delayInMillis)
-//      val pubsubMessage = new PubsubMessage().encodeData(message.toPB)
-//      pubsubMessage.setAttributes(ImmutableMap.of(TIMESTAMP_ATTRIBUTE, ((currTime - delayInMillis) / 1000 * 1000).toString))
-//      if (delayInMillis != 0) {
-//        println(pubsubMessage.getAttributes())
-//        println("late data for: " + message)
-//      }
-//      pubsubMessage
-//    }
-//    val publishRequest = new PublishRequest()
-//    publishRequest.setMessages(pubsubMessages.asJava)
-//    pubsub.projects().topics().publish(topic, publishRequest).execute()
-  }
 
-  /**
-    * Publish generated events to a file.
-    */
-  def publishDataToFile(fileName: String, numMessages: Int, delayInMillis: Int) {
-    val out = new PrintWriter(new OutputStreamWriter(
-      new BufferedOutputStream(new FileOutputStream(fileName, true)), "UTF-8"))
-    try {
-      for (i <- 0 until Math.max(1, numMessages)) {
-        val currTime = System.currentTimeMillis()
-        val message = generateEventAvro(currTime, delayInMillis)
-        println(message)
+    val pubsubMessages = for (i <- 0 until Math.max(1, numMessages)) yield {
+      val currTime = System.currentTimeMillis()
+      val message = generateEventProtoNested(currTime, delayInMillis)
+      val pubsubMessage = new PubsubMessage().encodeData(message)
+      pubsubMessage.setAttributes(ImmutableMap.of(TIMESTAMP_ATTRIBUTE, ((currTime - delayInMillis) / 1000 * 1000).toString))
+      if (delayInMillis != 0) {
+        println(pubsubMessage.getAttributes())
+        println("late data for: " + message)
       }
-    } catch {
-      case (e: Exception) => e.printStackTrace()
-    } finally {
-      if (out != null) {
-        out.flush()
-        out.close()
-      }
+      pubsubMessage
     }
+    val publishRequest = new PublishRequest()
+    publishRequest.setMessages(pubsubMessages.asJava)
+    pubsub.projects().topics().publish(topic, publishRequest).execute()
   }
 
   def run() = {
@@ -307,24 +263,20 @@ class Injector(project: String, topicName: Option[String], fileName: Option[Stri
         (nMsg, 0)
       }
 
-      if (fileName.isDefined) { // Won't use threading for the file write.
-        publishDataToFile(fileName.get, numMessages, delayInMillis)
-      } else { // Write to PubSub.
-        // Start a thread to inject some data.
-        new Thread() {
-          override def run() {
-            try {
-              val res = if (serialiser == "avro") {
-                publishDataAvro(numMessages, delayInMillis)
-              } else if (serialiser == "proto") {
-                publishDataProto(numMessages, delayInMillis)
-              }
-            } catch {
-              case (e: IOException) => System.err.println(e)
+      // Start a thread to inject some data.
+      new Thread() {
+        override def run() {
+          try {
+            val res = if (serialiser == "avro") {
+              publishDataAvro(numMessages, delayInMillis)
+            } else if (serialiser == "proto") {
+              publishDataProto(numMessages, delayInMillis)
             }
+          } catch {
+            case (e: IOException) => System.err.println(e)
           }
-        }.start()
-      }
+        }
+      }.start()
       // Wait before creating another injector thread.
       Thread.sleep(THREAD_SLEEP_MS)
     }
@@ -401,16 +353,17 @@ object Injector {
   def main(args: Array[String]): Unit = {
 
     if (args.length < 3) {
-      println("Usage: Injector project-name (topic-name|none) (filename|none) (avro|proto)")
+      println("Usage: Injector project-name topic-name (avro|proto) (true|false)")
       System.exit(1)
     }
+
     val project = args(0)
-    val topicName = if (args(1) == "none") None else Some(args(1))
-    val fileName = if (args(2) == "none") None else Some(args(2))
-    val serialiser = args(3)
+    val topicName = args(1)
+    val serialiser = args(2)
+    val nested = if (args(3) == "true") true else false
 
     println("Starting Injector")
-    val i = new Injector(project, topicName, fileName, serialiser)
+    val i = new Injector(project, topicName, serialiser, nested)
     i.run()
 
   }
