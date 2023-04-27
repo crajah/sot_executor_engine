@@ -52,7 +52,13 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => {val winnings = m.get('state).get('bets).apply(0).get('payout).get('winnings);val accNum = m.get('supportingState).get('customer).get('accountNumber);val outComeName = m.get('supportingState).get('outcome).apply(0).get('outcomeName);val marketName = m.get('supportingState).get('outcome).apply(0).get('marketName);val eventName = m.get('supportingState).get('outcome).apply(0).get('eventName);val catRef = m.get('supportingState).get('outcome).apply(0).get('categoryRef);val stateBetsId = m.get('state).get('bets).apply(0).get('id);val currency = m.get('state).get('bets).apply(0).get('stake).get('currencyRef);new Row('accountNumber ->> accNum :: 'winnings ->> winnings :: 'outComeName ->> outComeName :: 'marketName ->> marketName :: 'eventName ->> eventName :: 'categoryRef ->> catRef :: 'stateBetsId ->> stateBetsId :: 'currency ->> currency :: HNil)}"
+      "func": "m => {val winnings = m.get('state).get('bets).apply(0).get('payout).get('winnings);val customerRef = m.get('state).get('bets).apply(0).get('customerRef);val outComeName = m.get('supportingState).get('outcome).apply(0).get('outcomeName);val marketName = m.get('supportingState).get('outcome).apply(0).get('marketName);val eventName = m.get('supportingState).get('outcome).apply(0).get('eventName);val catRef = m.get('supportingState).get('outcome).apply(0).get('categoryRef);val stateBetsId = m.get('state).get('bets).apply(0).get('id);val currency = m.get('state).get('bets).apply(0).get('stake).get('currencyRef);val stake = m.get('state).get('bets).apply(0).get('stake).get('amount);new Row('customerRef ->> customerRef :: 'winnings ->> winnings :: 'outComeName ->> outComeName :: 'marketName ->> marketName :: 'eventName ->> eventName :: 'categoryRef ->> catRef :: 'stateBetsId ->> stateBetsId :: 'currency ->> currency :: 'stake ->> stake :: HNil)}"
+    },
+    {
+      "type": "transformation",
+      "name": "filter3",
+      "op": "filter",
+      "func": "m => m.get('winnings).get.toDouble > m.get('stake).get.toDouble * 1.30"
     },
     {
       "type": "transformation",
@@ -82,6 +88,10 @@
     },
     {
       "from": "mapper1",
+      "to": "filter3"
+    },
+    {
+      "from": "filter3",
       "to": "mapper2"
     },
     {
