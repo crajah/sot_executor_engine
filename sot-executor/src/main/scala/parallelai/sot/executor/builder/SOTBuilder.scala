@@ -56,7 +56,8 @@ sbt clean compile \
     --workerMachineType=n1-standard-1 \
     --diskSizeGb=150 \
     --maxNumWorkers=1 \
-    --waitToFinish=true"
+    --jobName=jobname \
+    --waitToFinish=false"
 */
 
 @SOTBuilder("application.conf")

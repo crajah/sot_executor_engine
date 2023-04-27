@@ -23,7 +23,7 @@
       "namespace": "parallelai.sot.avro",
       "fields": [
         {
-          "name": "accountNumber",
+          "name": "customerRef",
           "type": "string"
         },
         {
@@ -102,7 +102,7 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => {val winnings = m.get('state).get('bets).apply(0).get('payout).get('winnings).get;val accNum = m.get('supportingState).get('customer).get('accountNumber).get;val outComeName = m.get('supportingState).get('outcome).apply(0).get('outcomeName).get;val marketName = m.get('supportingState).get('outcome).apply(0).get('marketName).get;val eventName = m.get('supportingState).get('outcome).apply(0).get('eventName).get;val catRef = m.get('supportingState).get('outcome).apply(0).get('categoryRef).get;val stateBetsId = m.get('state).get('bets).apply(0).get('id);val currency = m.get('state).get('bets).apply(0).get('stake).get('currencyRef).get;new Row('accountNumber ->> accNum :: 'winnings ->> winnings :: 'outComeName ->> outComeName :: 'marketName ->> marketName :: 'eventName ->> eventName :: 'categoryRef ->> catRef :: 'stateBetsId ->> stateBetsId :: 'currency ->> currency :: HNil)}"
+      "func": "m => {val winnings = m.get('state).get('bets).apply(0).get('payout).get('winnings).get;val customerRef = m.get('state).get('bets).apply(0).get('customerRef).get;val outComeName = m.get('supportingState).get('outcome).apply(0).get('outcomeName).get;val marketName = m.get('supportingState).get('outcome).apply(0).get('marketName).get;val eventName = m.get('supportingState).get('outcome).apply(0).get('eventName).get;val catRef = m.get('supportingState).get('outcome).apply(0).get('categoryRef).get;val stateBetsId = m.get('state).get('bets).apply(0).get('id);val currency = m.get('state).get('bets).apply(0).get('stake).get('currencyRef).get;new Row('customerRef ->> customerRef :: 'winnings ->> winnings :: 'outComeName ->> outComeName :: 'marketName ->> marketName :: 'eventName ->> eventName :: 'categoryRef ->> catRef :: 'stateBetsId ->> stateBetsId :: 'currency ->> currency :: HNil)}"
     },
     {
       "type": "transformation",
