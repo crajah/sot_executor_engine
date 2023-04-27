@@ -112,7 +112,7 @@
       "type": "transformation",
       "name": "filter3",
       "op": "filter",
-      "func": "m => m.get('winnings).get.toDouble > m.get('stake).get.toDouble * 1.30"
+      "func": "m => m.get('winnings).toDouble > m.get('stake).toDouble * 1.30"
     },
     {
       "type": "transformation",
