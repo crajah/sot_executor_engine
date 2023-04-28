@@ -5,6 +5,43 @@ import shapeless._
 import shapeless.labelled.{FieldType, field}
 import shapeless.ops.hlist._
 import shapeless.ops.record.{Modifier, Selector, _}
+import shapeless.record.Record
+
+trait SelectAll[L <: HList, K <: HList] extends DepFn1[L] with Serializable { type Out <: HList }
+
+object SelectAll {
+  def apply[L <: HList, K <: HList](implicit sa: SelectAll[L, K]): Aux[L, K, sa.Out] = sa
+
+  type Aux[L <: HList, K <: HList, Out0 <: HList] = SelectAll[L, K] { type Out = Out0 }
+
+  implicit def hnilSelectAll[L <: HList]: Aux[L, HNil, HNil] =
+    new SelectAll[L, HNil] {
+      type Out = HNil
+      def apply(l: L): Out = HNil
+    }
+
+  implicit def hconsSelectAll[L <: HList, KH, KT <: HList]
+  (implicit
+   sh: Selector[L, KH],
+   st: SelectAll[L, KT]
+  ): Aux[L, KH :: KT, sh.Out :: st.Out] =
+    new SelectAll[L, KH :: KT] {
+      type Out = sh.Out :: st.Out
+      def apply(l: L): Out = sh(l) :: st(l)
+    }
+
+  implicit def hconsSelectFieldType[L <: HList, KH, KHOut <: HList, KN, KT <: HList]
+  (implicit
+   sh: Selector.Aux[L, KH, KHOut],
+   shNested: Selector[KHOut, KN],
+   st: SelectAll[L, KT]
+  ): Aux[L, FieldType[KH, KN] :: KT, shNested.Out :: st.Out] =
+    new SelectAll[L, FieldType[KH, KN] :: KT] {
+      type Out = shNested.Out :: st.Out
+      def apply(l: L): Out = shNested(sh(l)) :: st(l)
+    }
+
+}
 
 class Row[L <: HList](val hl: L) {
 
@@ -18,6 +55,10 @@ class Row[L <: HList](val hl: L) {
   def keys(implicit keys: Keys[L]): keys.Out = keys()
 
   def get(k: Witness)(implicit selector: Selector[L, k.T]): selector.Out = selector(hl)
+
+  def project[K <: HList](implicit selector: SelectAll[L, K]): Row[selector.Out] = {
+    new Row[selector.Out](selector(hl))
+  }
 
   def append[V, Out <: HList](k: Witness, v: V)(implicit updater: Updater.Aux[L, FieldType[k.T, V], Out],
                                                 lk: LacksKey[L, k.T]): Row[Out] = {
@@ -43,5 +84,27 @@ object Row {
                                                gen: LabelledGeneric.Aux[A, Repr],
                                                rdr: DeepRec[Repr]): Row[rdr.Out] =
     new Row[rdr.Out](rdr(gen.to(a)))
+
+}
+
+object Test2 extends App {
+
+  case class SuperNestedRecord(ii : Int)
+
+  case class NestedRecord(i: Int, sp : SuperNestedRecord)
+
+  case class NestedCaseClass(a: Int, b: String, c: Double, n: NestedRecord)
+
+  val ncc = NestedCaseClass(1, "b", 1.0, NestedRecord(1, SuperNestedRecord(123)))
+
+  val row = Row(ncc)
+
+  type v1 =  FieldType[Witness.`'n`.T, Witness.`'i`.T] :: Witness.`'b`.T :: HNil
+
+  type v2 = HList.`'a`.T
+
+  val rowProjected = row.project[v1]
+
+  println(rowProjected.hl)
 
 }
