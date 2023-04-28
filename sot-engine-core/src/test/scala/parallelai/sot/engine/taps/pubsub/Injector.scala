@@ -3,22 +3,15 @@ package parallelai.sot.engine.taps.pubsub
 import java.io._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-import scala.util.{Failure, Success}
-import com.typesafe.config.{Config, ConfigFactory}
-import com.google.api.services.pubsub.Pubsub
-import com.google.api.services.pubsub.model.PublishRequest
-import com.google.api.services.pubsub.model.PubsubMessage
-import com.google.common.collect.ImmutableMap
+import scala.util.{Random, Try}
+import parallelai.sot.engine.serialization.avro.AvroUtils
+import org.apache.avro.generic.GenericRecord
 import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
-import com.google.common.base.Throwables
-import org.apache.avro.io._
+import com.google.api.services.pubsub.Pubsub
+import com.google.api.services.pubsub.model.{PublishRequest, PubsubMessage}
+import com.google.common.collect.ImmutableMap
 import com.spotify.scio.avro.types.AvroType
-import org.apache.avro.Schema
-import org.apache.avro.Schema.Parser
-import org.apache.avro.generic.{GenericData, GenericRecord}
-import org.apache.avro.specific.SpecificDatumWriter
-import parallelai.sot.engine.serialization.avro.AvroUtils
 
 /**
   * This is a generator that simulates usage data from a mobile game, and either publishes the data to a pubsub topic in avro or protobuf format using nested or flat structure.
@@ -65,17 +58,25 @@ import parallelai.sot.engine.serialization.avro.AvroUtils
   *   sbt clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector bi-crm-poc p2pin none avro"
   * </pre>
   *
+  * To only publish a certain number of messages then end the command line issued to start the application with a number e.g.
+  * <pre>
+  *   sbt clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector bi-crm-poc p2pin none avro 1"
+  * </pre>
+  *
   * If there is no application.conf then compilation will fail, but you can supply your own conf as a Java option e.g. -Dconfig.resource=application-ps2ps-test.conf
   * <pre>
   *  sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector bi-crm-poc p2pin none avro"
   * </pre>
+  * NOTE That application configurations can also be set/overridden via system and environment properties.
   */
-class Injector(project: String, topicName: String, serialiser: String, nested: Boolean) {
-  val r = scala.util.Random
+class Injector(project: String, topicName: String, serialiser: String, nested: Boolean, numberOfMessage: Option[Int] = None) {
+  val random: Random.type = scala.util.Random
 
-  val avroT = AvroType[AvroSchema.MessageAvro]
-  val avroTNested = AvroType[AvroSchema.MessageAvroNested]
-  val schemaStr = avroT.schema.toString
+  val avroT: AvroType[AvroSchema.MessageAvro] = AvroType[AvroSchema.MessageAvro]
+  println(s"===> avroT = $avroT, where generic record = ${avroT.toGenericRecord}")
+
+  val avroTNested: AvroType[AvroSchema.MessageAvroNested] = AvroType[AvroSchema.MessageAvroNested]
+  val schemaStr: String = avroT.schema.toString
 
   private var pubsub: Pubsub = _
   private var topic: String = _
@@ -94,10 +95,12 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
 
   // Create the PubSub client.
   pubsub = InjectorUtils.getClient()
+  println(s"===> pubsub base URL = ${pubsub.getBaseUrl}")
+
   // Create the PubSub topic as necessary.
   topic = InjectorUtils.getFullyQualifiedTopicName(project, topicName)
   InjectorUtils.createTopic(pubsub, topic)
-  println("Injecting to topic: " + topic)
+  println("===> Injecting to topic: " + topic)
 
   // Start off with some random live teams.
   while (liveTeams.length < Injector.NUM_LIVE_TEAMS) {
@@ -174,7 +177,7 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
     val dateString = fmt.print(currTime)
 
     if (nested) {
-      val nestedData = (for (_ <- 1 to r.nextInt(10) + 1) yield MessageProtoNested.NestedClass(r.nextLong())).toList
+      val nestedData = (for (_ <- 1 to random.nextInt(10) + 1) yield MessageProtoNested.NestedClass(random.nextLong())).toList
       MessageProtoNested(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString, nestedData).toByteArray
     } else {
       MessageProto(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString).toByteArray
@@ -206,10 +209,16 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
     val dateString = fmt.print(currTime)
 
     if (nested) {
-      val nestedData = (for (_ <- 1 to r.nextInt(10) + 1) yield AvroSchema.MessageAvroNested$NestedClass(r.nextLong())).toList
+      val nestedData =
+        (for {
+          _ <- 1 to random.nextInt(10) + 1
+        } yield AvroSchema.MessageAvroNested$NestedClass(random.nextLong())).toList
+
       avroTNested.toGenericRecord(AvroSchema.MessageAvroNested(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString, nestedData))
     } else {
-      avroT.toGenericRecord(AvroSchema.MessageAvro(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString))
+      val msg = avroT.toGenericRecord(AvroSchema.MessageAvro(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString))
+      println(s"===> Generated Avro message to be sent to pubsub = $msg")
+      msg
     }
   }
 
@@ -218,7 +227,7 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
     * PubSub topic.
     */
   def publishDataAvro(numMessages: Int, delayInMillis: Int): Unit = {
-    val pubsubMessages = for (i <- 0 until Math.max(1, numMessages)) yield {
+    val pubsubMessages = for (i <- 0 until numberOfMessage.getOrElse(Math.max(1, numMessages))) yield {
       val currTime = System.currentTimeMillis()
       val message = generateEventAvro(currTime, delayInMillis)
       val pubsubMessage = new PubsubMessage().encodeData(AvroUtils.encodeAvro(message, schemaStr))
@@ -238,7 +247,7 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
   }
 
   def publishDataProto(numMessages: Int, delayInMillis: Int): Unit = {
-    val pubsubMessages = for (i <- 0 until Math.max(1, numMessages)) yield {
+    val pubsubMessages = for (i <- 0 until numberOfMessage.getOrElse(Math.max(1, numMessages))) yield {
       val currTime = System.currentTimeMillis()
       val message = generateEventProtoNested(currTime, delayInMillis)
       val pubsubMessage = new PubsubMessage().encodeData(message)
@@ -346,7 +355,7 @@ object Injector {
       "user" + userNum + "_" + teamName
     }
 
-    override def toString(): String = {
+    override def toString: String = {
       "(" + teamName + ", num members: " + numMembers + ", starting at: " +
         startTimeInMillis + ", expires in: " + expirationPeriod + ", robot: " + robot + ")"
     }
@@ -360,7 +369,7 @@ object Injector {
 
   def main(args: Array[String]): Unit = {
     if (args.length < 3) {
-      println("Usage: Injector project-name topic-name (avro|proto) (true|false)")
+      println("Usage: Injector project-name topic-name (avro | proto) (true | false) (numberOfMessages)")
       System.exit(1)
     }
 
@@ -368,9 +377,10 @@ object Injector {
     val topicName = args(1)
     val serialiser = args(2)
     val nested = if (args(3) == "true") true else false
+    val numberOfMessages = Try { args(4).toInt } toOption
 
     println("Starting Injector")
-    val i = new Injector(project, topicName, serialiser, nested)
+    val i = new Injector(project, topicName, serialiser, nested, numberOfMessages)
     i.run()
   }
 }

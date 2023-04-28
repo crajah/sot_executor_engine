@@ -7,6 +7,7 @@ libraryDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   typesafeConfig,
+  pureConfig,
   grizzledLogging,
   sprayJson,
   trueAccordCompiler,

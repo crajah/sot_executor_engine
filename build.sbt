@@ -1,13 +1,13 @@
 import scala.language.postfixOps
 import com.amazonaws.regions.{Region, Regions}
 
-lazy val globalResources = file("config")
+lazy val configResources = file("config")
 
 lazy val `sot-engine-core` = (project in file("./sot-engine-core"))
   .settings(
     Common.settings,
     Common.macroSettings,
-    unmanagedResourceDirectories in Compile += globalResources
+    unmanagedResourceDirectories in Compile += configResources
   )
 
 lazy val `sot-macros` = (project in file("./sot-macros"))
@@ -15,21 +15,22 @@ lazy val `sot-macros` = (project in file("./sot-macros"))
   .settings(
     Common.settings,
     Common.macroSettings,
-    unmanagedResourceDirectories in Compile += globalResources
+    unmanagedResourceDirectories in Compile += configResources
   )
 
 lazy val `sot-executor` = (project in file("./sot-executor"))
-  .dependsOn(`sot-macros`)
+  .dependsOn(`sot-engine-core` % "test->test;compile->compile", `sot-macros`)
   .settings(
     Common.settings,
     Common.macroSettings,
-    unmanagedResourceDirectories in Compile += globalResources
+    unmanagedResourceDirectories in Compile += configResources
   )
 
 lazy val `sot` = (project in file("."))
   .aggregate(`sot-engine-core`, `sot-macros`, `sot-executor`)
   .settings(
     name := "sot-executor-engine",
+    version := "0.1.1-SNAPSHOT",
     Common.settings,
     s3region := Region.getRegion(Regions.EU_WEST_2),
     publishTo := {
