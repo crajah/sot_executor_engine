@@ -23,6 +23,7 @@ object Dependencies {
   val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
   val typesafeConfig = "com.typesafe" % "config" % "1.3.2"
+  val pureConfig = "com.github.pureconfig" %% "pureconfig" % "0.8.0"
 
   val sprayJson = "io.spray" %% "spray-json" % "1.3.3"
 

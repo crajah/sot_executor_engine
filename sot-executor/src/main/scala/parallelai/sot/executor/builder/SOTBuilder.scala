@@ -3,6 +3,7 @@ package parallelai.sot.executor.builder
 import java.io.{File, InputStream}
 import java.util.TimeZone
 import scala.meta.Lit
+import parallelai.sot.engine.config.SchemaResourcePath
 import com.spotify.scio._
 import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.bigquery.BigQueryType
@@ -46,8 +47,9 @@ import parallelai.sot.engine.generic.row.Row
   * <pre>
   *   sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
   * </pre>
+  * NOTE That application configurations can also be set/overridden via system and environment properties.
   */
-@SOTBuilder("application.conf")
+@SOTBuilder
 object SOTBuilder {
   class Builder extends Serializable() {
     def execute(jobConfig: Config, sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
@@ -55,26 +57,19 @@ object SOTBuilder {
       val sinkTap = getSink(jobConfig)._2
       inOutSchemaHList.exec(sc, sourceTap, sinkTap, sotUtils)
       val result = sc.close()
+
       if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
     }
-  }
-
-  def loadConfig(): Config = {
-    val configPath = getClass.getResource("/application.conf")
-    val fileName = ConfigFactory.parseURL(configPath).getString("json.file.name")
-    SOTMacroJsonConfig(fileName)
   }
 
   val genericBuilder = new Builder()
 
   def main(cmdArg: Array[String]): Unit = {
-    val parsedArgs = ScioContext.parseArguments[SOTOptions](cmdArg)
-    val opts = parsedArgs._1
-    val args = parsedArgs._2
-    val sotUtils = new SOTUtils(opts)
-    val sc = ScioContext(opts)
+    val (sotOptions, sotArgs) = ScioContext.parseArguments[SOTOptions](cmdArg)
+    val sotUtils = new SOTUtils(sotOptions)
+    val sc = ScioContext(sotOptions)
     val builder = genericBuilder
-    val jobConfig = loadConfig()
-    builder.execute(jobConfig, sotUtils, sc, args)
+    val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
+    builder.execute(jobConfig, sotUtils, sc, sotArgs)
   }
 }

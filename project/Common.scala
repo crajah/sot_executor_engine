@@ -11,7 +11,6 @@ object Common {
   )
 
   val settings = Seq(
-    version := "0.1.1-SNAPSHOT",
     organization := "parallelai.sot",
     scalaVersion := scala211,
     scalacOptions ++= Seq(
