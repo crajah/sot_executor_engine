@@ -5,58 +5,87 @@ import shapeless._
 import shapeless.labelled.{FieldType, field}
 import shapeless.ops.hlist._
 import shapeless.ops.record.{Modifier, Selector, _}
+//important import: without it fields names might become incorrect in nested rows
+import shapeless.record._
 import shapeless.record.Record
 import syntax.singleton._
 
-trait SelectAll[L <: HList, K <: HList] extends DepFn1[L] with Serializable { type Out <: HList }
+trait SelectAll[L <: HList, K <: HList] extends DepFn1[L] with Serializable {
+  type Out <: HList
+}
 
-trait SelectorStuff {
+trait LowestPrioritySelector {
 
   def apply[L <: HList, K <: HList](implicit sa: SelectAll[L, K]): Aux[L, K, sa.Out] = sa
 
-  type Aux[L <: HList, K <: HList, Out0 <: HList] = SelectAll[L, K] { type Out = Out0 }
+  type Aux[L <: HList, K <: HList, Out0 <: HList] = SelectAll[L, K] {type Out = Out0}
 
-  implicit def selectors[L <: HList, K, Out0 <: HList, V](implicit
-                                                          selector: Selector.Aux[L, K, Out0],
-                                                          selectorNested: Selector[Out0, V]
-                                                         ) : Selector.Aux[L, FieldType[K, V], selectorNested.Out] =
-    new Selector[L, FieldType[K, V]] {
-      type Out = selectorNested.Out
-      def apply(l: L): selectorNested.Out = selectorNested(selector(l))
-    }
-
-  implicit def hconsSelectAll[L <: HList, KH, KT <: HList]
-  (implicit
-   sh: Selector[L, KH],
-   st: SelectAll[L, KT]
-  ): Aux[L, KH :: KT, FieldType[KH, sh.Out] :: st.Out] =
-    new SelectAll[L, KH :: KT] {
-      type Out = FieldType[KH, sh.Out] :: st.Out
-      def apply(l: L): Out = field[KH](sh(l)) :: st(l)
-    }
-
-
+    implicit def hconsSelectAll[L <: HList, KH, KT <: HList]
+    (implicit
+     sh: Selector[L, KH],
+     st: SelectAll[L, KT]
+    ): Aux[L, KH :: KT, FieldType[KH, sh.Out] :: st.Out] =
+      new SelectAll[L, KH :: KT] {
+        type Out = FieldType[KH, sh.Out] :: st.Out
+        def apply(l: L): Out = field[KH](sh(l)) :: st(l)
+      }
 
 }
 
-object SelectAll extends SelectorStuff {
+trait LowPioritySelector extends LowestPrioritySelector {
+
+  implicit def hconsSelectAllFieldType[L <: HList, KH <: FieldType[_, _], KT <: HList]
+  (implicit
+   sh: Selector[L, KH],
+   st: SelectAll[L, KT]
+  ): Aux[L, KH :: KT, sh.Out :: st.Out] =
+    new SelectAll[L, KH :: KT] {
+      type Out = sh.Out :: st.Out
+
+      def apply(l: L): Out = sh(l) :: st(l)
+    }
+
+  implicit def selectorBottom[L <: HList, K, Out0 <: HList, V](implicit
+                                                               selector: Selector.Aux[L, K, Out0],
+                                                               selectorNested: Selector[Out0, V]
+                                                              ): Selector.Aux[L, FieldType[K, V], FieldType[V, selectorNested.Out]] =
+    new Selector[L, FieldType[K, V]] {
+      type Out = FieldType[V, selectorNested.Out]
+
+      def apply(l: L): FieldType[V, selectorNested.Out] = field[V](selectorNested(selector(l)))
+    }
+
+}
+
+object SelectAll extends LowPioritySelector {
 
   implicit def hnilSelectAll[L <: HList]: Aux[L, HNil, HNil] =
     new SelectAll[L, HNil] {
       type Out = HNil
+
       def apply(l: L): Out = HNil
     }
 
+  implicit def selectorRecursive[L <: HList, K, Out0 <: HList, V <: FieldType[_, _]](implicit
+                                                                                     selector: Selector.Aux[L, K, Out0],
+                                                                                     selectorNested: Selector[Out0, V]
+                                                                                    ): Selector.Aux[L, FieldType[K, V], selectorNested.Out] =
+    new Selector[L, FieldType[K, V]] {
+      type Out = selectorNested.Out
 
-  implicit def hconsSelectFieldType[L <: HList, KH, KHOut <: HList, KN, KT <: HList]
+      def apply(l: L): selectorNested.Out = selectorNested(selector(l))
+    }
+
+  implicit def hconsSelectFieldType[L <: HList, KH <: Witness, KHOut <: HList, KN <: Witness, KT <: HList]
   (implicit
    sh: Selector.Aux[L, KH, KHOut],
-   shNested: Lazy[Selector[KHOut, KN]],
+   shNested: Selector[KHOut, KN],
    st: SelectAll[L, KT]
-  ): Aux[L, FieldType[KH, KN] :: KT, FieldType[KN, shNested.value.Out] :: st.Out] =
+  ): Aux[L, FieldType[KH, KN] :: KT, shNested.Out :: st.Out] =
     new SelectAll[L, FieldType[KH, KN] :: KT] {
-      type Out = FieldType[KN, shNested.value.Out] :: st.Out
-      def apply(l: L): Out = field[KN](shNested.value(sh(l))) :: st(l)
+      type Out = shNested.Out :: st.Out
+
+      def apply(l: L): Out = shNested(sh(l)) :: st(l)
     }
 
 }
@@ -105,24 +134,35 @@ object Row {
 
 }
 
+object CC {
+
+  case class SuperSuperNested(iii: Int)
+
+  case class SuperNestedRecord(ii: Int, spp: SuperSuperNested)
+
+  case class NestedRecord(sp: SuperNestedRecord, i: Int)
+
+  case class NestedCaseClass(nested: NestedRecord, a: Int, b: String, c: Double)
+
+}
+
 object Test2 extends App {
 
-  case class SuperNestedRecord(ii : Int)
+  import shapeless.record._
 
-  case class NestedRecord(i: Int, sp: SuperNestedRecord)
+  import CC._
 
-  case class NestedCaseClass(a: Int, b: String, c: Double, n: NestedRecord)
-
-  val ncc = NestedCaseClass(1, "bbb", 1.0, NestedRecord(1, SuperNestedRecord(12)))
+  val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23, nested = NestedRecord(sp = SuperNestedRecord(ii = 2233, spp = SuperSuperNested(iii = 32423)), i = 3333))
 
   val row = Row(ncc)
 
-  type v1 =  FieldType[Witness.`'n`.T, FieldType[Witness.`'sp`.T, Witness.`'ii`.T]] :: Witness.`'b`.T :: HNil
-
   import SelectAll._
+
+  type v1 = FieldType[Witness.`'nested`.T, FieldType[Witness.`'sp`.T, FieldType[Witness.`'spp`.T, Witness.`'iii`.T]]] :: Witness.`'a`.T :: HNil
+//  type v1 = FieldType[Witness.`'nested`.T, FieldType[Witness.`'sp`.T, FieldType[Witness.`'spp`.T, Witness.`'iii`.T]]] :: Witness.`'a`.T :: HNil
 
   val rowProjected = row.project[v1]
 
-  println(rowProjected.get('ii))
+  println(rowProjected.get('a))
 
 }
