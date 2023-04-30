@@ -143,8 +143,6 @@ class RowTest extends WordSpec with Matchers {
 
     "select nested fields from a row" in {
 
-      import SelectAll._
-
       case class Level3Record(iii: Int)
 
       case class Level2Record(ii: Int, l3: Level3Record)
@@ -158,11 +156,13 @@ class RowTest extends WordSpec with Matchers {
 
       val row = Row(ncc)
 
-      type selector = FieldType[Witness.`'l1`.T, FieldType[Witness.`'l2`.T, FieldType[Witness.`'l3`.T, Witness.`'iii`.T]]] :: Witness.`'a`.T :: HNil
+      type selector = FieldType[Witness.`'l1`.T, FieldType[Witness.`'l2`.T, FieldType[Witness.`'l3`.T, Witness.`'iii`.T]]] ::
+        FieldType[Witness.`'l1`.T, FieldType[Witness.`'l2`.T, Witness.`'l3`.T]] ::
+        Witness.`'a`.T :: HNil
 
       val rowProjected = row.project[selector]
 
-      rowProjected.hl should be ('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423) :: 'a ->> 123 :: HNil)
+      rowProjected.hl should be ('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
 
     }
 
