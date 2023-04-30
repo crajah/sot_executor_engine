@@ -1,7 +1,6 @@
 package parallelai.sot.engine.generic.row
 
 import org.scalatest.{Matchers, WordSpec}
-import parallelai.sot.engine.generic.row.Row
 import shapeless._
 import shapeless.labelled.FieldType
 import shapeless.record._
@@ -139,6 +138,31 @@ class RowTest extends WordSpec with Matchers {
       val rowProjected = row.project[v1]
 
       rowProjected.hl should be ('a ->> 1 :: 'n ->> ('i ->> 1 :: HNil) :: HNil)
+
+    }
+
+    "select nested fields from a row" in {
+
+      import SelectAll._
+
+      case class Level3Record(iii: Int)
+
+      case class Level2Record(ii: Int, l3: Level3Record)
+
+      case class Level1Record(l2: Level2Record, i: Int)
+
+      case class NestedCaseClass(l1: Level1Record, a: Int, b: String, c: Double)
+
+      val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23,
+        l1 = Level1Record(l2 = Level2Record(ii = 2233, l3 = Level3Record(iii = 32423)), i = 3333))
+
+      val row = Row(ncc)
+
+      type selector = FieldType[Witness.`'l1`.T, FieldType[Witness.`'l2`.T, FieldType[Witness.`'l3`.T, Witness.`'iii`.T]]] :: Witness.`'a`.T :: HNil
+
+      val rowProjected = row.project[selector]
+
+      rowProjected.hl should be ('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423) :: 'a ->> 123 :: HNil)
 
     }
 
