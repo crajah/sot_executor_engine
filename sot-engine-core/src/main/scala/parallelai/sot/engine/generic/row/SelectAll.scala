@@ -4,6 +4,8 @@ import shapeless.{::, DepFn1, HList, HNil, Witness}
 import shapeless.labelled.{FieldType, field}
 import shapeless.ops.record.Selector
 
+case class Nested[A, B](a: A, b: B)
+
 trait ExtendedSelector[L <: HList, K] extends DepFn1[L] with Serializable {
   type Out
   def apply(l : L): Out
@@ -26,8 +28,8 @@ trait LowestPrioritySelector extends SelectorWrapper {
   implicit def selectorBottom[L <: HList, K, Out0 <: HList, V](implicit
                                                                selector: ExtendedSelector.Aux[L, K, Out0],
                                                                selectorNested: ExtendedSelector[Out0, V]
-                                                              ): ExtendedSelector.Aux[L, FieldType[K, V], FieldType[V, selectorNested.Out]] =
-    new ExtendedSelector[L, FieldType[K, V]] {
+                                                              ): ExtendedSelector.Aux[L, Nested[K, V], FieldType[V, selectorNested.Out]] =
+    new ExtendedSelector[L, Nested[K, V]] {
       type Out = FieldType[V, selectorNested.Out]
 
       def apply(l: L): FieldType[V, selectorNested.Out] = field[V](selectorNested(selector(l)))
@@ -39,11 +41,11 @@ object ExtendedSelector extends LowestPrioritySelector {
 
   def apply[L <: HList, K](implicit selector: ExtendedSelector[L, K]): Aux[L, K, selector.Out] = selector
 
-  implicit def selectorRecursive[L <: HList, K, Out0 <: HList, V <: FieldType[_, _]](implicit
+  implicit def selectorRecursive[L <: HList, K, Out0 <: HList, V <: Nested[_, _]](implicit
                                                                                      selector: ExtendedSelector.Aux[L, K, Out0],
                                                                                      selectorNested: ExtendedSelector[Out0, V]
-                                                                                    ): ExtendedSelector.Aux[L, FieldType[K, V], selectorNested.Out] =
-    new ExtendedSelector[L, FieldType[K, V]] {
+                                                                                    ): ExtendedSelector.Aux[L, Nested[K, V], selectorNested.Out] =
+    new ExtendedSelector[L, Nested[K, V]] {
       type Out = selectorNested.Out
 
       def apply(l: L): selectorNested.Out = selectorNested(selector(l))
@@ -74,7 +76,7 @@ trait LowestPrioritySelectAll {
 
 trait LowPrioritySelectAll extends LowestPrioritySelectAll {
 
-  implicit def hconsSelectAllFieldType[L <: HList, KH <: FieldType[_, _], KT <: HList]
+  implicit def hconsSelectAllFieldType[L <: HList, KH <: Nested[_, _], KT <: HList]
   (implicit
    sh: ExtendedSelector[L, KH],
    st: SelectAll[L, KT]
@@ -103,8 +105,8 @@ object SelectAll extends LowPrioritySelectAll {
    sh: ExtendedSelector.Aux[L, KH, KHOut],
    shNested: ExtendedSelector[KHOut, KN],
    st: SelectAll[L, KT]
-  ): Aux[L, FieldType[KH, KN] :: KT, shNested.Out :: st.Out] =
-    new SelectAll[L, FieldType[KH, KN] :: KT] {
+  ): Aux[L, Nested[KH, KN] :: KT, shNested.Out :: st.Out] =
+    new SelectAll[L, Nested[KH, KN] :: KT] {
       type Out = shNested.Out :: st.Out
 
       def apply(l: L): Out = shNested(sh(l)) :: st(l)

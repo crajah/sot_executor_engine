@@ -156,8 +156,8 @@ class RowTest extends WordSpec with Matchers {
 
       val row = Row(ncc)
 
-      type selector = FieldType[Witness.`'l1`.T, FieldType[Witness.`'l2`.T, FieldType[Witness.`'l3`.T, Witness.`'iii`.T]]] ::
-        FieldType[Witness.`'l1`.T, FieldType[Witness.`'l2`.T, Witness.`'l3`.T]] ::
+      type selector = Nested[Witness.`'l1`.T, Nested[Witness.`'l2`.T, Nested[Witness.`'l3`.T, Witness.`'iii`.T]]] ::
+        Nested[Witness.`'l1`.T, Nested[Witness.`'l2`.T, Witness.`'l3`.T]] ::
         Witness.`'a`.T :: HNil
 
       val rowProjected = row.project[selector]
