@@ -1,6 +1,6 @@
 package parallelai.sot.engine.generic.row
 
-import shapeless.{::, DepFn1, HList, HNil, Witness}
+import shapeless.{::, DepFn1, HList, HNil, Lazy, Witness}
 import shapeless.labelled.{FieldType, field}
 import shapeless.ops.record.Selector
 
@@ -50,6 +50,8 @@ trait ExtendedSelector[L <: HList, K] extends DepFn1[L] with Serializable {
 
 trait SelectorWrapper {
 
+  type Aux[L <: HList, K, Out0] = ExtendedSelector[L, K] {type Out = Out0}
+
   implicit def selectorWrapper[L <: HList, K, Out0](implicit selector: Selector.Aux[L, K, Out0]): ExtendedSelector.Aux[L, K, Out0] =
     new ExtendedSelector[L, K] {
       type Out = Out0
@@ -61,9 +63,15 @@ trait SelectorWrapper {
 
 object ExtendedSelector extends SelectorWrapper {
 
-  type Aux[L <: HList, K, Out0] = ExtendedSelector[L, K] {type Out = Out0}
-
   def apply[L <: HList, K](implicit selector: ExtendedSelector[L, K]): Aux[L, K, selector.Out] = selector
+
+  implicit def selectorWrapperOption[L <: HList, K, Out0, OutTyped](implicit selector: Selector.Aux[L, K, Out0],
+                                                                    typeMapper: TypeMapper.Aux[Out0, OutTyped]): ExtendedSelector.Aux[L, K, OutTyped] =
+    new ExtendedSelector[L, K] {
+      type Out = OutTyped
+
+      override def apply(l: L): OutTyped = typeMapper(selector(l))
+    }
 
   implicit def selectorLeaf[L <: HList, K, Out0 <: HList, V, NestedOut](implicit
                                                                         selector: ExtendedSelector.Aux[L, K, Out0],
@@ -103,13 +111,13 @@ trait LowPrioritySelectAll extends LowestPrioritySelectAll {
 
   implicit def hconsSelectAllFieldType[L <: HList, KH <: Nested[_, _], KT <: HList]
   (implicit
-   sh: ExtendedSelector[L, KH],
+   sh: Lazy[ExtendedSelector[L, KH]],
    st: SelectAll[L, KT]
-  ): Aux[L, KH :: KT, sh.Out :: st.Out] =
+  ): Aux[L, KH :: KT, sh.value.Out :: st.Out] =
     new SelectAll[L, KH :: KT] {
-      type Out = sh.Out :: st.Out
+      type Out = sh.value.Out :: st.Out
 
-      def apply(l: L): Out = sh(l) :: st(l)
+      def apply(l: L): Out = sh.value(l) :: st(l)
     }
 
 }
@@ -127,14 +135,14 @@ object SelectAll extends LowPrioritySelectAll {
 
   implicit def hconsSelectFieldType[L <: HList, KH <: Witness, KHOut <: HList, KN <: Witness, KT <: HList]
   (implicit
-   sh: ExtendedSelector.Aux[L, KH, KHOut],
+   sh: Lazy[ExtendedSelector.Aux[L, KH, KHOut]],
    shNested: ExtendedSelector[KHOut, KN],
    st: SelectAll[L, KT]
   ): Aux[L, Nested[KH, KN] :: KT, shNested.Out :: st.Out] =
     new SelectAll[L, Nested[KH, KN] :: KT] {
       type Out = shNested.Out :: st.Out
 
-      def apply(l: L): Out = shNested(sh(l)) :: st(l)
+      def apply(l: L): Out = shNested(sh.value(l)) :: st(l)
     }
 
 }

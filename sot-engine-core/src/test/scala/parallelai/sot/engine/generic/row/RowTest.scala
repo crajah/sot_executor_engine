@@ -240,26 +240,53 @@ class RowTest extends WordSpec with Matchers {
 
   }
 
-//  "select nested optional field and list from a row that is not at the leaf node" in {
-//
-//    import Syntax._
-//
-//    case class Level1Record(i: Int, ii: List[Int])
-//
-//    case class NestedCaseClass(l1: Option[Level1Record], a: Int, b: String, c: Double)
-//
-//    val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23,
-//      l1 = Some(Level1Record(i = 3333, ii = List(1,2,3))))
-//
-//    val row = Row(ncc)
-//
-//    val selector = Witness('l1) ->>> Witness('i) :: Witness('l1) ->>> Witness('ii) :: HNil
-//
-//    val rowProjected = row.project(selector)
-//
-//    rowProjected.hl should be ('i ->> 3333 :: 'ii ->> 1 :: HNil)
-//
-//  }
+  "select nested options and lists from a row that where options and lists are not at the leaf node" in {
+
+    import Syntax._
+
+    case class Level2ListRecord(l2s: String, l2i: Int)
+
+    case class Level1Record(i: Int, ii: List[Int], l2: List[Level2ListRecord])
+
+    case class NestedCaseClass(l1: Option[Level1Record], a: Int, b: String, c: Double)
+
+    val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23,
+      l1 = Some(Level1Record(i = 3333, ii = List(1,2,3), l2 = List(Level2ListRecord("s1", 122), Level2ListRecord("s2", 122)))))
+
+    val row = Row(ncc)
+
+    val selector = Witness('l1) ->>> Witness('i) :: Witness('l1) ->>> (Witness('l2) ->>> Witness('l2s)) :: Witness('a) :: HNil
+
+    val rowProjected = row.project(selector)
+
+    rowProjected.hl should be ('i ->> 3333 :: 'l2s ->> "s1" :: 'a ->> 123 :: HNil)
+
+  }
+
+  "select nested options and lists from a row that where options and lists are at the leaf node and above" in {
+
+    import Syntax._
+
+    case class Level2ListRecord(l2s: List[String], l2i: Option[Int])
+
+    case class Level1Record(i: Int, ii: List[Int], l2: List[Level2ListRecord])
+
+    case class NestedCaseClass(l1: Option[Level1Record], a: Int, b: String, c: Double)
+
+    val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23,
+      l1 = Some(Level1Record(i = 3333, ii = List(1,2,3), l2 = List(
+        Level2ListRecord(List("s1", "s2"), Some(122)),
+        Level2ListRecord(List("s3", "s4"), Some(122))))))
+
+    val row = Row(ncc)
+
+    val selector = Witness('l1) ->>> Witness('i) :: Witness('l1) ->>> (Witness('l2) ->>> Witness('l2s)) :: Witness('a) :: HNil
+
+    val rowProjected = row.project(selector)
+
+    rowProjected.hl should be ('i ->> 3333 :: 'l2s ->> "s1" :: 'a ->> 123 :: HNil)
+
+  }
 
 
   "Row converter" should {
