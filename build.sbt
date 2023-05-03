@@ -33,7 +33,8 @@ publishTo := {
 
 lazy val macroSettings = Seq(
   addCompilerPlugin(paradise),
-  scalacOptions += "-Xplugin-require:macroparadise"
+  scalacOptions += "-Xplugin-require:macroparadise",
+  scalacOptions += "-Xlog-implicits"
 )
 
 // Macro setting is any module that has macros, or manipulates meta trees

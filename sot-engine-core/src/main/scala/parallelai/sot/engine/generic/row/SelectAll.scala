@@ -65,12 +65,12 @@ object ExtendedSelector extends SelectorWrapper {
 
   def apply[L <: HList, K](implicit selector: ExtendedSelector[L, K]): Aux[L, K, selector.Out] = selector
 
-  implicit def selectorWrapperOption[L <: HList, K, Out0, OutTyped](implicit selector: Selector.Aux[L, K, Out0],
-                                                                    typeMapper: TypeMapper.Aux[Out0, OutTyped]): ExtendedSelector.Aux[L, K, OutTyped] =
+  implicit def selectorWrapperOption[L <: HList, K, Out0](implicit selector: Selector.Aux[L, K, Out0],
+                                                                    typeMapper: TypeMapper[Out0]): ExtendedSelector.Aux[L, K, typeMapper.Out] =
     new ExtendedSelector[L, K] {
-      type Out = OutTyped
+      type Out = typeMapper.Out
 
-      override def apply(l: L): OutTyped = typeMapper(selector(l))
+      override def apply(l: L): Out = typeMapper(selector(l))
     }
 
   implicit def selectorLeaf[L <: HList, K, Out0 <: HList, V, NestedOut](implicit
@@ -111,13 +111,13 @@ trait LowPrioritySelectAll extends LowestPrioritySelectAll {
 
   implicit def hconsSelectAllFieldType[L <: HList, KH <: Nested[_, _], KT <: HList]
   (implicit
-   sh: Lazy[ExtendedSelector[L, KH]],
+   sh: ExtendedSelector[L, KH],
    st: SelectAll[L, KT]
-  ): Aux[L, KH :: KT, sh.value.Out :: st.Out] =
+  ): Aux[L, KH :: KT, sh.Out :: st.Out] =
     new SelectAll[L, KH :: KT] {
-      type Out = sh.value.Out :: st.Out
+      type Out = sh.Out :: st.Out
 
-      def apply(l: L): Out = sh.value(l) :: st(l)
+      def apply(l: L): Out = sh(l) :: st(l)
     }
 
 }
