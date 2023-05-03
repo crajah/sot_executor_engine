@@ -5,7 +5,6 @@ import shapeless._
 import shapeless.labelled.FieldType
 import shapeless.record._
 import shapeless.syntax.singleton._
-import shapeless.tag.Tagged
 
 class RowTest extends WordSpec with Matchers {
 
@@ -166,7 +165,7 @@ class RowTest extends WordSpec with Matchers {
 
     }
 
-    "select nested fields from a row where projection is passed as a parameter" in {
+    "select nested fields from a row with simplified syntax" in {
 
       case class Level3Record(iii: Int)
 
@@ -192,6 +191,76 @@ class RowTest extends WordSpec with Matchers {
     }
 
   }
+
+  "select nested fields from a row with simplified syntax with overridden keywords" in {
+
+    import Syntax._
+
+    case class Level3Record(iii: Int)
+
+    case class Level2Record(ii: Int, l3: Level3Record)
+
+    case class Level1Record(l2: Level2Record, i: Int)
+
+    case class NestedCaseClass(l1: Level1Record, a: Int, b: String, c: Double)
+
+    val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23,
+      l1 = Level1Record(l2 = Level2Record(ii = 2233, l3 = Level3Record(iii = 32423)), i = 3333))
+
+    val row = Row(ncc)
+
+    val selector = Projector(Col('l1) ->>> (Col('l2) ->>> (Col('l3) ->>> Col('iii))),
+      Col('l1) ->>> (Col('l2) ->>> Col('l3)),
+      Col('a))
+
+    val rowProjected = row.project(selector)
+
+    rowProjected.hl should be ('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
+
+  }
+
+  "select nested optional field and list from a row at the leaf node" in {
+
+    import Syntax._
+
+    case class Level1Record(i: Option[Int], ii: List[Int])
+
+    case class NestedCaseClass(l1: Level1Record, a: Int, b: String, c: Double)
+
+    val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23,
+      l1 = Level1Record(i = Some(3333), ii = List(1,2,3)))
+
+    val row = Row(ncc)
+
+    val selector = Witness('l1) ->>> Witness('i) :: Witness('l1) ->>> Witness('ii) :: HNil
+
+    val rowProjected = row.project(selector)
+
+    rowProjected.hl should be ('i ->> 3333 :: 'ii ->> 1 :: HNil)
+
+  }
+
+//  "select nested optional field and list from a row that is not at the leaf node" in {
+//
+//    import Syntax._
+//
+//    case class Level1Record(i: Int, ii: List[Int])
+//
+//    case class NestedCaseClass(l1: Option[Level1Record], a: Int, b: String, c: Double)
+//
+//    val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23,
+//      l1 = Some(Level1Record(i = 3333, ii = List(1,2,3))))
+//
+//    val row = Row(ncc)
+//
+//    val selector = Witness('l1) ->>> Witness('i) :: Witness('l1) ->>> Witness('ii) :: HNil
+//
+//    val rowProjected = row.project(selector)
+//
+//    rowProjected.hl should be ('i ->> 3333 :: 'ii ->> 1 :: HNil)
+//
+//  }
+
 
   "Row converter" should {
 

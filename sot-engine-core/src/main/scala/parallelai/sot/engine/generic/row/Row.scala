@@ -5,7 +5,7 @@ import parallelai.sot.engine.generic.row.DeepRec.ToCcPartiallyApplied
 import shapeless._
 import shapeless.labelled.{FieldType, field}
 import shapeless.ops.hlist._
-import shapeless.ops.record.{Modifier, _}
+import shapeless.ops.record.{Modifier, Selector, _}
 //important import: without it fields names might become incorrect in nested rows
 import shapeless.record._
 import shapeless.record.Record
@@ -13,7 +13,7 @@ import syntax.singleton._
 
 class Row[L <: HList](val hl: L) {
 
-  type FSL[K] = ExtendedSelector[L, K]
+  type FSL[K] = Selector[L, K]
 
   def updatedAt[V, W, Out <: HList](n: Nat, value: V)(implicit
                                                       replacer: ReplaceAt.Aux[L, n.N, V, (W, Out)]): Out = replacer(hl, value)._2
@@ -22,7 +22,7 @@ class Row[L <: HList](val hl: L) {
 
   def keys(implicit keys: Keys[L]): keys.Out = keys()
 
-  def get(k: Witness)(implicit selector: ExtendedSelector[L, k.T]): selector.Out = selector(hl)
+  def get(k: Witness)(implicit selector: Selector[L, k.T]): selector.Out = selector(hl)
 
   def project[T <: HList, W <: HList](v: T)(implicit m: WitnessType.Aux[T, W], selector: SelectAll[L, W]): Row[selector.Out]  = {
     new Row[selector.Out](selector(hl))

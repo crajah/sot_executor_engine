@@ -6,49 +6,74 @@ import shapeless.ops.record.Selector
 
 case class Nested[A, B](a: A, b: B)
 
+/**
+  * Resolve types such as list or option when data is projected
+  */
+trait TypeMapper[In] {
+  type Out
+
+  def apply(v: In): Out
+}
+
+object TypeMapper {
+
+  type Aux[In, Out0] = TypeMapper[In] {type Out = Out0}
+
+  def apply[In](implicit a: TypeMapper[In]): TypeMapper.Aux[In, a.Out] = a
+
+  implicit def optionTypeMapper[Out0]: TypeMapper.Aux[Option[Out0], Out0] = new TypeMapper[Option[Out0]] {
+    override type Out = Out0
+
+    override def apply(v: Option[Out0]): Out0 = v.get
+  }
+
+  implicit def listTypeMapper[Out0]: TypeMapper.Aux[List[Out0], Out0] = new TypeMapper[List[Out0]] {
+    override type Out = Out0
+
+    override def apply(v: List[Out0]): Out0 = v.head
+  }
+
+  implicit def identityMapper[In]: TypeMapper[In] = new TypeMapper[In] {
+    override type Out = In
+
+    override def apply(v: In): Out = v
+  }
+
+}
+
+
 trait ExtendedSelector[L <: HList, K] extends DepFn1[L] with Serializable {
   type Out
-  def apply(l : L): Out
+
+  def apply(l: L): Out
 }
 
 trait SelectorWrapper {
 
-  implicit def selectorWrapper[L<: HList, K, Out0](implicit selector: Selector.Aux[L, K, Out0]): ExtendedSelector.Aux[L, K, Out0] =
+  implicit def selectorWrapper[L <: HList, K, Out0](implicit selector: Selector.Aux[L, K, Out0]): ExtendedSelector.Aux[L, K, Out0] =
     new ExtendedSelector[L, K] {
       type Out = Out0
+
       override def apply(l: L): Out = selector(l)
     }
 
 }
 
-trait LowestPrioritySelector extends SelectorWrapper {
+object ExtendedSelector extends SelectorWrapper {
 
-  type Aux[L <: HList, K, Out0] = ExtendedSelector[L, K] { type Out = Out0 }
-
-  implicit def selectorBottom[L <: HList, K, Out0 <: HList, V](implicit
-                                                               selector: ExtendedSelector.Aux[L, K, Out0],
-                                                               selectorNested: ExtendedSelector[Out0, V]
-                                                              ): ExtendedSelector.Aux[L, Nested[K, V], FieldType[V, selectorNested.Out]] =
-    new ExtendedSelector[L, Nested[K, V]] {
-      type Out = FieldType[V, selectorNested.Out]
-
-      def apply(l: L): FieldType[V, selectorNested.Out] = field[V](selectorNested(selector(l)))
-    }
-
-}
-
-object ExtendedSelector extends LowestPrioritySelector {
+  type Aux[L <: HList, K, Out0] = ExtendedSelector[L, K] {type Out = Out0}
 
   def apply[L <: HList, K](implicit selector: ExtendedSelector[L, K]): Aux[L, K, selector.Out] = selector
 
-  implicit def selectorRecursive[L <: HList, K, Out0 <: HList, V <: Nested[_, _]](implicit
-                                                                                     selector: ExtendedSelector.Aux[L, K, Out0],
-                                                                                     selectorNested: ExtendedSelector[Out0, V]
-                                                                                    ): ExtendedSelector.Aux[L, Nested[K, V], selectorNested.Out] =
+  implicit def selectorLeaf[L <: HList, K, Out0 <: HList, V, NestedOut](implicit
+                                                                        selector: ExtendedSelector.Aux[L, K, Out0],
+                                                                        selectorNested: ExtendedSelector.Aux[Out0, V, NestedOut],
+                                                                        typeMapperNested: TypeMapper[NestedOut]
+                                                                       ): ExtendedSelector.Aux[L, Nested[K, V], FieldType[V, typeMapperNested.Out]] =
     new ExtendedSelector[L, Nested[K, V]] {
-      type Out = selectorNested.Out
+      type Out = FieldType[V, typeMapperNested.Out]
 
-      def apply(l: L): selectorNested.Out = selectorNested(selector(l))
+      def apply(l: L): FieldType[V, typeMapperNested.Out] = field[V](typeMapperNested(selectorNested(selector(l))))
     }
 
 }
