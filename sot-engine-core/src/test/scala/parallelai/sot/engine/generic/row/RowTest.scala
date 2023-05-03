@@ -119,7 +119,7 @@ class RowTest extends WordSpec with Matchers {
 
       val row = Row(fcc)
 
-      val rowProjected = row.project[HList.`'a, 'b`.T]
+      val rowProjected = row.projectTyped[HList.`'a, 'b`.T]
 
       rowProjected.hl should be ('a ->> 1 :: 'b ->> "b" :: HNil)
 
@@ -135,7 +135,7 @@ class RowTest extends WordSpec with Matchers {
 
       type v2 = HList.`'a, 'n`.T
 
-      val rowProjected = row.project[v1]
+      val rowProjected = row.projectTyped[v1]
 
       rowProjected.hl should be ('a ->> 1 :: 'n ->> ('i ->> 1 :: HNil) :: HNil)
 
@@ -160,7 +160,32 @@ class RowTest extends WordSpec with Matchers {
         Nested[Witness.`'l1`.T, Nested[Witness.`'l2`.T, Witness.`'l3`.T]] ::
         Witness.`'a`.T :: HNil
 
-      val rowProjected = row.project[selector]
+      val rowProjected = row.projectTyped[selector]
+
+      rowProjected.hl should be ('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
+
+    }
+
+    "select nested fields from a row where projection is passed as a parameter" in {
+
+      case class Level3Record(iii: Int)
+
+      case class Level2Record(ii: Int, l3: Level3Record)
+
+      case class Level1Record(l2: Level2Record, i: Int)
+
+      case class NestedCaseClass(l1: Level1Record, a: Int, b: String, c: Double)
+
+      val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23,
+        l1 = Level1Record(l2 = Level2Record(ii = 2233, l3 = Level3Record(iii = 32423)), i = 3333))
+
+      val row = Row(ncc)
+
+      val selector = Nested(Witness('l1), Nested(Witness('l2), Nested(Witness('l3), Witness('iii)))) ::
+        Nested(Witness('l1), Nested(Witness('l2), Witness('l3))) ::
+        Witness('a) :: HNil
+
+      val rowProjected = row.project(selector)
 
       rowProjected.hl should be ('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
 

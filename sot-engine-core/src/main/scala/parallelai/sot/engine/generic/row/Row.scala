@@ -24,7 +24,11 @@ class Row[L <: HList](val hl: L) {
 
   def get(k: Witness)(implicit selector: ExtendedSelector[L, k.T]): selector.Out = selector(hl)
 
-  def project[K <: HList](implicit selector: SelectAll[L, K]): Row[selector.Out] = {
+  def project[T <: HList, W <: HList](v: T)(implicit m: WitnessType.Aux[T, W], selector: SelectAll[L, W]): Row[selector.Out]  = {
+    new Row[selector.Out](selector(hl))
+  }
+
+  def projectTyped[K <: HList](implicit selector: SelectAll[L, K]): Row[selector.Out] = {
     new Row[selector.Out](selector(hl))
   }
 
