@@ -52,9 +52,9 @@ trait SelectorWrapper {
 
   type Aux[L <: HList, K, Out0] = ExtendedSelector[L, K] {type Out = Out0}
 
-  implicit def selectorWrapper[L <: HList, K, Out0](implicit selector: Selector.Aux[L, K, Out0]): ExtendedSelector.Aux[L, K, Out0] =
+  implicit def selectorWrapper[L <: HList, K](implicit selector: Selector[L, K]): ExtendedSelector.Aux[L, K, selector.Out] =
     new ExtendedSelector[L, K] {
-      type Out = Out0
+      type Out = selector.Out
 
       override def apply(l: L): Out = selector(l)
     }
