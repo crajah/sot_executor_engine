@@ -24,17 +24,17 @@ object TypeMapper {
   implicit def optionTypeMapper[Out0]: TypeMapper.Aux[Option[Out0], Out0] = new TypeMapper[Option[Out0]] {
     override type Out = Out0
 
-    override def apply(v: Option[Out0]): Out0 = v.get
+    override def apply(v: Option[Out0]): Out = v.get
   }
 
   implicit def listTypeMapper[Out0]: TypeMapper.Aux[List[Out0], Out0] = new TypeMapper[List[Out0]] {
     override type Out = Out0
 
-    override def apply(v: List[Out0]): Out0 = v.head
+    override def apply(v: List[Out0]): Out = v.head
   }
 
-  implicit def identityMapper[In]: TypeMapper[In] = new TypeMapper[In] {
-    override type Out = In
+  implicit def identityMapper[In, Out0](implicit ev: In =:= Out0): TypeMapper.Aux[In, Out0] = new TypeMapper[In] {
+    override type Out = Out0
 
     override def apply(v: In): Out = v
   }
@@ -59,6 +59,19 @@ trait SelectorWrapper {
       override def apply(l: L): Out = selector(l)
     }
 
+  implicit def selectorLeaf[L <: HList, K, Out0 <: HList, V, NestedOut](implicit
+                                                                        selector: ExtendedSelector.Aux[L, K, Out0],
+                                                                        selectorNested: ExtendedSelector.Aux[Out0, V, NestedOut],
+                                                                        typeMapperNested: TypeMapper[NestedOut]
+                                                                       ): ExtendedSelector.Aux[L, Nested[K, V], FieldType[V, typeMapperNested.Out]] =
+    new ExtendedSelector[L, Nested[K, V]] {
+      override type Out = FieldType[V, typeMapperNested.Out]
+      override def apply(l: L): Out = {
+        val f = field[V](typeMapperNested(selectorNested(selector(l))))
+        f
+      }
+    }
+
 }
 
 object ExtendedSelector extends SelectorWrapper {
@@ -66,22 +79,21 @@ object ExtendedSelector extends SelectorWrapper {
   def apply[L <: HList, K](implicit selector: ExtendedSelector[L, K]): Aux[L, K, selector.Out] = selector
 
   implicit def selectorWrapperOption[L <: HList, K, Out0](implicit selector: Selector.Aux[L, K, Out0],
-                                                                    typeMapper: TypeMapper[Out0]): ExtendedSelector.Aux[L, K, typeMapper.Out] =
+                                                          typeMapper: TypeMapper[Out0]): ExtendedSelector.Aux[L, K, typeMapper.Out] =
     new ExtendedSelector[L, K] {
       type Out = typeMapper.Out
 
       override def apply(l: L): Out = typeMapper(selector(l))
     }
 
-  implicit def selectorLeaf[L <: HList, K, Out0 <: HList, V, NestedOut](implicit
-                                                                        selector: ExtendedSelector.Aux[L, K, Out0],
-                                                                        selectorNested: ExtendedSelector.Aux[Out0, V, NestedOut],
-                                                                        typeMapperNested: TypeMapper[NestedOut]
-                                                                       ): ExtendedSelector.Aux[L, Nested[K, V], FieldType[V, typeMapperNested.Out]] =
-    new ExtendedSelector[L, Nested[K, V]] {
-      type Out = FieldType[V, typeMapperNested.Out]
+  implicit def selectorNested[L <: HList, K, Out0 <: HList, N1, N2](implicit
+                                                                    selector: ExtendedSelector.Aux[L, K, Out0],
+                                                                    selectorNested: ExtendedSelector[Out0, Nested[N1, N2]]
+                                                                   ): ExtendedSelector.Aux[L, Nested[K, Nested[N1, N2]], selectorNested.Out] =
+    new ExtendedSelector[L, Nested[K, Nested[N1, N2]]] {
+      type Out = selectorNested.Out
 
-      def apply(l: L): FieldType[V, typeMapperNested.Out] = field[V](typeMapperNested(selectorNested(selector(l))))
+      def apply(l: L): Out = selectorNested(selector(l))
     }
 
 }
@@ -107,22 +119,8 @@ trait LowestPrioritySelectAll {
 
 }
 
-trait LowPrioritySelectAll extends LowestPrioritySelectAll {
 
-  implicit def hconsSelectAllNestedType[L <: HList, K, V, KT <: HList]
-  (implicit
-   sh: ExtendedSelector[L, Nested[K, V]],
-   st: SelectAll[L, KT]
-  ): Aux[L, Nested[K, V] :: KT, sh.Out :: st.Out] =
-    new SelectAll[L, Nested[K, V] :: KT] {
-      type Out = sh.Out :: st.Out
-
-      def apply(l: L): Out = sh(l) :: st(l)
-    }
-
-}
-
-object SelectAll extends LowPrioritySelectAll {
+object SelectAll extends LowestPrioritySelectAll {
 
   def apply[L <: HList, K <: HList](implicit sa: SelectAll[L, K]): Aux[L, K, sa.Out] = sa
 
@@ -133,16 +131,15 @@ object SelectAll extends LowPrioritySelectAll {
       def apply(l: L): Out = HNil
     }
 
-  implicit def hconsSelectNestedType[L <: HList, NH, KHOut <: HList, NT, KT <: HList]
+  implicit def hconsSelectAllNestedType[L <: HList, K, V, KT <: HList]
   (implicit
-   sh: ExtendedSelector.Aux[L, NH, KHOut],
-   shNested: ExtendedSelector[KHOut, NT],
+   sh: ExtendedSelector[L, Nested[K, V]],
    st: SelectAll[L, KT]
-  ): Aux[L, Nested[NH, NT] :: KT, shNested.Out :: st.Out] =
-    new SelectAll[L, Nested[NH, NT] :: KT] {
-      type Out = shNested.Out :: st.Out
+  ): Aux[L, Nested[K, V] :: KT, sh.Out :: st.Out] =
+    new SelectAll[L, Nested[K, V] :: KT] {
+      type Out = sh.Out :: st.Out
 
-      def apply(l: L): Out = shNested(sh(l)) :: st(l)
+      def apply(l: L): Out = sh(l) :: st(l)
     }
 
 }
