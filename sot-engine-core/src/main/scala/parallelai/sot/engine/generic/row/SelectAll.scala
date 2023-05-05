@@ -109,12 +109,12 @@ trait LowestPrioritySelectAll {
 
 trait LowPrioritySelectAll extends LowestPrioritySelectAll {
 
-  implicit def hconsSelectAllFieldType[L <: HList, KH <: Nested[_, _], KT <: HList]
+  implicit def hconsSelectAllNestedType[L <: HList, K, V, KT <: HList]
   (implicit
-   sh: ExtendedSelector[L, KH],
+   sh: ExtendedSelector[L, Nested[K, V]],
    st: SelectAll[L, KT]
-  ): Aux[L, KH :: KT, sh.Out :: st.Out] =
-    new SelectAll[L, KH :: KT] {
+  ): Aux[L, Nested[K, V] :: KT, sh.Out :: st.Out] =
+    new SelectAll[L, Nested[K, V] :: KT] {
       type Out = sh.Out :: st.Out
 
       def apply(l: L): Out = sh(l) :: st(l)
@@ -133,16 +133,16 @@ object SelectAll extends LowPrioritySelectAll {
       def apply(l: L): Out = HNil
     }
 
-  implicit def hconsSelectFieldType[L <: HList, KH <: Witness, KHOut <: HList, KN <: Witness, KT <: HList]
+  implicit def hconsSelectNestedType[L <: HList, NH, KHOut <: HList, NT, KT <: HList]
   (implicit
-   sh: Lazy[ExtendedSelector.Aux[L, KH, KHOut]],
-   shNested: ExtendedSelector[KHOut, KN],
+   sh: ExtendedSelector.Aux[L, NH, KHOut],
+   shNested: ExtendedSelector[KHOut, NT],
    st: SelectAll[L, KT]
-  ): Aux[L, Nested[KH, KN] :: KT, shNested.Out :: st.Out] =
-    new SelectAll[L, Nested[KH, KN] :: KT] {
+  ): Aux[L, Nested[NH, NT] :: KT, shNested.Out :: st.Out] =
+    new SelectAll[L, Nested[NH, NT] :: KT] {
       type Out = shNested.Out :: st.Out
 
-      def apply(l: L): Out = shNested(sh.value(l)) :: st(l)
+      def apply(l: L): Out = shNested(sh(l)) :: st(l)
     }
 
 }

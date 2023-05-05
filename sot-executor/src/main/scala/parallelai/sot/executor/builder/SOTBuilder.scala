@@ -38,6 +38,8 @@ import parallelai.sot.engine.generic.helper.Helper
 import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.generic.row.Syntax._
 
+import parallelai.sot.engine.generic.row.Nested
+
 import scala.meta.Lit
 
 
