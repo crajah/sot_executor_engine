@@ -30,6 +30,12 @@ object NestedWitness extends LowPriorityNestedMappable {
       override type OutB = B#T
     }
 
+  implicit def nestedWitnessLeafRename[A <: Witness, B <: Witness, BB <: Witness]: NestedWitness.Aux[A, Rename[B, BB], A#T, Rename[B#T, BB#T]] =
+    new NestedWitness[A, Rename[B, BB]] {
+      override type OutA = A#T
+      override type OutB = Rename[B#T, BB#T]
+    }
+
 }
 
 trait WitnessType[L] {
@@ -49,6 +55,11 @@ object WitnessType {
   implicit def simpleWitness[H <: Witness, T <: HList](implicit t: WitnessType[T]): WitnessType.Aux[H :: T, H#T :: t.Out] =
     new WitnessType[H :: T] {
       override type Out = H#T :: t.Out
+    }
+
+  implicit def simpleWitnessRename[H <: Witness, HH <: Witness, T <: HList](implicit t: WitnessType[T]): WitnessType.Aux[Rename[H, HH] :: T, Rename[H#T, HH#T] :: t.Out] =
+    new WitnessType[Rename[H, HH] :: T] {
+      override type Out = Rename[H#T, HH#T] :: t.Out
     }
 
   implicit def nestedWitnessMappable[N1 <: Witness, N2, T <: HList](implicit

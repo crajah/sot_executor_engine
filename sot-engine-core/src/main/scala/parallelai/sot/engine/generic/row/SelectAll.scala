@@ -6,6 +6,8 @@ import shapeless.ops.record.Selector
 
 case class Nested[A, B](a: A, b: B)
 
+case class Rename[A, B](a: A, b: B)
+
 /**
   * Resolve types such as list or option when data is projected
   */
@@ -66,8 +68,22 @@ trait SelectorWrapper {
                                                                        ): ExtendedSelector.Aux[L, Nested[K, V], FieldType[V, typeMapperNested.Out]] =
     new ExtendedSelector[L, Nested[K, V]] {
       override type Out = FieldType[V, typeMapperNested.Out]
+
       override def apply(l: L): Out = {
         val f = field[V](typeMapperNested(selectorNested(selector(l))))
+        f
+      }
+    }
+
+  implicit def selectorLeafRename[L <: HList, K, Out0 <: HList, V, VV](implicit
+                                                                       selector: ExtendedSelector.Aux[L, K, Out0],
+                                                                       selectorNested: ExtendedSelector[Out0, V]
+                                                                      ): ExtendedSelector.Aux[L, Nested[K, Rename[V, VV]], FieldType[VV, selectorNested.Out]] =
+    new ExtendedSelector[L, Nested[K, Rename[V, VV]]] {
+      override type Out = FieldType[VV, selectorNested.Out]
+
+      override def apply(l: L): Out = {
+        val f = field[VV](selectorNested(selector(l)))
         f
       }
     }
@@ -115,6 +131,17 @@ trait LowestPrioritySelectAll {
       type Out = FieldType[KH, sh.Out] :: st.Out
 
       def apply(l: L): Out = field[KH](sh(l)) :: st(l)
+    }
+
+  implicit def hconsSelectAllRename[L <: HList, KH, KHH, KT <: HList]
+  (implicit
+   sh: ExtendedSelector[L, KH],
+   st: SelectAll[L, KT]
+  ): Aux[L, Rename[KH, KHH] :: KT, FieldType[KHH, sh.Out] :: st.Out] =
+    new SelectAll[L, Rename[KH, KHH] :: KT] {
+      type Out = FieldType[KHH, sh.Out] :: st.Out
+
+      def apply(l: L): Out = field[KHH](sh(l)) :: st(l)
     }
 
 }
