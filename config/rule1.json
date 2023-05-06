@@ -24,7 +24,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bi_crm_poc",
-      "table": "cdig_prod_winnotice_sf_ddd",
+      "table": "cdig_prod_winnotice_sf",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
