@@ -1,12 +1,22 @@
 import scala.language.postfixOps
-import com.amazonaws.regions.{Region, Regions}
 
 lazy val configResources = file("config")
 
+lazy val `sot-containers` = (project in file("./sot-containers"))
+  .configs(IntegrationTest)
+  .settings(
+    Common.settings,
+    Defaults.itSettings,
+    unmanagedResourceDirectories in Compile += configResources
+  )
+
 lazy val `sot-engine-core` = (project in file("./sot-engine-core"))
+  .dependsOn(`sot-containers` % "it->it;test->test;compile->compile")
+  .configs(IntegrationTest)
   .settings(
     Common.settings,
     Common.macroSettings,
+    Defaults.itSettings,
     unmanagedResourceDirectories in Compile += configResources
   )
 
@@ -27,16 +37,13 @@ lazy val `sot-executor` = (project in file("./sot-executor"))
   )
 
 lazy val `sot` = (project in file("."))
-  .aggregate(`sot-engine-core`, `sot-macros`, `sot-executor`)
+  .aggregate(`sot-containers`, `sot-engine-core`, `sot-macros`, `sot-executor`)
+  .configs(IntegrationTest)
   .settings(
     name := "sot-executor-engine",
     version := "0.1.1-SNAPSHOT",
     Common.settings,
-    s3region := Region.getRegion(Regions.EU_WEST_2),
-    publishTo := {
-      val prefix = if (isSnapshot.value) "snapshot" else "release"
-      Some(s3resolver.value(s"Parallel AI $prefix S3 bucket", s3(s"$prefix.repo.parallelai.com")) withMavenPatterns)
-    }
+    Defaults.itSettings
   )
 
 assemblyMergeStrategy in assembly := {
