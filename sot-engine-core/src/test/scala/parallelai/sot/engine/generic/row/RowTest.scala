@@ -24,6 +24,10 @@ class RowTest extends WordSpec with Matchers {
 
       row.hl should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
 
+      row.get('a) should be (1)
+      row.get('b) should be ("b")
+      row.get('c) should be (1.0)
+
     }
 
     "parse a nested structure" in {
@@ -33,6 +37,11 @@ class RowTest extends WordSpec with Matchers {
       val row = Row(ncc)
 
       row.hl should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: 'n ->> ('i ->> 1 :: HNil) :: HNil)
+
+      row.get('a) should be (1)
+      row.get('b) should be ("b")
+      row.get('c) should be (1.0)
+      row.get('n).get('i) should be (1)
 
     }
 
@@ -50,6 +59,11 @@ class RowTest extends WordSpec with Matchers {
 
       rowAppended.hl should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: 'd ->> 2.0 :: HNil)
 
+      rowAppended.get('a) should be (1)
+      rowAppended.get('b) should be ("b")
+      rowAppended.get('c) should be (1.0)
+      rowAppended.get('d) should be (2.0)
+
     }
 
     "remove a column from the row object" in {
@@ -62,6 +76,9 @@ class RowTest extends WordSpec with Matchers {
 
       rowAppended.hl should be('b ->> "b" :: 'c ->> 1.0 :: HNil)
 
+      rowAppended.get('b) should be ("b")
+      rowAppended.get('c) should be (1.0)
+
     }
 
     "update an existing column" in {
@@ -73,6 +90,10 @@ class RowTest extends WordSpec with Matchers {
       val rowUpdated = row.update('a, 2)
 
       rowUpdated.hl should be('a ->> 2 :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
+
+      rowUpdated.get('a) should be (2)
+      rowUpdated.get('b) should be ("b")
+      rowUpdated.get('c) should be (1.0)
 
     }
 
@@ -87,6 +108,10 @@ class RowTest extends WordSpec with Matchers {
 
       rowUpdated.hl should be('a ->> 21 :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
 
+      rowUpdated.get('a) should be (21)
+      rowUpdated.get('b) should be ("b")
+      rowUpdated.get('c) should be (1.0)
+
     }
 
     "update an existing column with different type" in {
@@ -99,6 +124,10 @@ class RowTest extends WordSpec with Matchers {
       val rowUpdated = row.update('a, "2")
 
       rowUpdated.hl should be('a ->> "2" :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
+
+      rowUpdated.get('a) should be ("2")
+      rowUpdated.get('b) should be ("b")
+      rowUpdated.get('c) should be (1.0)
 
     }
 
@@ -122,6 +151,9 @@ class RowTest extends WordSpec with Matchers {
 
       rowProjected.hl should be ('a ->> 1 :: 'b ->> "b" :: HNil)
 
+      rowProjected.get('a) should be (1)
+      rowProjected.get('b) should be ("b")
+
     }
 
     "select multiple fields from a nested row" in {
@@ -137,6 +169,9 @@ class RowTest extends WordSpec with Matchers {
       val rowProjected = row.projectTyped[v1]
 
       rowProjected.hl should be ('a ->> 1 :: 'n ->> ('i ->> 1 :: HNil) :: HNil)
+
+      rowProjected.get('a) should be (1)
+      rowProjected.get('n).get('i) should be (1)
 
     }
 
@@ -163,6 +198,10 @@ class RowTest extends WordSpec with Matchers {
 
       rowProjected.hl should be ('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
 
+      rowProjected.get('iii) should be (32423)
+      rowProjected.get('l3).get('iii) should be (32423)
+      rowProjected.get('a) should be (123)
+
     }
 
     "select nested fields from a row with simplified syntax" in {
@@ -187,6 +226,10 @@ class RowTest extends WordSpec with Matchers {
       val rowProjected = row.project(selector)
 
       rowProjected.hl should be ('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
+
+      rowProjected.get('iii) should be (32423)
+      rowProjected.get('l3).get('iii) should be (32423)
+      rowProjected.get('a) should be (123)
 
     }
 
@@ -217,6 +260,10 @@ class RowTest extends WordSpec with Matchers {
 
     rowProjected.hl should be ('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
 
+    rowProjected.get('iii) should be (32423)
+    rowProjected.get('l3).get('iii) should be (32423)
+    rowProjected.get('a) should be (123)
+
   }
 
   "select nested optional field and list from a row at the leaf node" in {
@@ -237,6 +284,9 @@ class RowTest extends WordSpec with Matchers {
     val rowProjected = row.project(selector)
 
     rowProjected.hl should be ('i ->> 3333 :: 'ii ->> 1 :: HNil)
+
+    rowProjected.get('i) should be (3333)
+    rowProjected.get('ii) should be (1)
 
   }
 
@@ -260,6 +310,10 @@ class RowTest extends WordSpec with Matchers {
     val rowProjected = row.project(selector)
 
     rowProjected.hl should be ('i ->> 3333 :: 'l2s ->> "s1" :: 'a ->> 123 :: HNil)
+
+    rowProjected.get('i) should be (3333)
+    rowProjected.get('l2s) should be ("s1")
+    rowProjected.get('a) should be (123)
 
   }
 
@@ -285,6 +339,41 @@ class RowTest extends WordSpec with Matchers {
     val rowProjected = row.project(selector)
 
     rowProjected.hl should be ('i ->> 3333 :: 'l2s ->> "s1" :: 'a ->> 123 :: HNil)
+
+    rowProjected.get('i) should be (3333)
+    rowProjected.get('l2s) should be ("s1")
+    rowProjected.get('a) should be (123)
+
+  }
+
+  "select fields from complex data structure" in {
+
+    val wins = Nested(Witness('state),  Nested(Witness('bets), Nested(Witness('payout), Witness('winnings))))
+    val customerRef = Nested(Witness('state), Nested(Witness('bets), Witness('customerRef)))
+    val activityId = Nested(Witness('header), Witness('activityId))
+
+    val pr = HList(customerRef, wins, activityId)
+
+    case class Payout(winnings: Option[String])
+    case class Bet(id: String, customerRef: Option[String], payout: Option[Payout])
+    case class BetState(bets: List[Bet])
+    case class ActivityHeader(activityId: Long, timeStamp: Option[Long])
+    case class Activity(header: ActivityHeader, state: Option[BetState])
+
+    val activity = Activity(header = ActivityHeader(activityId = 12L, timeStamp = Some(1L)),
+      state = Some(BetState(bets = List(Bet(id = "betid",
+        customerRef = Some("custRef"),
+        payout = Some(Payout(winnings = Some("1.2"))))))))
+
+    val row = Row(activity)
+
+    val rowProjected = row.project(pr)
+
+    rowProjected.hl should be ('customerRef ->> "custRef" :: 'winnings ->> "1.2" :: 'activityId ->> 12L :: HNil)
+
+    rowProjected.get('customerRef) should be ("custRef")
+    rowProjected.get('winnings) should be ("1.2")
+    rowProjected.get('activityId) should be (12l)
 
   }
 
