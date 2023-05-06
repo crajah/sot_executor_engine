@@ -90,6 +90,4 @@ object AvroSchema {
       |    ]
       |  }
     """.stripMargin) class MessageAvroNested
-
-
 }

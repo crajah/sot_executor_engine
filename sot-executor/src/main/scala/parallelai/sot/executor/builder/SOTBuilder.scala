@@ -2,7 +2,8 @@ package parallelai.sot.executor.builder
 
 import java.io.{File, InputStream}
 import java.util.TimeZone
-
+import scala.meta.Lit
+import parallelai.sot.engine.config.SchemaResourcePath
 import com.spotify.scio._
 import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.bigquery.BigQueryType
@@ -22,7 +23,6 @@ import com.spotify.scio.streaming.ACCUMULATING_FIRED_PANES
 import com.typesafe.config.ConfigFactory
 import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import org.apache.beam.sdk.transforms.windowing.{AfterProcessingTime, Repeatedly}
-import org.slf4j.LoggerFactory
 import parallelai.sot.executor.model.SOTMacroConfig._
 import parallelai.sot.executor.model.SOTMacroJsonConfig
 import parallelai.sot.engine.runner.scio.PaiScioContext._
@@ -40,56 +40,39 @@ import parallelai.sot.engine.generic.row.Syntax._
 
 import parallelai.sot.engine.generic.row.Nested
 
-import scala.meta.Lit
-
-
-/*
-TO RUN THE INJECTOR
-sbt "sot-executor/runMain parallelai.sot.executor.example.Injector bi-crm-poc p2pin none avro"
- */
-
-/*
-TO RUN THIS CLASS:
-sbt clean compile \
-   "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder \
-    --project=bi-crm-poc \
-    --runner=DataflowRunner \
-    --region=europe-west1 \
-    --zone=europe-west2-a \
-    --workerMachineType=n1-standard-1 \
-    --diskSizeGb=150 \
-    --maxNumWorkers=1 \
-    --jobName=jobname \
-    --waitToFinish=false"
-*/
-
-@SOTBuilder("application.conf")
+/**
+  * To run this class with a default configuration of application.conf:
+  * <pre>
+  *   sbt clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
+  * </pre>
+  *
+  * If there is no application.conf then compilation will fail, but you can supply your own conf as a Java option e.g. -Dconfig.resource=application-ps2ps-test.conf
+  * <pre>
+  *   sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
+  * </pre>
+  * NOTE That application configurations can also be set/overridden via system and environment properties.
+  */
+@SOTBuilder
 object SOTBuilder {
-
   class Builder extends Serializable() {
-    private val logger = LoggerFactory.getLogger(this.getClass)
-    def execute(jobConfig: Config, sotUtils: SOTUtils, sc: ScioContext, args: Args) = {
+    def execute(jobConfig: Config, sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
       val sourceTap = getSource(jobConfig)._2
       val sinkTap = getSink(jobConfig)._2
-      val runner = inOutSchemaHList.exec(sc, sourceTap, sinkTap, sotUtils)
+      inOutSchemaHList.exec(sc, sourceTap, sinkTap, sotUtils)
       val result = sc.close()
+
       if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
     }
   }
-  def loadConfig() = {
-    val configPath = getClass.getResource("/application.conf")
-    val fileName = ConfigFactory.parseURL(configPath).getString("json.file.name")
-    SOTMacroJsonConfig(fileName)
-  }
+
   val genericBuilder = new Builder()
+
   def main(cmdArg: Array[String]): Unit = {
-    val parsedArgs = ScioContext.parseArguments[SOTOptions](cmdArg)
-    val opts = parsedArgs._1
-    val args = parsedArgs._2
-    val sotUtils = new SOTUtils(opts)
-    val sc = ScioContext(opts)
+    val (sotOptions, sotArgs) = ScioContext.parseArguments[SOTOptions](cmdArg)
+    val sotUtils = new SOTUtils(sotOptions)
+    val sc = ScioContext(sotOptions)
     val builder = genericBuilder
-    val jobConfig = loadConfig()
-    builder.execute(jobConfig, sotUtils, sc, args)
+    val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
+    builder.execute(jobConfig, sotUtils, sc, sotArgs)
   }
 }

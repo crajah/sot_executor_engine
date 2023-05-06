@@ -1,7 +1,6 @@
 package parallelai.sot.engine.serialization.avro
 
 import java.io.ByteArrayOutputStream
-
 import org.apache.avro.Schema
 import org.apache.avro.Schema.Parser
 import org.apache.avro.generic.GenericRecord
@@ -9,7 +8,6 @@ import org.apache.avro.io._
 import org.apache.avro.specific.{SpecificDatumReader, SpecificDatumWriter}
 
 object AvroUtils {
-
   def decodeAvro(message: Array[Byte], schemaStr: String): GenericRecord = {
     val schema: Schema = new Parser().parse(schemaStr)
     // Deserialize and create generic record
@@ -27,8 +25,7 @@ object AvroUtils {
     writer.write(genericRecord, encoder)
     encoder.flush()
     out.close()
-    val serializedBytes: Array[Byte] = out.toByteArray()
+    val serializedBytes: Array[Byte] = out.toByteArray
     serializedBytes
   }
-
 }

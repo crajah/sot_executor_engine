@@ -1,81 +1,76 @@
 package parallelai.sot.engine.taps.pubsub
 
-import com.google.api.services.pubsub.Pubsub
-import com.google.api.services.pubsub.model.PublishRequest
-import com.google.api.services.pubsub.model.PubsubMessage
-import com.google.common.collect.ImmutableMap
-import org.joda.time.DateTimeZone
-import org.joda.time.format.DateTimeFormat
-import com.google.common.base.Throwables
-import org.apache.avro.io._
 import java.io._
-
-import com.spotify.scio.avro.types.AvroType
-import org.apache.avro.Schema
-import org.apache.avro.Schema.Parser
-import org.apache.avro.generic.{GenericData, GenericRecord}
-import org.apache.avro.specific.SpecificDatumWriter
-import parallelai.sot.engine.serialization.avro.AvroUtils
-
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
-import scala.util.{Failure, Success}
-import com.typesafe.config.{Config, ConfigFactory}
+import scala.util.Random
+import parallelai.sot.engine.serialization.avro.AvroUtils
+import org.apache.avro.generic.GenericRecord
+import org.joda.time.DateTimeZone
+import org.joda.time.format.DateTimeFormat
+import com.google.api.services.pubsub.Pubsub
+import com.google.api.services.pubsub.model.{PublishRequest, PubsubMessage}
+import com.google.common.collect.ImmutableMap
+import com.spotify.scio.avro.types.AvroType
 
 /**
-  * This is a generator that simulates usage data from a mobile game, and either publishes the data
-  * to a pubsub topic in avro or protobuf format using nested or flat structure.
+  * This is a generator that simulates usage data from a mobile game, and either publishes the data to a pubsub topic in avro or protobuf format using nested or flat structure.
+  * <p>
+  * The general model used by the generator is the following.
+  * There is a set of teams with team members. Each member is scoring points for their team.
+  * After some period, a team will dissolve and a new one will be created in its place. There is also a set of 'Robots', or spammer users.
+  * They hop from team to team. The robots are set to have a higher 'click rate' (generate more events) than the regular team members.
+  * <p>
+  * Each generated line of data has the following form:
+  * <pre>
+  *   username,teamname,score,timestamp_in_ms,readable_time
+  * </pre>
+  * e.g.
+  * <pre>
+  *   user2_AsparagusPig,AsparagusPig,10,1445230923951,2015-11-02 09:09:28.224
+  * </pre>
+  * <p>
+  * The Injector writes either to a PubSub topic, or a file. It will use the PubSub topic if specified. It takes the following arguments:
+  * {{{ Injector project-name (topic-name | none) (filename | none) }}}
+  * <p>
+  * To run the Injector in the mode where it publishes to PubSub,
+  * you will need to authenticate locally using project-based service account credentials to avoid running over PubSub quota.
+  * See https://developers.google.com/identity/protocols/application-default-credentials for more information on using service account credentials.
+  * Set the GOOGLE_APPLICATION_CREDENTIALS environment variable to point to your downloaded service account credentials before starting the program, e.g.
+  * {{{ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/credentials-key.json }}}
   *
-  * <p>The general model used by the generator is the following. There is a set of teams with team
-  * members. Each member is scoring points for their team. After some period, a team will dissolve
-  * and a new one will be created in its place. There is also a set of 'Robots', or spammer users.
-  * They hop from team to team. The robots are set to have a higher 'click rate' (generate more
-  * events) than the regular team members.
+  * If you do not do this, then your injector will only run for a few minutes on your 'user account' credentials before you will start to see quota error messages like:
+  * <pre>
+  *   "Request throttled due to user QPS limit being reached", and see this exception:
+  *   ".com.google.api.client.googleapis.json.GoogleJsonResponseException: 429 Too Many Requests".
+  * </pre>
   *
-  * <p>Each generated line of data has the following form:
-  * username,teamname,score,timestamp_in_ms,readable_time
-  * e.g.:
-  * user2_AsparagusPig,AsparagusPig,10,1445230923951,2015-11-02 09:09:28.224
-  *
-  * <p>The Injector writes to a PubSub topic. It will use the PubSub topic if
-  * specified. It takes the following arguments:
-  * {@code Injector project-name topic-name (avro|proto) (false|true)}.
-  *
-  * <p>To run the Injector in the mode where it publishes to PubSub, you will need to authenticate
-  * locally using project-based service account credentials to avoid running over PubSub
-  * quota.
-  * See https://developers.google.com/identity/protocols/application-default-credentials
-  * for more information on using service account credentials. Set the GOOGLE_APPLICATION_CREDENTIALS
-  * environment variable to point to your downloaded service account credentials before starting the
-  * program, e.g.:
-  * {@code export GOOGLE_APPLICATION_CREDENTIALS=/path/to/your/credentials-key.json}.
-  * If you do not do this, then your injector will only run for a few minutes on your
-  * 'user account' credentials before you will start to see quota error messages like:
-  * "Request throttled due to user QPS limit being reached", and see this exception:
-  * ".com.google.api.client.googleapis.json.GoogleJsonResponseException: 429 Too Many Requests".
   * Once you've set up your credentials, run the Injector like this":
-  * <pre>{@code
-  * Injector <project-name> <topic-name> none
- * }
-  * </pre>
-  * The pubsub topic will be created if it does not exist.
+  * {{{ Injector <project-name> <topic-name> none }}}
   *
-  * <p>To run the injector in write-to-file-mode, set the topic name to "none" and specify the
-  * filename:
-  * <pre>{@code
-  * Injector <project-name> none <filename>
- * }
+  * The pubsub topic will be created if it does not exist.
+  * <p>
+  * To run the injector in write-to-file-mode, set the topic name to "none" and specify the filename:
+  * {{{ Injector <project-name> none <filename> }}}
+  * <p>
+  * To run this class with a default configuration of application.conf:
+  * <pre>
+  *   sbt clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector bi-crm-poc p2pin none avro"
   * </pre>
+  *
+  * If there is no application.conf then compilation will fail, but you can supply your own conf as a Java option e.g. -Dconfig.resource=application-ps2ps-test.conf
+  * <pre>
+  *  sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector bi-crm-poc p2pin none avro"
+  * </pre>
+  * NOTE That application configurations can also be set/overridden via system and environment properties.
   */
-
-
 class Injector(project: String, topicName: String, serialiser: String, nested: Boolean) {
+  val random: Random.type = scala.util.Random
 
-  val r = scala.util.Random
+  val avroT: AvroType[AvroSchema.MessageAvro] = AvroType[AvroSchema.MessageAvro]
 
-  val avroT = AvroType[AvroSchema.MessageAvro]
-  val avroTNested = AvroType[AvroSchema.MessageAvroNested]
-  val schemaStr = avroT.schema.toString
+  val avroTNested: AvroType[AvroSchema.MessageAvroNested] = AvroType[AvroSchema.MessageAvroNested]
+  val schemaStr: String = avroT.schema.toString
 
   private var pubsub: Pubsub = _
   private var topic: String = _
@@ -94,10 +89,10 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
 
   // Create the PubSub client.
   pubsub = InjectorUtils.getClient()
+
   // Create the PubSub topic as necessary.
   topic = InjectorUtils.getFullyQualifiedTopicName(project, topicName)
   InjectorUtils.createTopic(pubsub, topic)
-  println("Injecting to topic: " + topic)
 
   // Start off with some random live teams.
   while (liveTeams.length < Injector.NUM_LIVE_TEAMS) {
@@ -113,20 +108,22 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
     val team = liveTeams(index)
     // If the selected team is expired, remove it and return a new team.
     val currTime = System.currentTimeMillis
+
     if ((team.endTimeInMillis < currTime) || team.numMembers == 0) {
       println("\nteam " + team + " is too old; replacing.")
       println("start time: " + team.startTimeInMillis + ", end time: " + team.endTimeInMillis + ", current time:" + currTime)
       removeTeam(index)
       // Add a new team in its stead.
-      addLiveTeam
+      addLiveTeam()
+    } else {
+      team
     }
-    else team
   }
 
   /**
     * Create and add a team. Possibly add a robot to the team.
     */
-  def addLiveTeam() = synchronized {
+  def addLiveTeam(): Injector.TeamInfo = synchronized {
     val teamName = Injector.randomElement(Injector.COLORS) + Injector.randomElement(Injector.ANIMALS)
 
     // Decide if we want to add a robot to the team.
@@ -143,7 +140,7 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
   /**
     * Remove a specific team.
     */
-  private def removeTeam(teamIndex: Int) = {
+  private def removeTeam(teamIndex: Int): Unit = {
     val removedTeam = liveTeams.remove(teamIndex)
     println("[-" + removedTeam + "]")
   }
@@ -152,6 +149,7 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
   def generateEventProtoNested(currTime: Long, delayInMillis: Int): Array[Byte] = {
     val team = randomTeam()
     val robot = team.robot
+
     // If the team has an associated robot team member...
     val user = robot match {
       case Some(r) =>
@@ -160,6 +158,7 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
         // members, so that if there is a robot on the team, it has a higher click rate.
         if (Injector.random.nextInt(team.numMembers / 2) == 0) r
         else team.getRandomUser
+
       case None =>
         // No robot
         team.getRandomUser
@@ -168,11 +167,12 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
     val eventTime = (currTime - delayInMillis) / 1000 * 1000
     // Add a (redundant) 'human-readable' date string to make the data semantics more clear.
     val dateString = fmt.print(currTime)
-    nested match {
-      case false => MessageProto(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString).toByteArray
-      case true =>
-        val nestedData = (for (_ <- 1 to r.nextInt(10) + 1) yield MessageProtoNested.NestedClass(r.nextLong())).toList
-        MessageProtoNested(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString, nestedData).toByteArray
+
+    if (nested) {
+      val nestedData = (for (_ <- 1 to random.nextInt(10) + 1) yield MessageProtoNested.NestedClass(random.nextLong())).toList
+      MessageProtoNested(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString, nestedData).toByteArray
+    } else {
+      MessageProto(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString).toByteArray
     }
   }
 
@@ -181,6 +181,7 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
     val team = randomTeam()
 
     val robot = team.robot
+
     // If the team has an associated robot team member...
     val user = robot match {
       case Some(r) =>
@@ -189,20 +190,27 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
         // members, so that if there is a robot on the team, it has a higher click rate.
         if (Injector.random.nextInt(team.numMembers / 2) == 0) r
         else team.getRandomUser
+
       case None =>
         // No robot
         team.getRandomUser
     }
+
     val eventTime = (currTime - delayInMillis) / 1000 * 1000
     // Add a (redundant) 'human-readable' date string to make the data semantics more clear.
     val dateString = fmt.print(currTime)
 
-    nested match {
-      case false => avroT.toGenericRecord(AvroSchema.MessageAvro(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString))
-      case true => {
-        val nestedData = (for (_ <- 1 to r.nextInt(10) + 1) yield AvroSchema.MessageAvroNested$NestedClass(r.nextLong())).toList
-        avroTNested.toGenericRecord(AvroSchema.MessageAvroNested(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString, nestedData))
-      }
+    if (nested) {
+      val nestedData =
+        (for {
+          _ <- 1 to random.nextInt(10) + 1
+        } yield AvroSchema.MessageAvroNested$NestedClass(random.nextLong())).toList
+
+      avroTNested.toGenericRecord(AvroSchema.MessageAvroNested(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString, nestedData))
+    } else {
+      val msg = avroT.toGenericRecord(AvroSchema.MessageAvro(user, team.teamName, Injector.random.nextInt(Injector.MAX_SCORE), eventTime, dateString))
+      println(s"===> Generated Avro message to be sent to pubsub = $msg")
+      msg
     }
   }
 
@@ -216,37 +224,41 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
       val message = generateEventAvro(currTime, delayInMillis)
       val pubsubMessage = new PubsubMessage().encodeData(AvroUtils.encodeAvro(message, schemaStr))
       pubsubMessage.setAttributes(ImmutableMap.of(TIMESTAMP_ATTRIBUTE, ((currTime - delayInMillis) / 1000 * 1000).toString))
+
       if (delayInMillis != 0) {
-        println(pubsubMessage.getAttributes())
+        println(pubsubMessage.getAttributes)
         println("late data for: " + message)
       }
+
       pubsubMessage
     }
+
     val publishRequest = new PublishRequest()
     publishRequest.setMessages(pubsubMessages.asJava)
     pubsub.projects().topics().publish(topic, publishRequest).execute()
   }
 
   def publishDataProto(numMessages: Int, delayInMillis: Int): Unit = {
-
     val pubsubMessages = for (i <- 0 until Math.max(1, numMessages)) yield {
       val currTime = System.currentTimeMillis()
       val message = generateEventProtoNested(currTime, delayInMillis)
       val pubsubMessage = new PubsubMessage().encodeData(message)
       pubsubMessage.setAttributes(ImmutableMap.of(TIMESTAMP_ATTRIBUTE, ((currTime - delayInMillis) / 1000 * 1000).toString))
+
       if (delayInMillis != 0) {
-        println(pubsubMessage.getAttributes())
+        println(pubsubMessage.getAttributes)
         println("late data for: " + message)
       }
+
       pubsubMessage
     }
+
     val publishRequest = new PublishRequest()
     publishRequest.setMessages(pubsubMessages.asJava)
     pubsub.projects().topics().publish(topic, publishRequest).execute()
   }
 
-  def run() = {
-
+  def run(): Unit = {
     // Publish messages at a rate determined by the QPS and Thread sleep settings.
     for (i <- 0 until Int.MaxValue) {
       if (Thread.activeCount() > 10) println("I'm falling behind!")
@@ -267,7 +279,7 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
       new Thread() {
         override def run() {
           try {
-            val res = if (serialiser == "avro") {
+            if (serialiser == "avro") {
               publishDataAvro(numMessages, delayInMillis)
             } else if (serialiser == "proto") {
               publishDataProto(numMessages, delayInMillis)
@@ -277,16 +289,14 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
           }
         }
       }.start()
+
       // Wait before creating another injector thread.
       Thread.sleep(THREAD_SLEEP_MS)
     }
   }
-
 }
 
-
 object Injector {
-
   // The total number of robots in the system.
   private val NUM_ROBOTS = 20
   // Determines the chance that a team will have a robot team member.
@@ -330,30 +340,28 @@ object Injector {
         Injector.random.nextInt(MEMBERS_PER_TEAM) + BASE_MEMBERS_PER_TEAM)
     }
 
-    def endTimeInMillis = startTimeInMillis + (expirationPeriod * 60 * 1000)
+    def endTimeInMillis: Long = startTimeInMillis + (expirationPeriod * 60 * 1000)
 
-    def getRandomUser = {
+    def getRandomUser: String = {
       val userNum = Injector.random.nextInt(numMembers)
       "user" + userNum + "_" + teamName
     }
 
-    override def toString() = {
+    override def toString: String = {
       "(" + teamName + ", num members: " + numMembers + ", starting at: " +
         startTimeInMillis + ", expires in: " + expirationPeriod + ", robot: " + robot + ")"
     }
   }
 
   /** Utility to grab a random element from an array of Strings. */
-  def randomElement(list: List[String]) = {
+  def randomElement(list: List[String]): String = {
     val index = random.nextInt(list.length)
     list(index)
   }
 
-
   def main(args: Array[String]): Unit = {
-
     if (args.length < 3) {
-      println("Usage: Injector project-name topic-name (avro|proto) (true|false)")
+      println("Usage: Injector project-name topic-name (avro | proto) (true | false) (numberOfMessages)")
       System.exit(1)
     }
 
@@ -365,8 +373,5 @@ object Injector {
     println("Starting Injector")
     val i = new Injector(project, topicName, serialiser, nested)
     i.run()
-
   }
-
 }
-

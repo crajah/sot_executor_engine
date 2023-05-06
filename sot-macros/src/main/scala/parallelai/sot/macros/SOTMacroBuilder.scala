@@ -1,8 +1,8 @@
 package parallelai.sot.macros
 
-import java.io.File
-
-import com.typesafe.config.ConfigFactory
+import scala.collection.immutable.Seq
+import scala.meta._
+import parallelai.sot.engine.config.SchemaResourcePath
 import parallelai.sot.engine.serialization.protobuf.ProtoPBCCodeGen
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
 import parallelai.sot.executor.model.SOTMacroJsonConfig._
@@ -10,21 +10,9 @@ import parallelai.sot.executor.model._
 import parallelai.sot.macros.SOTMacroHelper._
 import spray.json._
 
-import scala.collection.immutable.Seq
-import scala.meta._
-
-
-class SOTBuilder(resourceName: String) extends scala.annotation.StaticAnnotation {
-
+class SOTBuilder extends scala.annotation.StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
-
-    val resourcePath = this match {
-      case q"new $_(${Lit.String(resourceName)})" => getClass.getResource("/" + resourceName).getPath
-      case _ => abort("Config path parameter should be a string.")
-    }
-
-    val filePath = ConfigFactory.parseFile(new File(resourcePath)).getString("json.file.name")
-    val config = SOTMacroJsonConfig(filePath)
+    val config = SOTMacroJsonConfig(SchemaResourcePath().value)
 
     defn match {
       case q"object $name { ..$statements }" =>
@@ -35,33 +23,37 @@ class SOTBuilder(resourceName: String) extends scala.annotation.StaticAnnotation
   }
 }
 
-
 object SOTMainMacroImpl {
-
   def expand(name: Term.Name, statements: Seq[Stat], config: Config): Defn.Object = {
     val dag = config.parseDAG()
+
     val parsedSchemas = config.schemas.flatMap {
       case bq: BigQuerySchema =>
         bq.definition match {
           case bq: BigQueryDefinition => Some(bigQuerySchemaCodeGenerator(bq))
           case _ => throw new Exception("BigQuery does not support this definition")
         }
+
       case ps: AvroSchema =>
         ps.definition match {
           case av: AvroDefinition => Some(avroSchemaCodeGenerator(av))
           case _ => throw new Exception("Avro does not support this definition")
         }
+
       case ps: ProtobufSchema =>
         ps.definition match {
           case av: ProtobufDefinition => Some(protoSchemaCodeGenerator(av))
           case _ => throw new Exception("Protobuf does not support this definition")
         }
+
       case ds: DatastoreSchema =>
         ds.definition match {
           case dsd: DatastoreDefinition => Some(datastoreSchemaCodeGeneration(dsd))
           case _ => throw new Exception("Datastore does not support this definition")
         }
-      case _ => throw new Exception("Unsupported Schema Type")
+
+      case _ =>
+        throw new Exception("Unsupported Schema Type")
     }.flatten
 
     val definitionsSchemasTypes = schemaTypeValDecl(config, dag)
@@ -76,21 +68,20 @@ object SOTMainMacroImpl {
 
     val syn = parsedSchemas ++ definitionsSchemasTypes ++ transformations ++ statements
 
-    val x =
+    val code =
       q"""object $name {
-         ..$syn
-         }"""
-    println(x)
-    x
+        ..$syn
+      }"""
+
+    println(code)
+    code
   }
 
   /**
     * Generates the code for the all the operations
     */
-
   def transformationsCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Def] = {
-
-    //there should be only one source
+    // There should be only one source
     val sourceSchema = getSource(config)._1
     val sourceDefName = sourceSchema.get.definition
     val sourceTypeName = sourceDefName.name.parse[Type].get
@@ -107,18 +98,19 @@ object SOTMainMacroImpl {
 
       Seq(
         q"""
-         implicit def genericTransformation:Transformer[$sourceTypeName, $sinkTypeName, Nothing] = new Transformer[$sourceTypeName, $sinkTypeName, Nothing] {
-           import shapeless.record._
+          implicit def genericTransformation:Transformer[$sourceTypeName, $sinkTypeName, Nothing] = new Transformer[$sourceTypeName, $sinkTypeName, Nothing] {
+            import shapeless.record._
 
-           type Out = (Option[Nothing], SCollection[$sinkTypeName])
-           def transform(rowIn: SCollection[$sourceTypeName]): Out = {
-                   val converter = Row.to[$sinkTypeName]
-                   val in = rowIn.map(r => Row(r))
-                   $defTransformations
-                   (None, trans.map(r => converter.from(r.hl)))
-           }
-         }
-       """)
+            type Out = (Option[Nothing], SCollection[$sinkTypeName])
+
+            def transform(rowIn: SCollection[$sourceTypeName]): Out = {
+              val converter = Row.to[$sinkTypeName]
+              val in = rowIn.map(r => Row(r))
+              $defTransformations
+              (None, trans.map(r => converter.from(r.hl)))
+            }
+          }
+        """)
     } else {
       val transformations = geTransformations(config, dag)
 
@@ -126,23 +118,27 @@ object SOTMainMacroImpl {
 
       Seq(
         q"""
-         implicit def genericTransformation:Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] = new Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] {
-           import shapeless.record._
-           import parallelai.sot.engine.io.bigquery._
-           type Out = (Option[com.google.api.services.bigquery.model.TableSchema], SCollection[com.google.api.services.bigquery.model.TableRow])
-           def transform(rowIn: SCollection[$sourceTypeName]): Out = {
-                   def getSchema[A <: HList](a: SCollection[Row[A]])(implicit hListSchemaProvider: HListSchemaProvider[A]) = BigQuerySchemaProvider[A].getSchema
-                   val in = rowIn.map(r => Row(r))
-                   $defTransformations
-                   (Some(getSchema(trans)), trans.map(m => m.hl.toTableRow))
-           }
-         }
-       """)
+          implicit def genericTransformation:Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] =
+            new Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] {
+              import shapeless.record._
+              import parallelai.sot.engine.io.bigquery._
+
+              type Out = (Option[com.google.api.services.bigquery.model.TableSchema], SCollection[com.google.api.services.bigquery.model.TableRow])
+
+              def transform(rowIn: SCollection[$sourceTypeName]): Out = {
+                def getSchema[A <: HList](a: SCollection[Row[A]])(implicit hListSchemaProvider: HListSchemaProvider[A]) = BigQuerySchemaProvider[A].getSchema
+                val in = rowIn.map(r => Row(r))
+                $defTransformations
+                (Some(getSchema(trans)), trans.map(m => m.hl.toTableRow))
+              }
+            }
+        """)
     }
   }
 
   private def geTransformations(config: Config, dag: Topology[String, DAGMapping]): Term = {
     val sourceOperationName = dag.getSourceVertices().head
+
     val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
       case s: SourceOp => s
       case _ => throw new Exception("Unsupported source operation")
@@ -161,9 +157,10 @@ object SOTMainMacroImpl {
 
     val block =
       q"""
-           `@BigQueryType`.fromSchema($query)
-           class $className
-         """
+        `@BigQueryType`.fromSchema($query)
+        class $className
+      """
+
     Term.Block.unapply(block).get
   }
 
@@ -171,11 +168,14 @@ object SOTMainMacroImpl {
     val listSchema = definition.fields.map { sc =>
       s"${sc.name}: ${sc.`type`}".parse[Term.Param].get
     }
+
     val name = Type.Name(definition.name)
+
     val block =
       q"""
         case class $name ( ..$listSchema) extends HasDatastoreAnnotation
-        """
+      """
+
     Seq(block)
   }
 
@@ -186,28 +186,28 @@ object SOTMainMacroImpl {
 
     val block =
       q"""
-           `@AvroType`.fromSchema($query)
-           class $className
-         """
+        `@AvroType`.fromSchema($query)
+        class $className
+      """
+
     Term.Block.unapply(block).get
   }
 
   def protoSchemaCodeGenerator(definition: ProtobufDefinition): Seq[Stat] = {
     val generatedCode = ProtoPBCCodeGen.executeAll(definition.schemaBase64)
     val stats = generatedCode.parse[Source].get.stats
+
     stats.head match {
       case q"package $name  {..$statements}" =>
         Seq(
-          q"""
-           object gen { ..$statements}
-         """,
+          q"""object gen { ..$statements}""",
           q"import SOTBuilder.gen._")
       case _ =>
         abort("@main must annotate an object.")
     }
   }
 
-  def schemaTypeValDecl(config: Config, dag: Topology[String, DAGMapping]) = {
+  def schemaTypeValDecl(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Val] = {
     val (sourceSchema, sourceTap) = getSource(config)
     val (sinkSchema, sinkTap) = getSink(config)
 
@@ -219,15 +219,15 @@ object SOTMainMacroImpl {
         Type.Name(getSchemaAnnotation(sinkSchema)),
         Type.Name(getSchemaName(sinkSchema)),
         Type.Name(getTapType(sinkTap))))
+
     val schemaMapName = Pat.Var.Term(Term.Name("inOutSchemaHList"))
-    Seq(q" val ${schemaMapName} = ${configApply}")
+    Seq(q"val $schemaMapName = $configApply")
   }
 
-  def buildSchemaType(definitionName: String, annotation: String): Term.ApplyInfix = {
+  def buildSchemaType(definitionName: String, annotation: String): Term.ApplyInfix =
     q"${Lit.String(definitionName)} -> ${Term.ApplyType(Term.Name("SchemaType"), List(Type.Name(annotation), Type.Name(definitionName)))}"
-  }
 
-  def getSchemaAnnotation(schema: Option[Schema]) = schema match {
+  def getSchemaAnnotation(schema: Option[Schema]): String = schema match {
     case Some(s) if s.`type` == "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
     case Some(s) if s.`type` == "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
     case Some(s) if s.`type` == "datastore" => "parallelai.sot.engine.io.datastore.HasDatastoreAnnotation"
@@ -236,18 +236,16 @@ object SOTMainMacroImpl {
     case Some(s) => throw new Exception("Unsupported Schema Type " + s.`type`)
   }
 
-  def getSchemaName(schema: Option[Schema]) = schema match {
+  def getSchemaName(schema: Option[Schema]): String = schema match {
     case Some(s) => s.definition.name
     case None => "com.google.api.services.bigquery.model.TableRow"
   }
 
   private def getTapType(tapDefinition: TapDefinition) = tapDefinition.getClass.getCanonicalName
 
-  private def getSchemaType(config: Config, sourceOp: SourceOp) = {
+  private def getSchemaType(config: Config, sourceOp: SourceOp) =
     SOTMacroHelper.getSchema(sourceOp.schema, config.schemas).definition.name.parse[Type].get
-  }
 
-  private def getSchemaType(config: Config, sinkOp: SinkOp) = {
+  private def getSchemaType(config: Config, sinkOp: SinkOp) =
     SOTMacroHelper.getSchema(sinkOp.schema.get, config.schemas).definition.name.parse[Type].get
-  }
 }

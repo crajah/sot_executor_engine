@@ -309,4 +309,3 @@ object GenProtoNested extends _root_.com.trueaccord.scalapb.GeneratedFileObject 
 
   @deprecated("Use javaDescriptor instead. In a future version this will refer to scalaDescriptor.", "ScalaPB 0.5.47") def descriptor: com.google.protobuf.Descriptors.FileDescriptor = javaDescriptor
 }
-
