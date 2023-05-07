@@ -31,7 +31,7 @@
           "type": "string"
         },
         {
-          "name": "outcomeName",
+          "name": "outComeName",
           "type": "string"
         },
         {
@@ -47,15 +47,15 @@
           "type": "string"
         },
         {
-          "name": "id",
+          "name": "stateBetsId",
           "type": "string"
         },
         {
-          "name": "currencyRef",
+          "name": "currency",
           "type": "string"
         },
         {
-          "name": "amount",
+          "name": "stake",
           "type": "string"
         },
         {
@@ -106,19 +106,19 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => {val winnings = Col('state) ->>> (Col('bets) ->>> (Col('payout) ->>> Col('winnings)));val customerRef = Col('state) ->>> (Col('bets) ->>> Col('customerRef));val outComeName = Col('supportingState) ->>> (Col('outcome) ->>> Col('outcomeName));val marketName = Col('supportingState) ->>> (Col('outcome) ->>> Col('marketName));val eventName = Col('supportingState) ->>> (Col('outcome) ->>> Col('eventName));val catRef = Col('supportingState) ->>>  (Col('outcome) ->>> Col('categoryRef));val stateBetsId = Col('state) ->>> (Col('bets) ->>> Col('id));val currency = Col('state) ->>> (Col('bets) ->>> (Col('stake) ->>> Col('currencyRef)));val stake = Col('state) ->>> (Col('bets) ->>> (Col('stake) ->>> Col('amount)));m.project(Projector(customerRef, winnings, outComeName, marketName, eventName, catRef, stateBetsId, currency, stake))}"
+      "func": "m => {val winnings = Col('state) ->: Col('bets) ->: Col('payout) ->: Col('winnings);val customerRef = Col('state) ->: Col('bets) ->: Col('customerRef);val outComeName = Col('supportingState) ->: Col('outcome) ->: Col('outcomeName) ** Col('outComeName);val marketName = Col('supportingState) ->: Col('outcome) ->: Col('marketName);val eventName = Col('supportingState) ->: Col('outcome) ->: Col('eventName);val catRef = Col('supportingState) ->:  Col('outcome) ->: Col('categoryRef);val stateBetsId = Col('state) ->: Col('bets) ->: Col('id) ** Col('stateBetsId);val currency = Col('state) ->: Col('bets) ->: Col('stake) ->: Col('currencyRef) ** Col('currency);val stake = Col('state) ->: Col('bets) ->: Col('stake) ->: Col('amount) ** Col('stake);m.project(projector(customerRef, winnings, outComeName, marketName, eventName, catRef, stateBetsId, currency, stake))}"
     },
     {
       "type": "transformation",
       "name": "filter3",
       "op": "filter",
-      "func": "m => m.get('winnings).toDouble > m.get('amount).toDouble * 1.30"
+      "func": "m => m.get('winnings).toDouble > m.get('stake).toDouble * 1.30"
     },
     {
       "type": "transformation",
       "name": "mapper2",
       "op": "map",
-      "func": "m => {val message = \"Congratulations. You won \" + m.get('winnings) + \" \" + m.get('currencyRef) + \". On a bet placed on \" + m.get('eventName) + \" for \" + m.get('outcomeName) + \" to \" + m.get('marketName) + \".\";m.append('message, message).append('ts, Helper.fmt.print(Instant.now()))}"
+      "func": "m => {val message = \"Congratulations. You won \" + m.get('winnings) + \" \" + m.get('currency) + \". On a bet placed on \" + m.get('eventName) + \" for \" + m.get('outComeName) + \" to \" + m.get('marketName) + \".\";m.append('message, message).append('ts, Helper.fmt.print(Instant.now()))}"
 
     },
     {
