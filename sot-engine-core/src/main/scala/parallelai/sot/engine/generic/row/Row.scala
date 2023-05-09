@@ -24,8 +24,8 @@ class Row[L <: HList](val hl: L) {
 
   def get(k: Witness)(implicit selector: Selector[L, k.T]): selector.Out = selector(hl)
 
-  def project[T <: HList, W <: HList](v: T)(implicit m: WitnessType.Aux[T, W], selector: SelectAll[L, W]): Row[selector.Out]  = {
-    new Row[selector.Out](selector(hl))
+  def project[T <: HList, W <: HList, Out <: HList](v: T)(implicit m: WitnessType.Aux[T, W], selector: SelectAll.Aux[L, W, Out], isKeyDuplicated: IsKeyDuplicated[Out]): Row[Out]  = {
+    new Row[selector.Out](isKeyDuplicated(selector(hl)))
   }
 
   def projectTyped[K <: HList](implicit selector: SelectAll[L, K]): Row[selector.Out] = {
