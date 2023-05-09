@@ -15,7 +15,7 @@ object IsKeyDuplicated {
 
   def apply[A <: HList](implicit isKeyDuplicated: IsKeyDuplicated[A]): IsKeyDuplicated[A] = isKeyDuplicated
 
-  implicit val hnilOptionExtractor: IsKeyDuplicated[HNil] = new IsKeyDuplicated[HNil] {
+  implicit val hnilIsDuplicated: IsKeyDuplicated[HNil] = new IsKeyDuplicated[HNil] {
     def apply(l: HNil) = l
   }
 
