@@ -2,6 +2,22 @@ import scala.language.postfixOps
 
 lazy val configResources = file("config")
 
+val assembySettings = assemblyMergeStrategy in assembly := {
+  case PathList("javax", "servlet", xs @ _*) => MergeStrategy.first
+  case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
+  case PathList(ps @ _*) if ps.last endsWith ".class" => MergeStrategy.first
+  case PathList(ps @ _*) if ps.last endsWith ".properties" => MergeStrategy.first
+  case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
+  case "application.conf" => MergeStrategy.concat
+  case "unwanted.txt" => MergeStrategy.discard
+  case "plugin.xml" => MergeStrategy.discard
+  case "parquet.thrift" => MergeStrategy.discard
+
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
+
 lazy val `sot-containers` = (project in file("./sot-containers"))
   .configs(IntegrationTest)
   .settings(
@@ -33,6 +49,7 @@ lazy val `sot-executor` = (project in file("./sot-executor"))
   .settings(
     Common.settings,
     Common.macroSettings,
+    assembySettings,
     unmanagedResourceDirectories in Compile += configResources
   )
 
@@ -45,19 +62,3 @@ lazy val `sot` = (project in file("."))
     Common.settings,
     Defaults.itSettings
   )
-
-assemblyMergeStrategy in assembly := {
-  case PathList("javax", "servlet", xs @ _*) => MergeStrategy.first
-  case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
-  case PathList(ps @ _*) if ps.last endsWith ".class" => MergeStrategy.first
-  case PathList(ps @ _*) if ps.last endsWith ".properties" => MergeStrategy.first
-  case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
-  case "application.conf" => MergeStrategy.concat
-  case "unwanted.txt" => MergeStrategy.discard
-  case "plugin.xml" => MergeStrategy.discard
-  case "parquet.thrift" => MergeStrategy.discard
-
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
-}
