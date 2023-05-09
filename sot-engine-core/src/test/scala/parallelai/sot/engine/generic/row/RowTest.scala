@@ -5,6 +5,7 @@ import shapeless._
 import shapeless.labelled.FieldType
 import shapeless.record._
 import shapeless.syntax.singleton._
+import shapeless.test.illTyped
 
 class RowTest extends WordSpec with Matchers {
 
@@ -41,6 +42,7 @@ class RowTest extends WordSpec with Matchers {
       row.get('a) should be (1)
       row.get('b) should be ("b")
       row.get('c) should be (1.0)
+      row.get('n) should be ('i ->> 1 :: HNil)
       row.get('n).get('i) should be (1)
 
     }
@@ -79,6 +81,8 @@ class RowTest extends WordSpec with Matchers {
       rowAppended.get('b) should be("b")
       rowAppended.get('c) should be(1.0)
 
+      illTyped("row.remove('z)")
+
     }
 
     "update an existing column" in {
@@ -94,6 +98,8 @@ class RowTest extends WordSpec with Matchers {
       rowUpdated.get('a) should be(2)
       rowUpdated.get('b) should be("b")
       rowUpdated.get('c) should be(1.0)
+
+      illTyped("row.update('z, 2)")
 
     }
 
@@ -111,6 +117,8 @@ class RowTest extends WordSpec with Matchers {
       rowUpdated.get('a) should be(21)
       rowUpdated.get('b) should be("b")
       rowUpdated.get('c) should be(1.0)
+
+      illTyped("row.updateWith('z)(1)")
 
     }
 
@@ -138,6 +146,8 @@ class RowTest extends WordSpec with Matchers {
       val row = Row(ncc)
 
       row.get('n).get('i) should be(1)
+
+      illTyped("row.get('n).get('k)")
 
     }
 
@@ -173,6 +183,9 @@ class RowTest extends WordSpec with Matchers {
       rowProjected.get('a) should be(1)
       rowProjected.get('n).get('i) should be(1)
 
+      illTyped("rowProjected.get('z)")
+      illTyped("rowProjected.get('n).get('j)")
+
     }
 
     "select nested fields from a row" in {
@@ -202,6 +215,8 @@ class RowTest extends WordSpec with Matchers {
       rowProjected.get('l3).get('iii) should be(32423)
       rowProjected.get('a) should be(123)
 
+      illTyped("rowProjected.get('l3).get('iii).get('xx)")
+
     }
 
     "select nested fields from a row with simplified syntax" in {
@@ -212,9 +227,9 @@ class RowTest extends WordSpec with Matchers {
 
       case class Level1Record(l2: Level2Record, i: Int)
 
-      case class NestedCaseClass(l1: Level1Record, a: Int, b: String, c: Double)
+      case class NestedCaseClass(l1: Level1Record, a: Int, b: String, c: Double, iii: String)
 
-      val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23,
+      val ncc = NestedCaseClass(a = 123, b = "bbb", c = 1.23, iii = "t",
         l1 = Level1Record(l2 = Level2Record(ii = 2233, l3 = Level3Record(iii = 32423)), i = 3333))
 
       val row = Row(ncc)
@@ -231,6 +246,11 @@ class RowTest extends WordSpec with Matchers {
       rowProjected.get('l3).get('iii) should be(32423)
       rowProjected.get('a) should be(123)
 
+      val ambiguousSelector = Witness('a) :: Witness('a) :: HNil
+      illTyped("row.project(ambiguousSelector)")
+
+      val ambiguousSelector1 = Witness('iii) :: Nested(Witness('l1), Nested(Witness('l2), Nested(Witness('l3), Witness('iii)))) :: HNil
+      illTyped("row.project(ambiguousSelector1)")
     }
 
     "select nested fields from a row with simplified syntax with overridden keywords" in {
