@@ -37,7 +37,7 @@ object HListSchemaExtractor {
 
 }
 
-trait HListSchemaProvider[A <: HList] {
+trait HListSchemaProvider[A <: HList] extends Serializable {
 
   def getSchema: Iterable[TableFieldSchema]
 

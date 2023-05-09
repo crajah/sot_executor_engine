@@ -15,8 +15,8 @@ class SOTBuilder extends scala.annotation.StaticAnnotation {
     val config = SOTMacroJsonConfig(SchemaResourcePath().value)
 
     defn match {
-      case q"object $name { ..$statements }" =>
-        SOTMainMacroImpl.expand(name, statements, config)
+      case q"object $name {object conf { ..$confStatements };  ..$statements}" =>
+        SOTMainMacroImpl.expand(name, confStatements, statements, config)
       case _ =>
         abort("@main must annotate an object.")
     }
@@ -24,7 +24,8 @@ class SOTBuilder extends scala.annotation.StaticAnnotation {
 }
 
 object SOTMainMacroImpl {
-  def expand(name: Term.Name, statements: Seq[Stat], config: Config): Defn.Object = {
+  def expand(name: Term.Name, confStatements: Seq[Stat], statements: Seq[Stat], config: Config): Defn.Object = {
+
     val dag = config.parseDAG()
 
     val parsedSchemas = config.schemas.flatMap {
@@ -66,7 +67,10 @@ object SOTMainMacroImpl {
     val sink = dag.getSinkVertices().head
     val sinkOp = SOTMacroHelper.getOp(sink, config.steps).asInstanceOf[SinkOp]
 
-    val syn = parsedSchemas ++ definitionsSchemasTypes ++ transformations ++ statements
+    val allConfStatements = confStatements ++ definitionsSchemasTypes
+    val  configObject = Seq(q"object conf { ..$allConfStatements }" )
+
+    val syn = parsedSchemas ++ configObject ++ definitionsSchemasTypes ++ transformations ++ statements
 
     val code =
       q"""object $name {
@@ -80,60 +84,21 @@ object SOTMainMacroImpl {
   /**
     * Generates the code for the all the operations
     */
-  def transformationsCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Def] = {
-    // There should be only one source
-    val sourceSchema = getSource(config)._1
-    val sourceDefName = sourceSchema.get.definition
-    val sourceTypeName = sourceDefName.name.parse[Type].get
+  def transformationsCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Class] = {
+    val transformations = geMonadTransformations(config, dag, q"init[ScioContext].flatMap(a => read(conf.source, sotUtils))")
 
-    val sinkSchema = getSink(config)._1
-
-    if (sinkSchema.isDefined) {
-      val sinkDefName = sinkSchema.get.definition
-      val sinkTypeName = sinkDefName.name.parse[Type].get
-
-      val transformations = geTransformations(config, dag)
-
-      val defTransformations = q"val trans = $transformations"
-
-      Seq(
-        q"""
-          implicit def genericTransformation:Transformer[$sourceTypeName, $sinkTypeName, Nothing] = new Transformer[$sourceTypeName, $sinkTypeName, Nothing] {
-            import shapeless.record._
-
-            type Out = (Option[Nothing], SCollection[$sinkTypeName])
-
-            def transform(rowIn: SCollection[$sourceTypeName]): Out = {
-              val converter = Row.to[$sinkTypeName]
-              val in = rowIn.map(r => Row(r))
-              $defTransformations
-              (None, trans.map(r => converter.from(r.hl)))
-            }
-          }
-        """)
-    } else {
-      val transformations = geTransformations(config, dag)
-
-      val defTransformations = q"val trans = $transformations"
-
-      Seq(
-        q"""
-          implicit def genericTransformation:Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] =
-            new Transformer[$sourceTypeName, com.google.api.services.bigquery.model.TableRow, com.google.api.services.bigquery.model.TableSchema] {
-              import shapeless.record._
-              import parallelai.sot.engine.io.bigquery._
-
-              type Out = (Option[com.google.api.services.bigquery.model.TableSchema], SCollection[com.google.api.services.bigquery.model.TableRow])
-
-              def transform(rowIn: SCollection[$sourceTypeName]): Out = {
-                def getSchema[A <: HList](a: SCollection[Row[A]])(implicit hListSchemaProvider: HListSchemaProvider[A]) = BigQuerySchemaProvider[A].getSchema
-                val in = rowIn.map(r => Row(r))
-                $defTransformations
-                (Some(getSchema(trans)), trans.map(m => m.hl.toTableRow))
-              }
-            }
-        """)
-    }
+    Seq(
+      q"""
+       class Builder extends Serializable() {
+         def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
+           val job = ${transformations}
+           .flatMap(a => writeToSinks(sinks, sotUtils))
+           job.run(sc)._1
+           val result = sc.close()
+           if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
+         }
+       }
+      """)
   }
 
   private def geTransformations(config: Config, dag: Topology[String, DAGMapping]): Term = {
@@ -148,6 +113,21 @@ object SOTMainMacroImpl {
     val ops = SOTMacroHelper.getOps(dag, config, sourceOperationName, List(sourceOpCode)).flatten
 
     SOTMacroHelper.parseExpression(ops)
+  }
+
+  private def geMonadTransformations(config: Config, dag: Topology[String, DAGMapping], q: Term): Term = {
+    val sourceOperationName = dag.getSourceVertices().head
+
+    val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
+      case s: SourceOp => s
+      case _ => throw new Exception("Unsupported source operation")
+    }
+
+    val sourceOpCode = SOTMacroHelper.parseOperation(sourceOperation, dag, config)
+    val ops = SOTMacroHelper.getOps(dag, config, sourceOperationName, List(sourceOpCode)).flatten
+
+
+    SOTMacroHelper.parseStateMonadExpression(ops, q)
   }
 
   def bigQuerySchemaCodeGenerator(definition: BigQueryDefinition): Seq[Stat] = {
@@ -209,19 +189,45 @@ object SOTMainMacroImpl {
 
   def schemaTypeValDecl(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Val] = {
     val (sourceSchema, sourceTap) = getSource(config)
-    val (sinkSchema, sinkTap) = getSink(config)
+    val sinkTaps = getSinks(config)
 
-    val configApply = Term.ApplyType(Term.Name("Runner"),
-      List(Type.Name(getTapType(sourceTap)),
+    val sourceConfigApply = typedTap(sourceSchema, sourceTap)
+
+    val sourceTapTerm = Term.Apply(sourceConfigApply, Seq(Term.Name("conf.sourceTap")))
+
+    val sinksDefs = sinkTaps.view.zipWithIndex.map({
+      case ((sinkSchema, sinkTap), i) =>
+        val sinkConfigApply = if (sinkSchema.isDefined) {
+          typedTap(sinkSchema, sinkTap)
+        } else {
+          schemalessTap(sinkSchema, sinkTap)
+        }
+        Term.Apply(sinkConfigApply, Seq(q"conf.sinkTaps(${Lit.Int(i)})._2"))
+    })
+    val sinks = sinksDefs.tail.
+      foldLeft(Term.ApplyInfix(sinksDefs.head, Term.Name("::"), List(), List(Term.Name("HNil"))))((cumul: Term.ApplyInfix, t:Term.Apply) =>  Term.ApplyInfix(t, Term.Name("::"), List(), List(cumul)))
+
+
+    val sourceTapDef = Pat.Var.Term(Term.Name("source"))
+    val sinkTapDef = Pat.Var.Term(Term.Name("sink"))
+    Seq(q"val $sourceTapDef = $sourceTapTerm",
+        q"val sinks = $sinks"
+    )
+  }
+
+  private def schemalessTap(sinkSchema: Option[Schema], sinkTap: TapDefinition) = {
+    Term.ApplyType(Term.Name("SchemalessTapDef"),
+      List(Type.Name(getTapType(sinkTap)),
         Type.Name("parallelai.sot.engine.config.gcp.SOTUtils"),
-        Type.Name(getSchemaAnnotation(sourceSchema)),
-        Type.Name(sourceSchema.get.definition.name),
-        Type.Name(getSchemaAnnotation(sinkSchema)),
-        Type.Name(getSchemaName(sinkSchema)),
-        Type.Name(getTapType(sinkTap))))
+        Type.Name(getSchemaAnnotation(sinkSchema))))
+  }
 
-    val schemaMapName = Pat.Var.Term(Term.Name("inOutSchemaHList"))
-    Seq(q"val $schemaMapName = $configApply")
+  private def typedTap(maybeSchema: Option[Schema], tap: TapDefinition) = {
+    Term.ApplyType(Term.Name("TapDef"),
+      List(Type.Name(getTapType(tap)),
+        Type.Name("parallelai.sot.engine.config.gcp.SOTUtils"),
+        Type.Name(getSchemaAnnotation(maybeSchema)),
+        Type.Name(maybeSchema.get.definition.name)))
   }
 
   def buildSchemaType(definitionName: String, annotation: String): Term.ApplyInfix =

@@ -104,6 +104,18 @@ object SOTMacroHelper {
     }
   }
 
+  def parseStateMonadExpression(ops: List[(Term, Option[Term])], q: Term = q"in"): Term = {
+    ops match {
+      case Nil => q
+      case head :: tail => {
+        head match {
+          case (name, Some(expression)) => parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${Term.Name(name.syntax)}(${expression}))")
+          case (name, _) => parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${Term.Name(name.syntax)})")
+        }
+      }
+    }
+  }
+
   def getSource(config: Config): (Option[Schema], TapDefinition) = {
     val dag = config.parseDAG()
     val sourceOperationName = dag.getSourceVertices().head
@@ -115,19 +127,21 @@ object SOTMacroHelper {
     (Some(SOTMacroHelper.getSchema(sourceOperation.schema, config.schemas)), SOTMacroHelper.getTap(sourceOperation.tap, config.taps))
   }
 
-  def getSink(config: Config): (Option[Schema], TapDefinition) = {
+  def getSinks(config: Config): List[(Option[Schema], TapDefinition)] = {
     val dag = config.parseDAG()
-    val sinkOperationName = dag.getSinkVertices().head
-    val sinkOperation = SOTMacroHelper.getOp(sinkOperationName, config.steps) match {
-      case s: SinkOp => s
-      case _ => throw new Exception("Unsupported sink operation")
-    }
+    val sinkOperationNames = dag.getSinkVertices()
+    sinkOperationNames.map(sinkOperationName => {
+      val sinkOperation = SOTMacroHelper.getOp(sinkOperationName, config.steps) match {
+        case s: SinkOp => s
+        case _ => throw new Exception("Unsupported sink operation")
+      }
 
-    val sinkSchema = sinkOperation.schema match {
-      case Some(schemaName) =>  Some(SOTMacroHelper.getSchema (schemaName, config.schemas))
-      case None => None
-    }
-    (sinkSchema, SOTMacroHelper.getTap(sinkOperation.tap, config.taps))
+      val sinkSchema = sinkOperation.schema match {
+        case Some(schemaName) => Some(SOTMacroHelper.getSchema(schemaName, config.schemas))
+        case None => None
+      }
+      (sinkSchema, SOTMacroHelper.getTap(sinkOperation.tap, config.taps))
+    }).toList
   }
 
 }

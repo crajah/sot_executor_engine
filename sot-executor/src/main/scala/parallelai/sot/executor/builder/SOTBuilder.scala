@@ -2,6 +2,7 @@ package parallelai.sot.executor.builder
 
 import java.io.{File, InputStream}
 import java.util.TimeZone
+
 import scala.meta.Lit
 import parallelai.sot.engine.config.SchemaResourcePath
 import com.spotify.scio._
@@ -31,35 +32,34 @@ import com.trueaccord.scalapb.GeneratedMessage
 import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
 import parallelai.sot.engine.serialization.avro.AvroUtils
 import parallelai.sot.engine.runner.Reader
-import parallelai.sot.engine.runner.Transformer
+//import parallelai.sot.engine.runner.Transformer
 import parallelai.sot.engine.runner.Writer
-import parallelai.sot.engine.runner.Runner
+//import parallelai.sot.engine.runner.Runner
 import parallelai.sot.engine.generic.helper.Helper
+import parallelai.sot.engine.runner.SCollectionStateMonad._
 import parallelai.sot.engine.generic.row.Row
+import scalaz.Scalaz.init
+import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 
 /**
   * To run this class with a default configuration of application.conf:
   * <pre>
-  *   sbt clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
+  * sbt clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
   * </pre>
   *
   * If there is no application.conf then compilation will fail, but you can supply your own conf as a Java option e.g. -Dconfig.resource=application-ps2ps-test.conf
   * <pre>
-  *   sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
+  * sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
   * </pre>
   * NOTE That application configurations can also be set/overridden via system and environment properties.
   */
 @SOTBuilder
 object SOTBuilder {
-  class Builder extends Serializable() {
-    def execute(jobConfig: Config, sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
-      val sourceTap = getSource(jobConfig)._2
-      val sinkTap = getSink(jobConfig)._2
-      inOutSchemaHList.exec(sc, sourceTap, sinkTap, sotUtils)
-      val result = sc.close()
 
-      if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
-    }
+  object conf {
+    val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
+    val sourceTap = getSource(jobConfig)._2
+    val sinkTaps = getSinks(jobConfig)
   }
 
   val genericBuilder = new Builder()
@@ -69,7 +69,6 @@ object SOTBuilder {
     val sotUtils = new SOTUtils(sotOptions)
     val sc = ScioContext(sotOptions)
     val builder = genericBuilder
-    val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
-    builder.execute(jobConfig, sotUtils, sc, sotArgs)
+    builder.execute(sotUtils, sc, sotArgs)
   }
 }

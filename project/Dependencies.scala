@@ -32,6 +32,8 @@ object Dependencies {
 
   val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
 
+  val scalaz = "org.scalaz" % "scalaz-core_2.11" % "7.2.16"
+
   val gcloudDatastore = "com.google.cloud" % "google-cloud-datastore" % "1.6.0"
 
   val kafka = ("org.apache.kafka" %% "kafka" % "0.10.1.1")
