@@ -1,10 +1,15 @@
 package parallelai.sot.engine.generic.row
 
+import parallelai.sot.engine.generic.row._
 import parallelai.sot.engine.generic.row.DeepRec.ToCcPartiallyApplied
 import shapeless._
 import shapeless.labelled.{FieldType, field}
 import shapeless.ops.hlist._
 import shapeless.ops.record.{Modifier, Selector, _}
+//important import: without it fields names might become incorrect in nested rows
+import shapeless.record._
+import shapeless.record.Record
+import syntax.singleton._
 
 trait Row {
 
@@ -21,6 +26,14 @@ trait Row {
   def keys(implicit keys: Keys[L]): keys.Out = keys()
 
   def get(k: Witness)(implicit selector: Selector[L, k.T]): selector.Out = selector(hl)
+
+  def project[T <: HList, W <: HList, Out <: HList](v: T)(implicit m: WitnessType.Aux[T, W], selector: SelectAll.Aux[L, W, Out], isKeyDuplicated: IsKeyDuplicated[Out]): Row[Out]  = {
+    new Row[selector.Out](isKeyDuplicated(selector(hl)))
+  }
+
+  def projectTyped[K <: HList](implicit selector: SelectAll[L, K]): Row[selector.Out] = {
+    new Row[selector.Out](selector(hl))
+  }
 
   def append[V, Out <: HList](k: Witness, v: V)(implicit updater: Updater.Aux[L, FieldType[k.T, V], Out],
                                                 lk: LacksKey[L, k.T]): Row.Aux[Out] = {
