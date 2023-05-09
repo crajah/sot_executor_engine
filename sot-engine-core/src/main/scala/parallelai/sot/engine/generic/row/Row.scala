@@ -27,12 +27,12 @@ trait Row {
 
   def get(k: Witness)(implicit selector: Selector[L, k.T]): selector.Out = selector(hl)
 
-  def project[T <: HList, W <: HList, Out <: HList](v: T)(implicit m: WitnessType.Aux[T, W], selector: SelectAll.Aux[L, W, Out], isKeyDuplicated: IsKeyDuplicated[Out]): Row[Out]  = {
-    new Row[selector.Out](isKeyDuplicated(selector(hl)))
+  def project[T <: HList, W <: HList, Out <: HList](v: T)(implicit m: WitnessType.Aux[T, W], selector: SelectAll.Aux[L, W, Out], isKeyDuplicated: IsKeyDuplicated[Out]): Row.Aux[Out]  = {
+    Row[selector.Out](isKeyDuplicated(selector(hl)))
   }
 
-  def projectTyped[K <: HList](implicit selector: SelectAll[L, K]): Row[selector.Out] = {
-    new Row[selector.Out](selector(hl))
+  def projectTyped[K <: HList](implicit selector: SelectAll[L, K]): Row.Aux[selector.Out] = {
+    Row[selector.Out](selector(hl))
   }
 
   def append[V, Out <: HList](k: Witness, v: V)(implicit updater: Updater.Aux[L, FieldType[k.T, V], Out],
