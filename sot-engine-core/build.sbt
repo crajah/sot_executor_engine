@@ -15,6 +15,7 @@ libraryDependencies ++= Seq(
   protoc,
   kafka,
   spotifyCore,
+  spotifyTensorflow,
   spotifyBigTable,
   spotifyExtra,
   avro,
@@ -30,5 +31,7 @@ libraryDependencies ++= Seq(
   scalatest % Test,
   mockito % Test,
   scalacheckShapeless % Test,
-  spotifyTest % Test
+  spotifyTest % Test,
+  spotifyCore % Test,
+  spotifyTensorflow % Test
 )
