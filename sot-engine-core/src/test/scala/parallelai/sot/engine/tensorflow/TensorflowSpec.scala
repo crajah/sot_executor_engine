@@ -32,6 +32,18 @@ private object TFJob2Inputs {
   }
 }
 
+private object TFJobLinearModel {
+  def main(argv: Array[String]): Unit = {
+    val (sc, args) = ContextAndArgs(argv)
+    sc.parallelize(1L to 10)
+      .predict(args("graphURI"), Seq("predict"))
+      {e => Map("input" -> Tensor.create(e.toFloat))}
+      {o => o.map{case (_, t) => t.floatValue()}.head}
+      .saveAsTextFile(args("output"))
+    sc.close()
+  }
+}
+
 class TensorflowSpec extends PipelineSpec {
 
   private def createHelloWorldGraph = {
@@ -89,16 +101,29 @@ class TensorflowSpec extends PipelineSpec {
 
   it should "allow to predict a linear model" in {
     val g = new Graph()
+
     val input = g.opBuilder("Placeholder", "input")
-      .setAttr("dtype", DataType.INT64).build.output(0)
-    val weight = g.opBuilder("Variable", "weight")
-      .setAttr("dtype", DataType.INT64).build.output(0)
-    g.opBuilder("Mul", "multiply").addInput(input).addInput(weight).build()
-    JobTest[TFJob.type]
+      .setAttr("dtype", DataType.FLOAT).build.output(0)
+
+    val w1 = Tensor.create(1.5f)
+    val weight = g.opBuilder("Const", "weight")
+      .setAttr("dtype", w1.dataType())
+      .setAttr("value", w1).build().output(0)
+
+    val b1 = Tensor.create(2.0f)
+    val bias = g.opBuilder("Const", "bias")
+      .setAttr("dtype", b1.dataType())
+      .setAttr("value", b1).build().output(0)
+
+    val mul = g.opBuilder("Mul", "multiply").addInput(input).addInput(weight).build().output(0)
+
+    g.opBuilder("Add", "predict").addInput(mul).addInput(bias).build()
+
+    JobTest[TFJobLinearModel.type]
       .distCache(DistCacheIO[Array[Byte]]("tf-graph.bin"), g.toGraphDef)
       .args("--graphURI=tf-graph.bin", "--output=output")
-      .output(Tex)
-
+      .output(TextIO("output"))(_ should containInAnyOrder((1 to 10).map(a => (a.toFloat * 1.5f) + 2.0f).map(_.toString)))
+      .run()
 
   }
 
