@@ -52,6 +52,7 @@ object Dependencies {
   val spotifyCore = "com.spotify" %% "scio-core" % spotifyVersion
   val spotifyBigTable = "com.spotify" %% "scio-bigtable" % spotifyVersion
   val spotifyExtra = "com.spotify" %% "scio-extra" % spotifyVersion
+  val spotifyTensorflow = "com.spotify" %% "scio-tensorflow" % spotifyVersion
   val spotifyTest = "com.spotify" %% "scio-test" % spotifyVersion
 
   val shapelessDataTypeBigQuery = "me.lyh" %% "shapeless-datatype-bigquery" % shapelessDataTypeDataVersion
