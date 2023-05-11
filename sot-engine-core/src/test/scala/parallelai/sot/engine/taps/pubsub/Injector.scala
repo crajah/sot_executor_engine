@@ -30,8 +30,8 @@ import com.spotify.scio.avro.types.AvroType
   *   user2_AsparagusPig,AsparagusPig,10,1445230923951,2015-11-02 09:09:28.224
   * </pre>
   * <p>
-  * The Injector writes either to a PubSub topic, or a file. It will use the PubSub topic if specified. It takes the following arguments:
-  * {{{ Injector project-name (topic-name | none) (filename | none) }}}
+  * The Injector writes to a PubSub topic. It will use the PubSub topic if specified. It takes the following arguments:
+  * {{{ Injector project-name topic-name (avro | proto) (true | false) }}}
   * <p>
   * To run the Injector in the mode where it publishes to PubSub,
   * you will need to authenticate locally using project-based service account credentials to avoid running over PubSub quota.
@@ -45,22 +45,14 @@ import com.spotify.scio.avro.types.AvroType
   *   ".com.google.api.client.googleapis.json.GoogleJsonResponseException: 429 Too Many Requests".
   * </pre>
   *
-  * Once you've set up your credentials, run the Injector like this":
-  * {{{ Injector <project-name> <topic-name> none }}}
-  *
-  * The pubsub topic will be created if it does not exist.
-  * <p>
-  * To run the injector in write-to-file-mode, set the topic name to "none" and specify the filename:
-  * {{{ Injector <project-name> none <filename> }}}
-  * <p>
   * To run this class with a default configuration of application.conf:
   * <pre>
-  *   sbt clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector bi-crm-poc p2pin none avro"
+  *   sbt clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector project-name topic-name (avro | proto) (true | false)"
   * </pre>
   *
   * If there is no application.conf then compilation will fail, but you can supply your own conf as a Java option e.g. -Dconfig.resource=application-ps2ps-test.conf
   * <pre>
-  *  sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector bi-crm-poc p2pin none avro"
+  *  sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector project-name topic-name (avro | proto) (true | false)"
   * </pre>
   * NOTE That application configurations can also be set/overridden via system and environment properties.
   */
@@ -361,7 +353,7 @@ object Injector {
 
   def main(args: Array[String]): Unit = {
     if (args.length < 3) {
-      println("Usage: Injector project-name topic-name (avro | proto) (true | false) (numberOfMessages)")
+      println("Usage: Injector project-name topic-name (avro | proto) (true | false)")
       System.exit(1)
     }
 
