@@ -60,9 +60,10 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
   val random: Random.type = scala.util.Random
 
   val avroT: AvroType[AvroSchema.MessageAvro] = AvroType[AvroSchema.MessageAvro]
+  val schemaStr: String = avroT.schema.toString
 
   val avroTNested: AvroType[AvroSchema.MessageAvroNested] = AvroType[AvroSchema.MessageAvroNested]
-  val schemaStr: String = avroT.schema.toString
+  val schemaStrNested: String = avroT.schema.toString
 
   private var pubsub: Pubsub = _
   private var topic: String = _
@@ -214,7 +215,11 @@ class Injector(project: String, topicName: String, serialiser: String, nested: B
     val pubsubMessages = for (i <- 0 until Math.max(1, numMessages)) yield {
       val currTime = System.currentTimeMillis()
       val message = generateEventAvro(currTime, delayInMillis)
-      val pubsubMessage = new PubsubMessage().encodeData(AvroUtils.encodeAvro(message, schemaStr))
+      val pubsubMessage = if (nested) {
+        new PubsubMessage().encodeData(AvroUtils.encodeAvro(message, schemaStrNested))
+      } else {
+        new PubsubMessage().encodeData(AvroUtils.encodeAvro(message, schemaStr))
+      }
       pubsubMessage.setAttributes(ImmutableMap.of(TIMESTAMP_ATTRIBUTE, ((currTime - delayInMillis) / 1000 * 1000).toString))
 
       if (delayInMillis != 0) {
