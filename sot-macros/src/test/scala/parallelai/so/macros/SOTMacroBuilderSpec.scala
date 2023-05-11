@@ -1,81 +1,85 @@
-//package parallelai.so.macros
-//
-//import org.scalatest.compatible.Assertion
-//import org.scalatest.{FlatSpec, Matchers}
-//import parallelai.sot.executor.model.SOTMacroConfig
-//import parallelai.sot.executor.model.SOTMacroConfig._
-//import parallelai.sot.macros.SOTMainMacroImpl
-//import spray.json.{JsArray, JsObject, JsString}
-//
-//import scala.meta.{Term, _}
-//
-//class SOTMacroBuilderSpec extends FlatSpec with Matchers {
-//
-//  "SOTMacroBuilder service" should "build pubsub to bigquery macro" in {
-//    val avroFields =
-//      JsArray(JsObject(Map(
-//        "name" -> JsString("user"),
-//        "type" -> JsString("string")
-//      )),
-//        JsObject(Map(
-//          "name" -> JsString("score"),
-//          "type" -> JsString("in")
-//        )))
-//
-//    val avroDef = AvroDefinition(`type` = "record", name = "MessageExtended", namespace = "parallelai.sot.avro", fields = avroFields)
-//    val in = AvroSchema(`type` = "avro", id =  "inschema1", version = "", definition = avroDef)
-//
-//    val bqFields = JsArray(JsObject(Map(
-//      "mode" -> JsString("REQUIRED"),
-//      "name" -> JsString("user"),
-//      "type" -> JsString("STRING")
-//    )),
-//      JsObject(Map(
-//        "mode" -> JsString("REQUIRED"),
-//        "name" -> JsString("total_score"),
-//        "type" -> JsString("INTEGER")
-//      )))
-//
-//    val bqDefinition = BigQueryDefinition(`type` = "bigquerydefinition", name = "BigQueryRow", fields = bqFields)
-//    val out = BigQuerySchema(`type` = "bigquery", id =  "outschema1", version = "", definition = bqDefinition)
-//
-//    val schemas = List(in, out)
-//
-//    val taps = List(
-//      PubSubTapDefinition(`type` = "pubsub", id = "insource", topic = "p2pin"),
-//      BigQueryTapDefinition(`type` = "bigquery", id =  "outsource", dataset = "dataset1", table = "table1")
-//    )
-//
-//    val dag = List(
-//      DAGMapping(from = "in", to = "mapper1"),
-//      DAGMapping(from = "mapper1", to = "out")
-//    )
-//
-//    val steps = List(
-//      SourceOp(`type` = "source", name = "in", schema = "inschema1", tap = "insource"),
-//      TransformationOp(`type` = "transformation", name = "mapper1", op = "map", func = "m => BigQueryRow(m, (m.name, m.count))"),
-//      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), tap = "outsource")
-//    )
-//
-//    val config = Config(name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
-//
-//    val expectedBlock =
-//      q"""
-//            `@AvroType`.fromSchema("{\"type\":\"record\",\"name\":\"MessageExtended\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"user\",\"type\":\"string\"},{\"name\":\"score\",\"type\":\"in\"}]}")
-//            class MessageExtended
-//            `@BigQueryType`.fromSchema("{\"type\":\"bigquerydefinition\",\"name\":\"BigQueryRow\",\"fields\":[{\"mode\":\"REQUIRED\",\"name\":\"user\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"total_score\",\"type\":\"INTEGER\"}]}")
-//            class BigQueryRow
-//            def transform(in: SCollection[MessageExtended]) = {
-//              in.map(m => BigQueryRow(m, (m.name, m.count)))
-//            }
-//            val inArgs = PubSubArgs(topic = "p2pin")
-//            val outArgs = BigQueryArgs(dataset = "dataset1", table = "table1")
-//            val getBuilder = new ScioBuilderPubSubToBigQuery(transform, inArgs, outArgs)
-//            val x = 1
-//       """
+package parallelai.so.macros
+
+import org.scalatest.compatible.Assertion
+import org.scalatest.{FlatSpec, Matchers}
+import parallelai.sot.executor.model.SOTMacroConfig
+import parallelai.sot.executor.model.SOTMacroConfig._
+import parallelai.sot.macros.SOTMainMacroImpl
+import spray.json.{JsArray, JsObject, JsString}
+
+import scala.meta.{Term, _}
+
+class SOTMacroBuilderSpec extends FlatSpec with Matchers {
+
+  "SOTMacroBuilder service" should "build pubsub to bigquery macro" in {
+    val avroFields =
+      JsArray(JsObject(Map(
+        "name" -> JsString("user"),
+        "type" -> JsString("string")
+      )),
+        JsObject(Map(
+          "name" -> JsString("score"),
+          "type" -> JsString("in")
+        )))
+
+    val avroDef = AvroDefinition(`type` = "record", name = "MessageExtended", namespace = "parallelai.sot.avro", fields = avroFields)
+    val in = AvroSchema(`type` = "avro", id = "inschema1", version = "", definition = avroDef)
+
+    val bqFields = JsArray(JsObject(Map(
+      "mode" -> JsString("REQUIRED"),
+      "name" -> JsString("user"),
+      "type" -> JsString("STRING")
+    )),
+      JsObject(Map(
+        "mode" -> JsString("REQUIRED"),
+        "name" -> JsString("total_score"),
+        "type" -> JsString("INTEGER")
+      )))
+
+    val bqDefinition = BigQueryDefinition(`type` = "bigquerydefinition", name = "BigQueryRow", fields = bqFields)
+    val out = BigQuerySchema(`type` = "bigquery", id = "outschema1", version = "", definition = bqDefinition)
+
+    val schemas = List(in, out)
+
+    val taps = List(
+      PubSubTapDefinition(`type` = "pubsub", id = "insource", topic = "p2pin"),
+      BigQueryTapDefinition(`type` = "bigquery", id = "outsource", dataset = "dataset1", table = "table1", None, None)
+
+    )
+
+    val dag = List(
+      DAGMapping(from = "in", to = "mapper1"),
+      DAGMapping(from = "mapper1", to = "mapper2"),
+      DAGMapping(from = "mapper2", to = "out")
+    )
+
+    val steps = List(
+      SourceOp(`type` = "source", name = "in", schema = "inschema1", tap = "insource"),
+      TransformationOp(`type` = "transformation", name = "mapper1", op = "map", func = "m => BigQueryRow(m, (m.name, m.count))"),
+      TransformationOp(`type` = "transformation", name = "mapper2", op = "map", func = "m1 => BigQueryRow(m1, (m1.name, m1.count))"),
+      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), tap = "outsource")
+    )
+
+    val config = Config(name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
+
+    val expectedBlock =
+      q"""
+            `@AvroType`.fromSchema("{\"type\":\"record\",\"name\":\"MessageExtended\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"user\",\"type\":\"string\"},{\"name\":\"score\",\"type\":\"in\"}]}")
+            class MessageExtended
+            `@BigQueryType`.fromSchema("{\"type\":\"bigquerydefinition\",\"name\":\"BigQueryRow\",\"fields\":[{\"mode\":\"REQUIRED\",\"name\":\"user\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"total_score\",\"type\":\"INTEGER\"}]}")
+            class BigQueryRow
+            def transform(in: SCollection[MessageExtended]) = {
+              in.map(m => BigQueryRow(m, (m.name, m.count)))
+            }
+            val inArgs = PubSubArgs(topic = "p2pin")
+            val outArgs = BigQueryArgs(dataset = "dataset1", table = "table1")
+            val getBuilder = new ScioBuilderPubSubToBigQuery(transform, inArgs, outArgs)
+            val x = 1
+       """
 //    assertEqualStructure(config, expectedBlock)
-//
-//  }
+
+  }
+
 //
 //  "SOTMacroBuilder service" should "build pubsub to bigtable macro" in {
 //    val avroFields =
@@ -288,19 +292,19 @@
 //    assertEqualStructure(config, expectedBlock)
 //  }
 //
-//  def assertEqualStructure(config: Config, expectedBlock: Term.Block): Assertion = {
-//    val rs = q"object Test { val x =1 }" match {
-//      case q"object $name { ..$stats }" =>
-//        SOTMainMacroImpl.expand(name, stats, config)
-//    }
-//
-//    val stats = rs.templ.stats.get
-//    val expected = Term.Block.unapply(expectedBlock).get
-//    for (i <- 1 until expected.length) {
-//      expected(i).structure should ===(stats(i).structure)
-//    }
-//    expected.structure should ===(stats.structure)
-//  }
-//
-//
-//}
+  def assertEqualStructure(config: Config, expectedBlock: Term.Block): Assertion = {
+    val rs = q"object Test { object conf { }; val x =1 }" match {
+      case q"object $name {object conf { ..$confStatements };  ..$statements}" =>
+        SOTMainMacroImpl.expand(name, confStatements, statements, config)
+    }
+
+    val stats = rs.templ.stats.get
+    val expected = Term.Block.unapply(expectedBlock).get
+    for (i <- 1 until expected.length) {
+      expected(i).structure should ===(stats(i).structure)
+    }
+    expected.structure should ===(stats.structure)
+  }
+
+
+}
