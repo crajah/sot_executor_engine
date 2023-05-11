@@ -70,7 +70,7 @@ object SOTMainMacroImpl {
     val allConfStatements = confStatements ++ definitionsSchemasTypes
     val  configObject = Seq(q"object conf { ..$allConfStatements }" )
 
-    val syn = parsedSchemas ++ configObject ++ definitionsSchemasTypes ++ transformations ++ statements
+    val syn = parsedSchemas ++ configObject  ++ transformations ++ statements
 
     val code =
       q"""object $name {
@@ -92,7 +92,7 @@ object SOTMainMacroImpl {
        class Builder extends Serializable() {
          def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
            val job = ${transformations}
-           .flatMap(a => writeToSinks(sinks, sotUtils))
+           .flatMap(a => writeToSinks(conf.sinks, sotUtils))
            job.run(sc)._1
            val result = sc.close()
            if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)

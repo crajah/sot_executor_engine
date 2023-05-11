@@ -39,6 +39,7 @@ import scalaz.Scalaz.init
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.engine.generic.row.Syntax._
 import parallelai.sot.engine.generic.row.Nested
+import shapeless.record._
 
 /**
   * To run this class with a default configuration of application.conf:
