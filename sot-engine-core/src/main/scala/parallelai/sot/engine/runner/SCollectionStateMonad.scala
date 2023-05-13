@@ -2,6 +2,7 @@ package parallelai.sot.engine.runner
 
 import com.spotify.scio.ScioContext
 import com.spotify.scio.values.SCollection
+import org.tensorflow.Tensor
 import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.io.TapDef
 import parallelai.sot.executor.model.SOTMacroConfig.TapDefinition
@@ -43,6 +44,13 @@ object SCollectionStateMonad {
 
   def map[L <: HList, Out <: HList](f: Row.Aux[L] => Row.Aux[Out]): IndexedState[SCollection[Row.Aux[L]], SCollection[Row.Aux[Out]], Unit] =
     IndexedState(sColl => (sColl.map(f), ()))
+
+  def predict[L <: HList, Out <: HList](modelBucket: String, path: String, fetchOps: Seq[String],
+                                        inFn: Row.Aux[L] => Map[String, Tensor],
+                                        outFn: (Row.Aux[L], Map[String, Tensor]) => Row.Aux[Out]): IndexedState[SCollection[Row.Aux[L]], SCollection[Row.Aux[Out]], Unit] = {
+    import com.spotify.scio.sot.tensorflow._
+    IndexedState(sColl => (sColl.predict(modelBucket, path, fetchOps){inFn}{outFn}, ()))
+  }
 
   def writeToSinks[L <: HList, S <: HList, OutT <: HList, UTILS](sinks: S, utils: UTILS)
                                                                 (implicit

@@ -8,19 +8,21 @@
       "version": "version2",
       "definition": {
         "type": "record",
-        "name": "Message",
+        "name": "Features",
         "namespace": "parallelai.sot.avro",
         "fields": [
           {
-            "name": "feature1",
-            "type": "float"
+            "name": "features",
+            "type": {
+              "type": "array",
+              "items": "float"
+            }
           },
           {
-            "name": "feature2",
-            "type": "float"
+            "name": "id",
+            "type": "string"
           }
-        ],
-        "doc": "A basic schema for storing user records"
+        ]
       }
     },
     {
@@ -32,7 +34,7 @@
         "name": "BigQueryRow",
         "fields": [
           {
-            "mode": "REQUIRED",
+            "mode": "REPEATED",
             "name": "prediction",
             "type": "FLOAT"
           }

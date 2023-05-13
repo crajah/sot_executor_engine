@@ -40,26 +40,57 @@ import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.engine.generic.row.Syntax._
 import parallelai.sot.engine.generic.row.Nested
 import shapeless.record._
+import org.tensorflow._
 
 /**
   * To run this class with a default configuration of application.conf:
   * <pre>
-  *   sbt clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
+  * sbt clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
   * </pre>
   *
   * If there is no application.conf then compilation will fail, but you can supply your own conf as a Java option e.g. -Dconfig.resource=application-ps2ps-test.conf
   * <pre>
-  *   sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
+  * sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
   * </pre>
   * NOTE That application configurations can also be set/overridden via system and environment properties.
   */
-@SOTBuilder
 object SOTBuilder {
+
+  @AvroType.fromSchema("{\"type\":\"record\",\"name\":\"Features\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"features\",\"type\":{\"type\":\"array\",\"items\":\"float\"}},{\"name\":\"id\",\"type\":\"string\"}]}")
+  class Features
+
+  @BigQueryType.fromSchema("{\"type\":\"bigquerydefinition\",\"name\":\"BigQueryRow\",\"fields\":[{\"mode\":\"REPEATED\",\"name\":\"prediction\",\"type\":\"FLOAT\"}]}")
+  class BigQueryRow
 
   object conf {
     val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
     val sourceTap = getSource(jobConfig)._2
     val sinkTaps = getSinks(jobConfig)
+    val source = TapDef[parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Features](conf.sourceTap)
+    val sinks = TapDef[parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow](conf.sinkTaps(0)._2) :: HNil
+  }
+
+  class Builder extends Serializable() {
+    def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
+      val job = init[ScioContext].flatMap(a => read(conf.source, sotUtils))
+        .flatMap(sColl => predict("lb-tf-models",
+          "inception_v1",
+          Seq("InceptionV1/Logits/Predictions/Reshape_1"),
+          { e => Map("input" -> Tensor.create(Array(e.get('features).grouped(672).map(_.toArray.grouped(3).toArray).toArray))) },
+          { (r, o) =>
+            o.map {
+              case (_, t) =>
+                val v = Array.ofDim[Float](1, 1001)
+                t.copyTo(v)
+                val res = v.apply(0).map(_.toDouble).toList
+                Row('prediction ->> res :: HNil)
+            }.head
+          }
+        )).flatMap(a => writeToSinks(conf.sinks, sotUtils))
+      job.run(sc)._1
+      val result = sc.close()
+      if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
+    }
   }
 
   val genericBuilder = new Builder()

@@ -22,7 +22,7 @@ import scala.reflect.ClassTag
 private class PredictDoFn[T, V](modelBucket: String, modelPath: String,
                                 fetchOp: Seq[String],
                                 inFn: T => Map[String, Tensor],
-                                outFn: Map[String, Tensor] => V) extends DoFn[T, V] {
+                                outFn: (T, Map[String, Tensor]) => V) extends DoFn[T, V] {
 
   @transient private var storage: Storage = _
 
@@ -30,7 +30,7 @@ private class PredictDoFn[T, V](modelBucket: String, modelPath: String,
   @transient private var g: Graph = _
   @transient private var s: Session = _
 
-  private def downloadModel(bucket: String, path: String) : String = {
+  private def downloadModel(bucket: String, path: String): String = {
     val s = storage.list(bucket, BlobListOption.prefix(path))
     val basePath = s"/tmp/tf-models/${UUID.randomUUID.toString}/"
     for (blob <- s.getValues.asScala) {
@@ -66,14 +66,16 @@ private class PredictDoFn[T, V](modelBucket: String, modelPath: String,
   def process(c: DoFn[T, V]#ProcessContext): Unit = {
     val runner = s.runner()
     import scala.collection.JavaConverters._
-    val i = inFn(c.element())
+    val e: T = c.element()
+    val i = inFn(e)
     try {
       i.foreach { case (op, t) => runner.feed(op, t) }
       fetchOp.foreach(runner.fetch)
       val outTensors = runner.run()
       try {
         import scala.collection.breakOut
-        c.output(outFn((fetchOp zip outTensors.asScala)(breakOut)))
+        val outRes: Map[String, org.tensorflow.Tensor] = (fetchOp zip outTensors.asScala) (breakOut)
+        c.output(outFn(e, outRes))
       } finally {
         log.debug("Closing down output tensors")
         outTensors.asScala.foreach(_.close())
@@ -113,20 +115,20 @@ class TensorFlowSCollectionFunctions[T: ClassTag](@transient val self: SCollecti
     * Predict/infer/forward-pass on pre-trained GraphDef.
     *
     * @param modelBucket Cloud Storage bucket that contains the tensorflow model
-    * @param path path to the folder that contains the tensorflow model
-    * @param fetchOps names of [[org.tensorflow.Operation]]s to fetch the results from
-    * @param inFn translates input elements of T to map of input-operation ->
-    *             [[org.tensorflow.Tensor Tensor]]. This method takes ownership of the
-    *             [[org.tensorflow.Tensor Tensor]]s.
-    * @param outFn translates output of prediction from map of output-operation ->
-    *              [[org.tensorflow.Tensor Tensor]], to elements of V. This method takes ownership
-    *              of the [[org.tensorflow.Tensor Tensor]]s.
+    * @param path        path to the folder that contains the tensorflow model
+    * @param fetchOps    names of [[org.tensorflow.Operation]]s to fetch the results from
+    * @param inFn        translates input elements of T to map of input-operation ->
+    *                    [[org.tensorflow.Tensor Tensor]]. This method takes ownership of the
+    *                    [[org.tensorflow.Tensor Tensor]]s.
+    * @param outFn       translates output of prediction from map of output-operation ->
+    *                    [[org.tensorflow.Tensor Tensor]], to elements of V. This method takes ownership
+    *                    of the [[org.tensorflow.Tensor Tensor]]s.
     */
   def predict[V: ClassTag](modelBucket: String,
                            path: String,
                            fetchOps: Seq[String])
                           (inFn: T => Map[String, Tensor])
-                          (outFn: Map[String, Tensor] => V): SCollection[V] = {
+                          (outFn: (T, Map[String, Tensor]) => V): SCollection[V] = {
     self.parDo(new PredictDoFn[T, V](modelBucket, path, fetchOps, inFn, outFn))
   }
 }
