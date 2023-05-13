@@ -22,6 +22,7 @@ libraryDependencies ++= Seq(
   shapelessDataTypeDatastore,
   shapelessDataTypeCore,
   shapelessDataTypeBigQuery,
+  scalaz,
   gcloudDatastore,
   gcloudStorage,
   logbackClassic,

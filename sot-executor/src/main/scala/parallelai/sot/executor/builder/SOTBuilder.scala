@@ -31,14 +31,15 @@ import com.trueaccord.scalapb.GeneratedMessage
 import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
 import parallelai.sot.engine.serialization.avro.AvroUtils
 import parallelai.sot.engine.runner.Reader
-import parallelai.sot.engine.runner.Transformer
 import parallelai.sot.engine.runner.Writer
-import parallelai.sot.engine.runner.Runner
 import parallelai.sot.engine.generic.helper.Helper
+import parallelai.sot.engine.runner.SCollectionStateMonad._
 import parallelai.sot.engine.generic.row.Row
+import scalaz.Scalaz.init
+import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.engine.generic.row.Syntax._
-
 import parallelai.sot.engine.generic.row.Nested
+import shapeless.record._
 
 /**
   * To run this class with a default configuration of application.conf:
@@ -52,58 +53,22 @@ import parallelai.sot.engine.generic.row.Nested
   * </pre>
   * NOTE That application configurations can also be set/overridden via system and environment properties.
   */
+@SOTBuilder
 object SOTBuilder {
 
-  @AvroType.fromSchema("""
-    |  {"type":"record","name":"Features","namespace":"parallelai.sot.avro","fields":[
-    |  {"name": "features", "type": {"type": "array", "items": "float"}},
-    |  {"name":"id","type":"string"}
-    |  ]}
-    """.stripMargin)
-  class Features
-  @BigQueryType.fromSchema("{\"type\":\"bigquerydefinition\",\"name\":\"BigQueryRow\",\"fields\":[{\"mode\":\"REPEATED\",\"name\":\"prediction\",\"type\":\"FLOAT\"}]}")
-  class BigQueryRow
-
-  import org.tensorflow._
-  import com.spotify.scio.sot.tensorflow._
-
-  val inOutSchemaHList = Runner[parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Features, com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation, BigQueryRow, parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition]
-  implicit def genericTransformation: Transformer[Features, BigQueryRow, Nothing] = new Transformer[Features, BigQueryRow, Nothing] {
-    import shapeless.record._
-
-    type Out = (Option[Nothing], SCollection[BigQueryRow])
-    def transform(rowIn: SCollection[Features]): Out = {
-      val converter = Row.to[BigQueryRow]
-      val in = rowIn.map(r => Row(r))
-      val trans = in.predict("lb-tf-models", "inception_v1", Seq("InceptionV1/Logits/Predictions/Reshape_1"))
-      {e => Map("input" -> Tensor.create(Array(e.get('features).grouped(672).map(_.toArray.grouped(3).toArray).toArray)))}
-      {o => o.map{
-        case (_, t) =>
-          val v = Array.ofDim[Float](1,1001)
-          t.copyTo(v)
-          val res = v.apply(0).map(_.toDouble).toList
-          new Row('prediction ->> res :: HNil)
-      }.head}
-
-      (None, trans.map(r => converter.from(r.hl)))
-    }
+  object conf {
+    val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
+    val sourceTap = getSource(jobConfig)._2
+    val sinkTaps = getSinks(jobConfig)
   }
-  class Builder extends Serializable() {
-    def execute(jobConfig: Config, sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
-      val sourceTap = getSource(jobConfig)._2
-      val sinkTap = getSink(jobConfig)._2
-      inOutSchemaHList.exec(sc, sourceTap, sinkTap, sotUtils)
-      val result = sc.close()
-      if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
-    }
-  }
+
   val genericBuilder = new Builder()
+
   def main(cmdArg: Array[String]): Unit = {
     val (sotOptions, sotArgs) = ScioContext.parseArguments[SOTOptions](cmdArg)
     val sotUtils = new SOTUtils(sotOptions)
     val sc = ScioContext(sotOptions)
     val builder = genericBuilder
-    val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
-    builder.execute(jobConfig, sotUtils, sc, sotArgs)
+    builder.execute(sotUtils, sc, sotArgs)
   }
 }
