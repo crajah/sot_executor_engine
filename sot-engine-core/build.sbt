@@ -15,14 +15,15 @@ libraryDependencies ++= Seq(
   protoc,
   kafka,
   spotifyCore,
-  spotifyTensorflow,
   spotifyBigTable,
   spotifyExtra,
+  tensorflow,
   avro,
   shapelessDataTypeDatastore,
   shapelessDataTypeCore,
   shapelessDataTypeBigQuery,
   gcloudDatastore,
+  gcloudStorage,
   logbackClassic,
   scalacheck
 )

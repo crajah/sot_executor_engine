@@ -15,7 +15,6 @@ libraryDependencies ++= Seq(
   spotifyCore,
   spotifyBigTable,
   spotifyExtra,
-  spotifyTensorflow,
   avro,
   shapelessDataTypeDatastore,
   shapelessDataTypeCore,
