@@ -115,7 +115,7 @@ class TensorFlowSCollectionFunctions[T: ClassTag](@transient val self: SCollecti
     * Predict/infer/forward-pass on pre-trained GraphDef.
     *
     * @param modelBucket Cloud Storage bucket that contains the tensorflow model
-    * @param path        path to the folder that contains the tensorflow model
+    * @param modelPath        path to the folder that contains the tensorflow model
     * @param fetchOps    names of [[org.tensorflow.Operation]]s to fetch the results from
     * @param inFn        translates input elements of T to map of input-operation ->
     *                    [[org.tensorflow.Tensor Tensor]]. This method takes ownership of the
@@ -125,11 +125,11 @@ class TensorFlowSCollectionFunctions[T: ClassTag](@transient val self: SCollecti
     *                    of the [[org.tensorflow.Tensor Tensor]]s.
     */
   def predict[V: ClassTag](modelBucket: String,
-                           path: String,
+                           modelPath: String,
                            fetchOps: Seq[String])
                           (inFn: T => Map[String, Tensor])
                           (outFn: (T, Map[String, Tensor]) => V): SCollection[V] = {
-    self.parDo(new PredictDoFn[T, V](modelBucket, path, fetchOps, inFn, outFn))
+    self.parDo(new PredictDoFn[T, V](modelBucket, modelPath, fetchOps, inFn, outFn))
   }
 }
 

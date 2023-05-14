@@ -52,7 +52,9 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "tfprediction"
+      "table": "tfprediction",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
     }
   ],
   "steps": [
@@ -63,22 +65,13 @@
       "source": "pubsubsource1"
     },
     {
-      "type": "transformation",
-      "name": "filter",
-      "op": "filter",
-      "func": "m => m.get('score) > 2"
-    },
-    {
-      "type": "transformation",
-      "name": "mapper1",
-      "op": "map",
-      "func": "m => m.append('score2, m.get('score) * 0.23)"
-    },
-    {
-      "type": "transformation",
-      "name": "mapper2",
-      "op": "map",
-      "func": "m => m.append('processingTime, Helper.fmt.print(Instant.now()))"
+      "type": "tfpredict",
+      "name": "predict1",
+      "modelBucket": "lb-tf-models",
+      "modelPath": "inception_v1",
+      "fetchOps": ["InceptionV1/Logits/Predictions/Reshape_1"],
+      "inFn": "r => Map(\"input\" -> Tensor.create(Array(r.get('features).grouped(672).map(_.toArray.grouped(3).toArray).toArray)))",
+      "outFn": "(r, o) => o.map { case (_, t) => val v = Array.ofDim[Float](1, 1001);t.copyTo(v);val res = v.apply(0).map(_.toDouble).toList;Row('prediction ->> res :: HNil)}.head"
     },
     {
       "type": "sink",
@@ -90,18 +83,10 @@
   "dag": [
     {
       "from": "in",
-      "to": "filter"
+      "to": "predict1"
     },
     {
-      "from": "mapper1",
-      "to": "mapper2"
-    },
-    {
-      "from": "filter",
-      "to": "mapper1"
-    },
-    {
-      "from": "mapper2",
+      "from": "predict1",
       "to": "out"
     }
   ]

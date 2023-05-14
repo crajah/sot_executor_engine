@@ -85,7 +85,7 @@ object SOTMainMacroImpl {
     * Generates the code for the all the operations
     */
   def transformationsCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Class] = {
-    val transformations = geMonadTransformations(config, dag, q"init[ScioContext].flatMap(a => read(conf.source, sotUtils))")
+    val transformations = getMonadTransformations(config, dag, q"init[ScioContext].flatMap(a => read(conf.source, sotUtils))")
 
     Seq(
       q"""
@@ -101,21 +101,7 @@ object SOTMainMacroImpl {
       """)
   }
 
-  private def geTransformations(config: Config, dag: Topology[String, DAGMapping]): Term = {
-    val sourceOperationName = dag.getSourceVertices().head
-
-    val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
-      case s: SourceOp => s
-      case _ => throw new Exception("Unsupported source operation")
-    }
-
-    val sourceOpCode = SOTMacroHelper.parseOperation(sourceOperation, dag, config)
-    val ops = SOTMacroHelper.getOps(dag, config, sourceOperationName, List(sourceOpCode)).flatten
-
-    SOTMacroHelper.parseExpression(ops)
-  }
-
-  private def geMonadTransformations(config: Config, dag: Topology[String, DAGMapping], q: Term): Term = {
+  private def getMonadTransformations(config: Config, dag: Topology[String, DAGMapping], q: Term): Term = {
     val sourceOperationName = dag.getSourceVertices().head
 
     val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
