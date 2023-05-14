@@ -76,16 +76,8 @@ object SOTBuilder {
         .flatMap(sColl => predict("lb-tf-models",
           "inception_v1",
           Seq("InceptionV1/Logits/Predictions/Reshape_1"),
-          { e => Map("input" -> Tensor.create(Array(e.get('features).grouped(672).map(_.toArray.grouped(3).toArray).toArray))) },
-          { (r, o) =>
-            o.map {
-              case (_, t) =>
-                val v = Array.ofDim[Float](1, 1001)
-                t.copyTo(v)
-                val res = v.apply(0).map(_.toDouble).toList
-                Row('prediction ->> res :: HNil)
-            }.head
-          }
+          {e => Map("input" -> Tensor.create(Array(e.get('features).grouped(672).map(_.toArray.grouped(3).toArray).toArray)))},
+          {(r, o) =>o.map { case (_, t) => val v = Array.ofDim[Float](1, 1001);t.copyTo(v);val res = v.apply(0).map(_.toDouble).toList;Row('prediction ->> res :: HNil)}.head}
         )).flatMap(a => writeToSinks(conf.sinks, sotUtils))
       job.run(sc)._1
       val result = sc.close()
