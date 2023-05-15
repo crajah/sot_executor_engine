@@ -34,6 +34,5 @@ libraryDependencies ++= Seq(
   mockito % Test,
   scalacheckShapeless % Test,
   spotifyTest % Test,
-  spotifyCore % Test,
-  spotifyTensorflow % Test
+  spotifyCore % Test
 )

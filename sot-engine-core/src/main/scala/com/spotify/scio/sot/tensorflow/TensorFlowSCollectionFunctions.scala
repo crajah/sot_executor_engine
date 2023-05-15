@@ -5,9 +5,6 @@ import java.nio.file.Files
 import java.util.UUID
 import javax.annotation.Nullable
 
-import com.google.cloud.ReadChannel
-import com.google.cloud.storage.Storage.BlobListOption
-import com.google.cloud.storage.{Blob, Storage, StorageOptions}
 import com.spotify.scio.values.{DistCache, SCollection}
 import org.apache.beam.sdk.transforms.DoFn
 import org.apache.beam.sdk.transforms.DoFn.{ProcessElement, Setup, Teardown}
@@ -16,50 +13,23 @@ import org.slf4j.LoggerFactory
 import org.tensorflow._
 
 import scala.collection.JavaConverters._
-
 import scala.reflect.ClassTag
 
-private class PredictDoFn[T, V](modelBucket: String, modelPath: String,
-                                fetchOp: Seq[String],
+private class PredictDoFn[T, V](fetchOp: Seq[String],
                                 inFn: T => Map[String, Tensor],
-                                outFn: (T, Map[String, Tensor]) => V) extends DoFn[T, V] {
-
-  @transient private var storage: Storage = _
+                                outFn: (T, Map[String, Tensor]) => V,
+                                modelLoader: => SavedModelBundleSOT
+                               ) extends DoFn[T, V] {
 
   @transient private lazy val log = LoggerFactory.getLogger(this.getClass)
   @transient private var g: Graph = _
   @transient private var s: Session = _
 
-  private def downloadModel(bucket: String, path: String): String = {
-    val s = storage.list(bucket, BlobListOption.prefix(path))
-    val basePath = s"/tmp/tf-models/${UUID.randomUUID.toString}/"
-    for (blob <- s.getValues.asScala) {
-      if (blob.getSize > 0) {
-        val file = new File(s"${basePath}${blob.getName}")
-        file.getParentFile.mkdirs()
-        blob.downloadTo(file.toPath)
-      }
-    }
-    s"${basePath}${path}"
-  }
-
   @Setup
   def setup(): Unit = {
-    log.info("Setting up Storage")
-    storage = StorageOptions.getDefaultInstance.getService
-    log.info("Downloading model")
-    val path = downloadModel(modelBucket, modelPath)
-    log.info("Loading TensorFlow graph")
-    val loadStart = System.currentTimeMillis
-    try {
-      val bundle = SavedModelBundle.load(path, "serve")
-      g = bundle.graph()
-      s = bundle.session()
-      log.info(s"TensorFlow graph loaded in ${System.currentTimeMillis - loadStart} ms")
-    } catch {
-      case e: Exception =>
-        throw new IOException("Not a valid TensorFlow Graph serialization: " + e.getMessage)
-    }
+    val bundle = modelLoader
+    g = bundle.graph
+    s = bundle.session
   }
 
   @ProcessElement
@@ -115,7 +85,7 @@ class TensorFlowSCollectionFunctions[T: ClassTag](@transient val self: SCollecti
     * Predict/infer/forward-pass on pre-trained GraphDef.
     *
     * @param modelBucket Cloud Storage bucket that contains the tensorflow model
-    * @param modelPath        path to the folder that contains the tensorflow model
+    * @param modelPath   path to the folder that contains the tensorflow model
     * @param fetchOps    names of [[org.tensorflow.Operation]]s to fetch the results from
     * @param inFn        translates input elements of T to map of input-operation ->
     *                    [[org.tensorflow.Tensor Tensor]]. This method takes ownership of the
@@ -129,7 +99,19 @@ class TensorFlowSCollectionFunctions[T: ClassTag](@transient val self: SCollecti
                            fetchOps: Seq[String])
                           (inFn: T => Map[String, Tensor])
                           (outFn: (T, Map[String, Tensor]) => V): SCollection[V] = {
-    self.parDo(new PredictDoFn[T, V](modelBucket, modelPath, fetchOps, inFn, outFn))
+    lazy val modelLoader = TensorFlowUtils.tfModelLoader(modelBucket, modelPath)
+    self.parDo(new PredictDoFn[T, V](fetchOps, inFn, outFn, modelLoader))
   }
+
+  def predictFromBundle[V: ClassTag](graphUri: String,
+                                     fetchOps: Seq[String])
+                                    (inFn: T => Map[String, Tensor])
+                                    (outFn: (T, Map[String, Tensor]) => V): SCollection[V] = {
+    val graphBytes = self.context.distCache(graphUri)(f => Files.readAllBytes(f.toPath))
+    lazy val modelLoader = TensorFlowUtils.tfModelLoaderFromGraph(graphBytes())
+    self.parDo(new PredictDoFn[T, V](fetchOps, inFn, outFn, modelLoader))
+  }
+
+
 }
 

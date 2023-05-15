@@ -1,11 +1,11 @@
-package parallelai.sot.engine.tensorflow
+package com.spotify.scio.sot.tensorflow
 
 import java.nio.file.Files
 
+import com.spotify.scio.sot.tensorflow._
 import com.spotify.scio.ContextAndArgs
 import com.spotify.scio.testing.{DistCacheIO, PipelineSpec, TextIO}
 import org.tensorflow._
-import com.spotify.scio.tensorflow._
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 
@@ -13,9 +13,9 @@ private object TFJob {
   def main(argv: Array[String]): Unit = {
     val (sc, args) = ContextAndArgs(argv)
     sc.parallelize(1L to 10)
-      .predict(args("graphURI"), Seq("multiply"))
-      {e => Map("input" -> Tensor.create(e))}
-      {o => o.map{case (_, t) => t.longValue()}.head}
+      .predictFromBundle(args("graphURI"), Seq("multiply"))
+      {r => Map("input" -> Tensor.create(r))}
+      {(r, o) => o.map{case (_, t) => t.longValue()}.head}
       .saveAsTextFile(args("output"))
     sc.close()
   }
@@ -25,10 +25,10 @@ private object TFJob2Inputs {
   def main(argv: Array[String]): Unit = {
     val (sc, args) = ContextAndArgs(argv)
     sc.parallelize(1L to 10)
-      .predict(args("graphURI"), Seq("multiply"))
-      {e => Map("input" -> Tensor.create(e),
+      .predictFromBundle(args("graphURI"), Seq("multiply"))
+      {r => Map("input" -> Tensor.create(r),
         "input2" -> Tensor.create(3L))}
-      {o => o.map{case (_, t) => t.longValue()}.head}
+      {(r, o) => o.map{case (_, t) => t.longValue()}.head}
       .saveAsTextFile(args("output"))
     sc.close()
   }
@@ -38,9 +38,9 @@ private object TFJobLinearModel {
   def main(argv: Array[String]): Unit = {
     val (sc, args) = ContextAndArgs(argv)
     sc.parallelize(List(Array(Array(1.0f, 2.0f)), Array(Array(2.0f, 3.0f))))
-      .predict(args("graphURI"), Seq("predict"))
-      {e => Map("input" -> Tensor.create(e))}
-      {o => o.map{
+      .predictFromBundle(args("graphURI"), Seq("predict"))
+      {r => Map("input" -> Tensor.create(r))}
+      {(r, o) => o.map{
         case (_, t) =>
           val v = Array.ofDim[Float](1,1)
           t.copyTo(v)
