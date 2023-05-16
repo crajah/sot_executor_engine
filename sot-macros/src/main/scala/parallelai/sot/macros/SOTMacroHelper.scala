@@ -109,7 +109,32 @@ object SOTMacroHelper {
       case Nil => q
       case head :: tail => {
         head match {
-          case (name, Some(expression)) => parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${Term.Name(name.syntax)}(${expression}))")
+          case (name, Some(expression)) => {
+
+            expression match {
+              case q"(..$exprsnel)" => {
+                if (exprsnel.length == 2) {
+                  val expr1 = exprsnel(0) match {
+                    case q"(..$exprsnel1)" => exprsnel1
+                    case _=> List(exprsnel(0))
+                  }
+
+                  val expr2 = exprsnel(1) match {
+                    case q"(..$exprsnel1)" => exprsnel1
+                    case _=> List(exprsnel(1))
+                  }
+                  parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${Term.Apply(Term.Apply(name, expr1), expr2)})")
+
+                }
+                else {
+                  parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${Term.Apply(name, exprsnel)})")
+                }
+              }
+              case _ => parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${Term.Name(name.syntax)}(${expression}))")
+            }
+
+
+          }
           case (name, _) => parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${Term.Name(name.syntax)})")
         }
       }
