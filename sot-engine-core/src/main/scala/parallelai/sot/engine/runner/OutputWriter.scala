@@ -130,8 +130,7 @@ object writer2 extends Poly2 {
    h: IsHCons[OutR],
    ev: OutT =:= OutR,
    writer: Writer[TAP, UTIL, ANNO, Out]
-  )
-  = at[(SCollection[Row.Aux[OutT]], UTIL), TapDef[TAP, UTIL, ANNO, Out]] {
+  ) = at[(SCollection[Row.Aux[OutT]], UTIL), TapDef[TAP, UTIL, ANNO, Out]] {
     case ((sColl, utils), tap) =>
       writer.write(sColl.map(r => Row[OutR](ev(r.hl))), tap.tapDefinition, utils)
       (sColl, utils)
@@ -144,8 +143,7 @@ object writer2 extends Poly2 {
    h: IsHCons[OutR],
    ev: OutT =:= OutR,
    writer: DatastoreWriter[TAP, UTIL, ANNO, Out]
-  )
-  = at[(SCollection[Row.Aux[OutT]], UTIL), TapDef[TAP, UTIL, ANNO, Out]] {
+  ) = at[(SCollection[Row.Aux[OutT]], UTIL), TapDef[TAP, UTIL, ANNO, Out]] {
     case ((sColl, utils), tap) =>
       writer.write(sColl.map(r => Row[OutR](ev(r.hl))), tap.tapDefinition, utils)
       (sColl, utils)
