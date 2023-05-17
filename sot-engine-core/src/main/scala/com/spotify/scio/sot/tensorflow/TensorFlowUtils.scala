@@ -6,6 +6,7 @@ import java.util.UUID
 import com.google.cloud.storage.{Blob, Storage, StorageOptions}
 import com.google.cloud.storage.Storage.BlobListOption
 import org.slf4j.LoggerFactory
+import org.tensorflow.framework.ConfigProto
 import org.tensorflow.{Graph, SavedModelBundle, Session}
 
 import scala.collection.JavaConverters._
@@ -34,7 +35,7 @@ object TensorFlowUtils {
     @transient val log = LoggerFactory.getLogger(this.getClass)
 
     val path = downloadModel(modelBucket, modelPath)
-    log.info("Loading TensorFlow graph")
+    log.info(s"Loading TensorFlow graph from $path")
     val loadStart = System.currentTimeMillis
     try {
       val bundle = SavedModelBundle.load(path, "serve")
@@ -51,7 +52,9 @@ object TensorFlowUtils {
 
     log.info("Loading TensorFlow graph")
     val g = new Graph()
-    val s = new Session(g)
+    val builder = ConfigProto.newBuilder()
+    builder.setLogDevicePlacement(true)
+    val s = new Session(g, builder.build().toByteArray)
     val loadStart = System.currentTimeMillis
     try {
       g.importGraphDef(graphBytes)
