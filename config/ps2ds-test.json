@@ -45,12 +45,12 @@
     {
       "type": "pubsub",
       "id": "pubsubsource1",
-      "topic": "p2pin"
+      "topic": "p2pds"
     },
     {
       "type": "datastore",
       "id": "datastoresource1",
-      "kind": "kind1"
+      "kind": "dataflowwrite"
     }
   ],
   "steps": [

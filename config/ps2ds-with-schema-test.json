@@ -49,6 +49,10 @@
         "name": "OutSchema",
         "fields": [
           {
+            "name": "id",
+            "type": "Int"
+          },
+          {
             "name": "user",
             "type": "String"
           },
@@ -68,12 +72,12 @@
     {
       "type": "pubsub",
       "id": "pubsubsource1",
-      "topic": "p2pin"
+      "topic": "p2pds"
     },
     {
       "type": "datastore",
       "id": "datastoresource1",
-      "kind": "kind1"
+      "kind": "dataflowwrite"
     }
   ],
   "steps": [
@@ -87,7 +91,7 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => m.project(projector(Col('user), Col('score) ** Col('score1), Col('score) ** Col('score2)))"
+      "func": "m => {val updated = m.append('id, Helper.random.nextInt());updated.project(projector(Col('id), Col('user), Col('score) ** Col('score1), Col('score) ** Col('score2)))}"
     },
     {
       "type": "transformation",

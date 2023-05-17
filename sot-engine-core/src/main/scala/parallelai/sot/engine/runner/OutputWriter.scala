@@ -137,7 +137,7 @@ object writer2 extends Poly2 {
       (sColl, utils)
   }
 
-  implicit def datastorewriter0[TAP <: DatastoreTapDefinition, UTIL, ANNO <: HasDatastoreAnnotation, Out, OutR <: HList, OutT <: HList]
+  implicit def datastoreWriter[TAP <: DatastoreTapDefinition, UTIL, ANNO <: HasDatastoreAnnotation, Out, OutR <: HList, OutT <: HList]
   (implicit
    gen2: LabelledGeneric.Aux[Out, OutR],
    e: ToEntity[OutR],
