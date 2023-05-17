@@ -19,6 +19,7 @@ import syntax.singleton._
 import com.google.datastore.v1.{GqlQuery, Query}
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
+import parallelai.sot.engine.io.datastore.HasDatastoreAnnotation
 import com.spotify.scio.streaming.ACCUMULATING_FIRED_PANES
 import com.typesafe.config.ConfigFactory
 import org.apache.beam.sdk.extensions.gcp.options.GcpOptions

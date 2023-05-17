@@ -10,14 +10,24 @@ import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.engine.io.bigquery.{BigQuerySchemaProvider, HListSchemaProvider, ToTableRow}
-import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, PubSubTapDefinition, TapDefinition}
+import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, DatastoreTapDefinition, PubSubTapDefinition, TapDefinition}
 import parallelai.sot.engine.runner.scio.PaiScioContext._
 import shapeless.{HList, LabelledGeneric, Poly2}
 import parallelai.sot.engine.io.bigquery._
+import parallelai.sot.engine.io.datastore.{HasDatastoreAnnotation, ToEntity}
+import shapeless.ops.hlist.IsHCons
 
-trait Writer[TAP, UTIL, ANNO, Out]  extends Serializable {
+trait Writer[TAP, UTIL, ANNO, Out] extends Serializable {
   def write[TOUT <: HList](sc: SCollection[Row.Aux[TOUT]], tap: TAP, utils: UTIL)(implicit
-                                                                                  gen: LabelledGeneric.Aux[Out, TOUT]): Unit
+                                                                                  gen: LabelledGeneric.Aux[Out, TOUT],
+                                                                                  h: IsHCons[TOUT]): Unit
+}
+
+trait DatastoreWriter[TAP, UTIL, ANNO, Out] extends Serializable {
+  def write[TOUT <: HList](sc: SCollection[Row.Aux[TOUT]], tap: TAP, utils: UTIL)(implicit
+                                                                                  gen: LabelledGeneric.Aux[Out, TOUT],
+                                                                                  e: ToEntity[TOUT],
+                                                                                  h: IsHCons[TOUT]): Unit
 }
 
 object Writer {
@@ -25,46 +35,60 @@ object Writer {
 
   implicit def pubSubWriterAvro[T0 <: HasAvroAnnotation : Manifest]: Writer[PubSubTapDefinition, SOTUtils, HasAvroAnnotation, T0] = new Writer[PubSubTapDefinition, SOTUtils, HasAvroAnnotation, T0] {
     def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils)(implicit
-                                                                                                                 gen: LabelledGeneric.Aux[T0, OutR]): Unit = {
+                                                                                                                 gen: LabelledGeneric.Aux[T0, OutR],
+                                                                                                                 h: IsHCons[OutR]): Unit = {
       utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
       utils.setupPubsubTopic()
       sCollection.map(x => gen.from(x.hl)).saveAsTypedPubSubAvro(utils.getProject, tap.topic)
     }
   }
 
-    implicit def pubSubWriterProto[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0] : Manifest](implicit
-                                                                                                   messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]): Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0] = new Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0] {
-      def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils)(implicit
-                                                                                         gen: LabelledGeneric.Aux[T0, OutR]): Unit = {
-        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
-        utils.setupPubsubTopic()
-        sCollection.map(x => gen.from(x.hl)).saveAsTypedPubSubProto(utils.getProject, tap.topic)
-      }
+  implicit def pubSubWriterProto[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0] : Manifest](implicit
+                                                                                                            messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]): Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0] = new Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0] {
+    def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils)(implicit
+                                                                                                                 gen: LabelledGeneric.Aux[T0, OutR],
+                                                                                                                 h: IsHCons[OutR]): Unit = {
+      utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
+      utils.setupPubsubTopic()
+      sCollection.map(x => gen.from(x.hl)).saveAsTypedPubSubProto(utils.getProject, tap.topic)
     }
+  }
 
-    implicit def bigqueryWriter[T0 <: HasAnnotation : Manifest]: Writer[BigQueryTapDefinition, SOTUtils, HasAnnotation, T0] = new Writer[BigQueryTapDefinition, SOTUtils, HasAnnotation, T0] {
-      def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: BigQueryTapDefinition, utils: SOTUtils)(implicit
-                                                                                                          gen: LabelledGeneric.Aux[T0, OutR]): Unit = {
-        val createDisposition = tap.createDisposition match {
-          case Some(cd) if cd == "CREATE_IF_NEEDED" => CreateDisposition.CREATE_IF_NEEDED
-          case Some(cd) if cd == "CREATE_NEVER" => CreateDisposition.CREATE_NEVER
-          case None => CreateDisposition.CREATE_IF_NEEDED
-        }
-        val writeDisposition = tap.writeDisposition match {
-          case Some(wd) if wd == "WRITE_TRUNCATE" => WriteDisposition.WRITE_TRUNCATE
-          case Some(wd) if wd == "WRITE_EMPTY" => WriteDisposition.WRITE_EMPTY
-          case Some(wd) if wd == "WRITE_APPEND" => WriteDisposition.WRITE_APPEND
-          case None => WriteDisposition.WRITE_EMPTY
-        }
-
-        sCollection.map(x => gen.from(x.hl)).saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}", writeDisposition, createDisposition)
+  implicit def bigqueryWriter[T0 <: HasAnnotation : Manifest]: Writer[BigQueryTapDefinition, SOTUtils, HasAnnotation, T0] = new Writer[BigQueryTapDefinition, SOTUtils, HasAnnotation, T0] {
+    def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: BigQueryTapDefinition, utils: SOTUtils)(implicit
+                                                                                                                   gen: LabelledGeneric.Aux[T0, OutR],
+                                                                                                                   h: IsHCons[OutR]): Unit = {
+      val createDisposition = tap.createDisposition match {
+        case Some(cd) if cd == "CREATE_IF_NEEDED" => CreateDisposition.CREATE_IF_NEEDED
+        case Some(cd) if cd == "CREATE_NEVER" => CreateDisposition.CREATE_NEVER
+        case None => CreateDisposition.CREATE_IF_NEEDED
       }
-    }
+      val writeDisposition = tap.writeDisposition match {
+        case Some(wd) if wd == "WRITE_TRUNCATE" => WriteDisposition.WRITE_TRUNCATE
+        case Some(wd) if wd == "WRITE_EMPTY" => WriteDisposition.WRITE_EMPTY
+        case Some(wd) if wd == "WRITE_APPEND" => WriteDisposition.WRITE_APPEND
+        case None => WriteDisposition.WRITE_EMPTY
+      }
 
+      sCollection.map(x => gen.from(x.hl)).saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}", writeDisposition, createDisposition)
+    }
+  }
+}
+
+object DatastoreWriter {
+
+  implicit def datastoreWriter[T0 <: HasDatastoreAnnotation : Manifest]: DatastoreWriter[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0] = new DatastoreWriter[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0] {
+    def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils)(implicit
+                                                                                                                    gen: LabelledGeneric.Aux[T0, OutR],
+                                                                                                                    e: ToEntity[OutR],
+                                                                                                                    h: IsHCons[OutR]): Unit = {
+      sCollection.map(x => (h.head(x.hl), gen.from(x.hl))).saveAsTypedDatastore(utils.getProject, tap.kind)
+    }
+  }
 
 }
 
-trait SchemalessWriter[TAP, UTIL, ANNO, OutR <: HList]  extends Serializable {
+trait SchemalessWriter[TAP, UTIL, ANNO, OutR <: HList] extends Serializable {
   def write(sc: SCollection[Row.Aux[OutR]], tap: TAP, utils: UTIL): Unit
 }
 
@@ -99,9 +123,11 @@ object SchemalessWriter {
 }
 
 object writer2 extends Poly2 {
+
   implicit def writer0[TAP <: TapDefinition, UTIL, ANNO, Out, OutR <: HList, OutT <: HList]
   (implicit
-   gen2: LabelledGeneric.Aux[Out, OutR],
+   gen: LabelledGeneric.Aux[Out, OutR],
+   h: IsHCons[OutR],
    ev: OutT =:= OutR,
    writer: Writer[TAP, UTIL, ANNO, Out]
   )
@@ -111,6 +137,19 @@ object writer2 extends Poly2 {
       (sColl, utils)
   }
 
+  implicit def datastorewriter0[TAP <: DatastoreTapDefinition, UTIL, ANNO <: HasDatastoreAnnotation, Out, OutR <: HList, OutT <: HList]
+  (implicit
+   gen2: LabelledGeneric.Aux[Out, OutR],
+   e: ToEntity[OutR],
+   h: IsHCons[OutR],
+   ev: OutT =:= OutR,
+   writer: DatastoreWriter[TAP, UTIL, ANNO, Out]
+  )
+  = at[(SCollection[Row.Aux[OutT]], UTIL), TapDef[TAP, UTIL, ANNO, Out]] {
+    case ((sColl, utils), tap) =>
+      writer.write(sColl.map(r => Row[OutR](ev(r.hl))), tap.tapDefinition, utils)
+      (sColl, utils)
+  }
 
   implicit def schemalessWriter[TAP <: TapDefinition, UTIL, ANNO, OutT <: HList]
   (implicit
