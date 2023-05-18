@@ -222,9 +222,9 @@ object SOTMainMacroImpl {
   def getSchemaAnnotation(schema: Option[Schema]): String = schema match {
     case Some(s) if s.`type` == "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
     case Some(s) if s.`type` == "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
-    case Some(s) if s.`type` == "datastore" => "parallelai.sot.engine.io.datastore.HasDatastoreAnnotation"
+    case Some(s) if s.`type` == "datastore" => "parallelai.sot.engine.io.utils.annotations.HasDatastoreAnnotation"
     case Some(s) if s.`type` == "protobuf" => "com.trueaccord.scalapb.GeneratedMessage"
-    case None => "com.google.api.client.json.GenericJson"
+    case None => "parallelai.sot.engine.io.utils.annotations.Schemaless"
     case Some(s) => throw new Exception("Unsupported Schema Type " + s.`type`)
   }
 

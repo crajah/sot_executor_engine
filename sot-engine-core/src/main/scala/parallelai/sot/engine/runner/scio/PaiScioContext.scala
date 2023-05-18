@@ -5,9 +5,10 @@ import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.values.SCollection
 import com.trueaccord.scalapb.GeneratedMessage
-import parallelai.sot.engine.io.datastore.{DatastoreType, HasDatastoreAnnotation, ToEntity}
+import parallelai.sot.engine.io.datastore.{DatastoreType, ToEntity}
 import parallelai.sot.engine.serialization.avro.AvroUtils
 import com.google.datastore.v1.client.DatastoreHelper.makeKey
+import parallelai.sot.engine.io.utils.annotations.HasDatastoreAnnotation
 import shapeless.{HList, LabelledGeneric}
 
 
@@ -47,7 +48,7 @@ object PaiScioContext extends Serializable {
     }
   }
 
-  implicit class PaiScioSCollectionDatastore[Out <: HasDatastoreAnnotation : Manifest, Key](c: SCollection[(Key, Out)]) {
+  implicit class KVPaiScioSCollection[Out <: HasDatastoreAnnotation : Manifest, Key](c: SCollection[(Key, Out)]) {
     def saveAsTypedDatastore[L <: HList](project: String, kind: String)(implicit gen: LabelledGeneric.Aux[Out, L],
                                                                         toL: ToEntity[L]): Unit = {
       val dataStoreT: DatastoreType[Out] = DatastoreType[Out]

@@ -64,25 +64,13 @@
       "type": "transformation",
       "name": "mapper1",
       "op": "map",
-      "func": "m => (m.teamName, m.score.toInt)"
+      "func": "m => {val updated = m.append('id, Helper.random.nextInt());updated.project(projector(Col('id), Col('user), Col('score) ** Col('score1), Col('score) ** Col('score2), Col('eventTime)))}"
     },
     {
       "type": "transformation",
       "name": "filter",
       "op": "filter",
-      "func": "m => m.score > 2"
-    },
-    {
-      "type": "transformation",
-      "name": "mapper2",
-      "op": "map",
-      "func": "m => 'teamscores ->> m._1 :: 'score1 ->> m._2.toString :: 'score2 ->> (m._2 * 0.123) :: HNil"
-    },
-    {
-      "type": "transformation",
-      "name": "sumByKey",
-      "op": "sumByKey",
-      "func": ""
+      "func": "m => m.get('score1) > 1"
     },
     {
       "type": "sink",
@@ -93,22 +81,14 @@
   "dag": [
     {
       "from": "in",
-      "to": "filter"
-    },
-    {
-      "from": "filter",
       "to": "mapper1"
     },
     {
       "from": "mapper1",
-      "to": "sumByKey"
+      "to": "filter"
     },
     {
-      "from": "sumByKey",
-      "to": "mapper2"
-    },
-    {
-      "from": "mapper2",
+      "from": "filter",
       "to": "out"
     }
   ]

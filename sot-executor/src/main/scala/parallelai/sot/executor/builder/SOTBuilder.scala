@@ -2,11 +2,8 @@ package parallelai.sot.executor.builder
 
 import java.io.{File, InputStream}
 import java.util.TimeZone
-import scala.meta.Lit
 import parallelai.sot.engine.config.SchemaResourcePath
 import com.spotify.scio._
-import com.spotify.scio.avro.types.AvroType
-import com.spotify.scio.bigquery.BigQueryType
 import com.spotify.scio.values.{SCollection, WindowOptions}
 import org.apache.beam.sdk.io.gcp.datastore.DatastoreIO
 import org.apache.beam.sdk.options.{PipelineOptions, StreamingOptions}
@@ -14,12 +11,8 @@ import org.joda.time.{DateTimeZone, Duration, Instant}
 import org.joda.time.format.DateTimeFormat
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.macros.SOTBuilder
-import shapeless._
-import syntax.singleton._
+
 import com.google.datastore.v1.{GqlQuery, Query}
-import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
-import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
-import parallelai.sot.engine.io.datastore.HasDatastoreAnnotation
 import com.spotify.scio.streaming.ACCUMULATING_FIRED_PANES
 import com.typesafe.config.ConfigFactory
 import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
@@ -40,8 +33,20 @@ import scalaz.Scalaz.init
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.engine.generic.row.Syntax._
 import parallelai.sot.engine.generic.row.Nested
+
+//Shapeless imports
+import shapeless._
+import syntax.singleton._
 import shapeless.record._
+
 import org.tensorflow._
+
+//Annotations
+import parallelai.sot.engine.io.utils.annotations._
+import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
+import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
+import com.spotify.scio.avro.types.AvroType
+import com.spotify.scio.bigquery.BigQueryType
 
 /**
   * To run this class with a default configuration of application.conf:
@@ -65,7 +70,6 @@ object SOTBuilder {
   }
 
   val genericBuilder = new Builder()
-
   def main(cmdArg: Array[String]): Unit = {
     val (sotOptions, sotArgs) = ScioContext.parseArguments[SOTOptions](cmdArg)
     val sotUtils = new SOTUtils(sotOptions)

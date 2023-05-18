@@ -30,16 +30,6 @@ class DatastoreType[A] extends Serializable {
                            gen: LabelledGeneric.Aux[A, L],
                            toL: ToEntity[L]): Entity =
     toL(gen.to(a)).build()
-
-  def toEntityBuilder[L <: HList](a: L)
-                                 (implicit
-                                  toL: ToEntity[L]): Entity.Builder =
-    toL(a)
-
-  def toEntity[L <: HList](a: L)
-                          (implicit
-                           toL: ToEntity[L]): Entity =
-    toL(a).build()
 }
 
 object DatastoreType {
@@ -50,6 +40,16 @@ object DatastoreType {
       override def from(value: Value): V = fromFn(value)
       override def to(value: V): Value = toFn(value)
     }
+
+  def toEntityBuilder[L <: HList](a: L)
+                                 (implicit
+                                  toL: ToEntity[L]): Entity.Builder =
+    toL(a)
+
+  def toEntity[L <: HList](a: L)
+                          (implicit
+                           toL: ToEntity[L]): Entity =
+    toL(a).build()
 }
 
 trait DatastoreMappableTypes {

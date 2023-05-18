@@ -2,8 +2,6 @@ package parallelai.sot.engine.io.utils
 
 import java.{io => jio}
 
-import parallelai.sot.engine.io.datastore.{DatastoreType, HasDatastoreAnnotation}
-
 //TODO: Move to separate test project
 object SerializableUtils {
 
@@ -21,13 +19,5 @@ object SerializableUtils {
 
   def ensureSerializable[T <: Serializable](value: T): T =
     deserializeFromByteArray(serializeToByteArray(value)).asInstanceOf[T]
-
-}
-
-object Test extends App {
-
-  case class OutSchema(teamscores: String, score1: Int, score2: Int) extends HasDatastoreAnnotation
-  def dataStoreT: DatastoreType[OutSchema] = DatastoreType[OutSchema]
-  SerializableUtils.ensureSerializable(dataStoreT)
 
 }
