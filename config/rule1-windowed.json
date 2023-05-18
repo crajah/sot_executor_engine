@@ -1,10 +1,12 @@
 {
+  "id": "schemaname",
   "name": "schemaname",
   "version": "version1",
   "schemas": [
     {
       "type": "protobuf",
       "id": "protoschema1",
+      "name": "protoschema1",
       "version": "version2",
       "definition": {
         "type": "protobufdefinition",
@@ -32,37 +34,52 @@
   "steps": [
     {
       "type": "source",
+      "id": "in",
       "name": "in",
       "schema": "protoschema1",
       "source": "pubsubsource1"
     },
     {
       "type": "transformation",
+      "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "func": "m => {val winnings = Col('state) ->: Col('bets) ->: Col('payout) ->: Col('winnings);val customerRef = Col('state) ->: Col('bets) ->: Col('customerRef);val outComeName = Col('supportingState) ->: Col('outcome) ->: Col('outcomeName) ** Col('outComeName);val marketName = Col('supportingState) ->: Col('outcome) ->: Col('marketName);val eventName = Col('supportingState) ->: Col('outcome) ->: Col('eventName);val catRef = Col('supportingState) ->:  Col('outcome) ->: Col('categoryRef);val stateBetsId = Col('state) ->: Col('bets) ->: Col('id) ** Col('stateBetsId);val currency = Col('state) ->: Col('bets) ->: Col('stake) ->: Col('currencyRef) ** Col('currency);val stake = Col('state) ->: Col('bets) ->: Col('stake) ->: Col('amount) ** Col('stake);m.project(projector(customerRef, winnings, outComeName, marketName, eventName, catRef, stateBetsId, currency, stake))}"
+      "params": [["m => {val winnings = Col('state) ->: Col('bets) ->: Col('payout) ->: Col('winnings);val customerRef = Col('state) ->: Col('bets) ->: Col('customerRef);val outComeName = Col('supportingState) ->: Col('outcome) ->: Col('outcomeName) ** Col('outComeName);val marketName = Col('supportingState) ->: Col('outcome) ->: Col('marketName);val eventName = Col('supportingState) ->: Col('outcome) ->: Col('eventName);val catRef = Col('supportingState) ->:  Col('outcome) ->: Col('categoryRef);val stateBetsId = Col('state) ->: Col('bets) ->: Col('id) ** Col('stateBetsId);val currency = Col('state) ->: Col('bets) ->: Col('stake) ->: Col('currencyRef) ** Col('currency);val stake = Col('state) ->: Col('bets) ->: Col('stake) ->: Col('amount) ** Col('stake);m.project(projector(customerRef, winnings, outComeName, marketName, eventName, catRef, stateBetsId, currency, stake))}"]],
+      "paramsEncoded": false
     },
     {
       "type": "transformation",
+      "id": "mapper2",
       "name": "mapper2",
       "op": "map",
-      "func": "m => {val message = \"Congratulations. You won \" + m.get('winnings) + \" \" + m.get('currency) + \". On a bet placed on \" + m.get('eventName) + \" for \" + m.get('outComeName) + \" to \" + m.get('marketName) + \".\";m.append('message, message).append('ts, Helper.fmt.print(Instant.now()))}"
-
+      "params": [["m => {val message = \"Congratulations. You won \" + m.get('winnings) + \" \" + m.get('currency) + \". On a bet placed on \" + m.get('eventName) + \" for \" + m.get('outComeName) + \" to \" + m.get('marketName) + \".\";m.append('message, message).append('ts, Helper.fmt.print(Instant.now()))}"]],
+      "paramsEncoded": false
     },
     {
       "type": "transformation",
+      "id": "window1",
       "name": "window1",
       "op": "withFixedWindows",
-      "func": "(Duration.millis(10000), Duration.millis(0), WindowOptions())"
+      "params": [["Duration.millis(100)",
+                  "Duration.millis(0)",
+                  "WindowOptions(trigger =  Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardMinutes(2))), accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES, allowedLateness =  Duration.standardMinutes(args.int(\"allowedLateness\", 120)))"]],
+      "paramsEncoded": false
     },
     {
       "type": "transformation",
+      "id": "aggregate1",
       "name": "aggregate1",
       "op": "aggregate",
-      "func": "((Row(('events ->> List[String]()) :: HNil)), ({(aggr, m) => Row(('events ->> (aggr.get('events) :+ m.get('eventName))) :: HNil)}, {(aggr1, aggr2) => Row(('events ->> (aggr1.get('events) ++ aggr2.get('events))) :: HNil)}))"
+      "params": [["Row(('events ->> List[String]()) :: HNil)"],
+                 ["(aggr, m) => Row(('events ->> (aggr.get('events) :+ m.get('eventName))) :: HNil)",
+                   "(aggr1, aggr2) => Row(('events ->> (aggr1.get('events) ++ aggr2.get('events))) :: HNil)"
+                 ]
+                ],
+      "paramsEncoded": false
     },
     {
       "type": "sink",
+      "id": "out",
       "name": "out",
       "source": "bigquerysource1"
     }

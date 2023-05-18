@@ -1,10 +1,12 @@
 {
+  "id": "schemaname",
   "name": "schemaname",
   "version": "version1",
   "schemas": [
     {
       "type": "avro",
       "id": "avroschema1",
+      "name": "avroschema1",
       "version": "version2",
       "definition": {
         "type": "record",
@@ -43,6 +45,7 @@
     {
       "type": "datastore",
       "id": "datastore1",
+      "name": "datastore1",
       "version": "version3",
       "definition": {
         "type": "datastoredefinition",
@@ -79,36 +82,46 @@
   "steps": [
     {
       "type": "source",
+      "id": "in",
       "name": "in",
       "schema": "avroschema1",
       "source": "pubsubsource1"
     },
     {
       "type": "transformation",
+      "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "func": "m => (m.teamName, m.score.toInt)"
+      "params": [["m => (m.teamName, m.score.toInt)"]],
+      "paramsEncoded": false
     },
     {
       "type": "transformation",
+      "id": "filter",
       "name": "filter",
       "op": "filter",
-      "func": "m => m.score > 2"
+      "params": [["m => m.score > 2"]],
+      "paramsEncoded": false
     },
     {
       "type": "transformation",
+      "id": "mapper2",
       "name": "mapper2",
       "op": "map",
-      "func": "m => OutSchema(m._1, m._2.toString, m._2 * 0.123)"
+      "params": [["m => OutSchema(m._1, m._2.toString, m._2 * 0.123)"]],
+      "paramsEncoded": false
     },
     {
       "type": "transformation",
+      "id": "sumByKey",
       "name": "sumByKey",
       "op": "sumByKey",
-      "func": ""
+      "params": [[""]],
+      "paramsEncoded": false
     },
     {
       "type": "sink",
+      "id": "out",
       "name": "out",
       "schema": "datastore1",
       "source": "datastoresource1"

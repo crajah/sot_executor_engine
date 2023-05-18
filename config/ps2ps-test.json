@@ -1,10 +1,12 @@
 {
+  "id": "schemaname",
   "name": "schemaname",
   "version": "version1",
   "schemas": [
     {
       "type": "avro",
       "id": "avroschema1",
+      "name": "avroschema1",
       "version": "version2",
       "definition": {
         "type": "record",
@@ -43,6 +45,7 @@
     {
       "type": "avro",
       "id": "avroschema2",
+      "name": "avroschema2",
       "version": "version2",
       "definition": {
         "type": "record",
@@ -99,18 +102,22 @@
   "steps": [
     {
       "type": "source",
+      "id": "in",
       "name": "in",
       "schema": "avroschema1",
       "source": "pubsubsource1"
     },
     {
       "type": "transformation",
+      "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "func": "m => m.append('count, 1)"
+      "params": [["m => m.append('count, 1)"]],
+      "paramsEncoded": false
     },
     {
       "type": "sink",
+      "id": "out",
       "name": "out",
       "schema": "avroschema2",
       "source": "pubsubsource2"
