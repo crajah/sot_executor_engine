@@ -1,0 +1,93 @@
+{
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "id": "avroschema1",
+      "version": "version2",
+      "definition": {
+        "type": "record",
+        "name": "Features",
+        "namespace": "parallelai.sot.avro",
+        "fields": [
+          {
+            "name": "features",
+            "type": {
+              "type": "array",
+              "items": "float"
+            }
+          },
+          {
+            "name": "id",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "type": "bigquery",
+      "id": "bigqueryschema1",
+      "version": "version3",
+      "definition": {
+        "type": "bigquerydefinition",
+        "name": "BigQueryRow",
+        "fields": [
+          {
+            "mode": "REPEATED",
+            "name": "prediction",
+            "type": "FLOAT"
+          }
+        ]
+      }
+    }
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource1",
+      "topic": "tffeatures"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "tfprediction",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "name": "in",
+      "schema": "avroschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "tfpredict",
+      "name": "predict1",
+      "modelBucket": "lb-tf-models",
+      "modelPath": "inception_v1",
+      "fetchOps": ["InceptionV1/Logits/Predictions/Reshape_1"],
+      "inFn": "r => Map(\"input\" -> Tensor.create(Array(r.get('features).grouped(672).map(_.toArray.grouped(3).toArray).toArray)))",
+      "outFn": "(r, o) => o.map { case (_, t) => val v = Array.ofDim[Float](1, 1001);t.copyTo(v);val res = v.apply(0).map(_.toDouble).toList;Row('prediction ->> res :: HNil)}.head"
+    },
+    {
+      "type": "sink",
+      "name": "out",
+      "schema": "bigqueryschema1",
+      "source": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "predict1"
+    },
+    {
+      "from": "predict1",
+      "to": "out"
+    }
+  ]
+}

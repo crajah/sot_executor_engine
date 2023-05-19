@@ -17,12 +17,14 @@ libraryDependencies ++= Seq(
   spotifyCore,
   spotifyBigTable,
   spotifyExtra,
+  tensorflow,
   avro,
   shapelessDataTypeDatastore,
   shapelessDataTypeCore,
   shapelessDataTypeBigQuery,
   scalaz,
   gcloudDatastore,
+  gcloudStorage,
   logbackClassic,
   scalacheck
 )
@@ -31,5 +33,6 @@ libraryDependencies ++= Seq(
   scalatest % Test,
   mockito % Test,
   scalacheckShapeless % Test,
-  spotifyTest % Test
+  spotifyTest % Test,
+  spotifyCore % Test
 )

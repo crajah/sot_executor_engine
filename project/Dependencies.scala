@@ -9,6 +9,8 @@ object Dependencies {
   val twitterBijectionVersion = "0.9.5"
   val spotifyVersion = "0.4.4"
   val shapelessDataTypeDataVersion = "0.1.7"
+  val tensorflowVersion = "1.3.0"
+  val gcloudVersion = "1.6.0"
 
   val scalameta = "org.scalameta" %% "scalameta" % metaVersion
   val contrib = "org.scalameta" %% "contrib" % metaVersion
@@ -34,7 +36,8 @@ object Dependencies {
 
   val scalaz = "org.scalaz" % "scalaz-core_2.11" % "7.2.16"
 
-  val gcloudDatastore = "com.google.cloud" % "google-cloud-datastore" % "1.6.0"
+  val gcloudDatastore = "com.google.cloud" % "google-cloud-datastore" % gcloudVersion
+  val gcloudStorage = "com.google.cloud" % "google-cloud-storage" % gcloudVersion
 
   val kafka = ("org.apache.kafka" %% "kafka" % "0.10.1.1")
     .exclude("javax.jms", "jms")
@@ -54,7 +57,10 @@ object Dependencies {
   val spotifyCore = "com.spotify" %% "scio-core" % spotifyVersion
   val spotifyBigTable = "com.spotify" %% "scio-bigtable" % spotifyVersion
   val spotifyExtra = "com.spotify" %% "scio-extra" % spotifyVersion
+  val spotifyTensorflow = "com.spotify" %% "scio-tensorflow" % spotifyVersion
   val spotifyTest = "com.spotify" %% "scio-test" % spotifyVersion
+
+  val tensorflow = "org.tensorflow" % "tensorflow" % tensorflowVersion
 
   val shapelessDataTypeBigQuery = "me.lyh" %% "shapeless-datatype-bigquery" % shapelessDataTypeDataVersion
   val shapelessDataTypeCore = "me.lyh" %% "shapeless-datatype-core" % shapelessDataTypeDataVersion
