@@ -53,6 +53,12 @@ object SOTMainMacroImpl {
           case _ => throw new Exception("Datastore does not support this definition")
         }
 
+      case json: JSONSchema =>
+        json.definition match {
+          case jsond: JSONDefinition => Some(jsonSchemaCodeGeneration(jsond))
+          case _ => throw new Exception("JSON does not support this definition")
+        }
+
       case _ =>
         throw new Exception("Unsupported Schema Type")
     }.flatten
@@ -68,9 +74,9 @@ object SOTMainMacroImpl {
     val sinkOp = SOTMacroHelper.getOp(sink, config.steps).asInstanceOf[SinkOp]
 
     val allConfStatements = confStatements ++ definitionsSchemasTypes
-    val  configObject = Seq(q"object conf { ..$allConfStatements }" )
+    val configObject = Seq(q"object conf { ..$allConfStatements }")
 
-    val syn = parsedSchemas ++ configObject  ++ transformations ++ statements
+    val syn = parsedSchemas ++ configObject ++ transformations ++ statements
 
     val code =
       q"""object $name {
@@ -139,7 +145,22 @@ object SOTMainMacroImpl {
 
     val block =
       q"""
-        case class $name ( ..$listSchema) extends HasDatastoreAnnotation
+        case class $name ( ..$listSchema) extends parallelai.sot.engine.io.utils.annotations.HasDatastoreAnnotation
+      """
+
+    Seq(block)
+  }
+
+  def jsonSchemaCodeGeneration(definition: JSONDefinition): Seq[Stat] = {
+    val listSchema = definition.fields.map { sc =>
+      s"${sc.name}: ${sc.`type`}".parse[Term.Param].get
+    }
+
+    val name = Type.Name(definition.name)
+
+    val block =
+      q"""
+        case class $name ( ..$listSchema) extends parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
       """
 
     Seq(block)
@@ -191,13 +212,13 @@ object SOTMainMacroImpl {
         Term.Apply(sinkConfigApply, Seq(q"conf.sinkTaps(${Lit.Int(i)})._2"))
     })
     val sinks = sinksDefs.tail.
-      foldLeft(Term.ApplyInfix(sinksDefs.head, Term.Name("::"), List(), List(Term.Name("HNil"))))((cumul: Term.ApplyInfix, t:Term.Apply) =>  Term.ApplyInfix(t, Term.Name("::"), List(), List(cumul)))
+      foldLeft(Term.ApplyInfix(sinksDefs.head, Term.Name("::"), List(), List(Term.Name("HNil"))))((cumul: Term.ApplyInfix, t: Term.Apply) => Term.ApplyInfix(t, Term.Name("::"), List(), List(cumul)))
 
 
     val sourceTapDef = Pat.Var.Term(Term.Name("source"))
     val sinkTapDef = Pat.Var.Term(Term.Name("sink"))
     Seq(q"val $sourceTapDef = $sourceTapTerm",
-        q"val sinks = $sinks"
+      q"val sinks = $sinks"
     )
   }
 
@@ -220,10 +241,11 @@ object SOTMainMacroImpl {
     q"${Lit.String(definitionName)} -> ${Term.ApplyType(Term.Name("SchemaType"), List(Type.Name(annotation), Type.Name(definitionName)))}"
 
   def getSchemaAnnotation(schema: Option[Schema]): String = schema match {
-    case Some(s) if s.`type` == "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
-    case Some(s) if s.`type` == "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
-    case Some(s) if s.`type` == "datastore" => "parallelai.sot.engine.io.utils.annotations.HasDatastoreAnnotation"
-    case Some(s) if s.`type` == "protobuf" => "com.trueaccord.scalapb.GeneratedMessage"
+    case Some(_: BigQuerySchema) => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
+    case Some(_: AvroSchema) => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
+    case Some(_: DatastoreSchema) => "parallelai.sot.engine.io.utils.annotations.HasDatastoreAnnotation"
+    case Some(_: ProtobufSchema) => "com.trueaccord.scalapb.GeneratedMessage"
+    case Some(_: JSONSchema) => "parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation"
     case None => "parallelai.sot.engine.io.utils.annotations.Schemaless"
     case Some(s) => throw new Exception("Unsupported Schema Type " + s.`type`)
   }

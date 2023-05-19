@@ -6,4 +6,6 @@ object annotations {
 
   trait HasDatastoreAnnotation
 
+  trait HasJSONAnnotation
+
 }

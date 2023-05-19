@@ -28,6 +28,7 @@ object Dependencies {
   val pureConfig = "com.github.pureconfig" %% "pureconfig" % "0.8.0"
 
   val sprayJson = "io.spray" %% "spray-json" % "1.3.3"
+  val circe = "io.circe" %% "circe-core" % "0.8.0"
 
   val trueAccordCompiler = "com.trueaccord.scalapb" %% "compilerplugin" % trueAccordVersion
   val trueAccordRuntime = "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % trueAccordVersion

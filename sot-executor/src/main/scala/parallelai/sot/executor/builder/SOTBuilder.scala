@@ -12,6 +12,10 @@ import parallelai.sot.macros.SOTMacroHelper._
 import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 
+//// JSON parser
+import io.circe.generic.auto._
+import io.circe.parser._
+
 //// SCIO
 import com.spotify.scio._
 

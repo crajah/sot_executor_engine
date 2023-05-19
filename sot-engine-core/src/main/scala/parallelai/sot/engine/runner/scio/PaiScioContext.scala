@@ -8,8 +8,11 @@ import com.trueaccord.scalapb.GeneratedMessage
 import parallelai.sot.engine.io.datastore.{DatastoreType, ToEntity}
 import parallelai.sot.engine.serialization.avro.AvroUtils
 import com.google.datastore.v1.client.DatastoreHelper.makeKey
-import parallelai.sot.engine.io.utils.annotations.HasDatastoreAnnotation
+import parallelai.sot.engine.io.utils.annotations.{HasDatastoreAnnotation, HasJSONAnnotation}
 import shapeless.{HList, LabelledGeneric}
+import io.circe.generic.auto._
+import io.circe.parser._
+import org.slf4j.LoggerFactory
 
 
 object PaiScioContext extends Serializable {
@@ -29,6 +32,16 @@ object PaiScioContext extends Serializable {
 
       sc.pubsubTopic[Array[Byte]](s"projects/${project}/topics/${topic}", timestampAttribute = "timestamp_ms")
         .map(f => messageCompanion.parseFrom(f))
+    }
+
+    def typedPubSubJSON[In <: HasJSONAnnotation : Manifest](project: String, topic: String)(implicit ev: io.circe.Decoder[In]): SCollection[In] = {
+      sc.pubsubTopic[Array[Byte]](s"projects/${project}/topics/${topic}", timestampAttribute = "timestamp_ms")
+        .map { f =>
+          decode[In](new String(f)) match {
+            case Right(in) => in
+            case Left(p) => throw p.fillInStackTrace()
+          }
+        }
     }
   }
 
