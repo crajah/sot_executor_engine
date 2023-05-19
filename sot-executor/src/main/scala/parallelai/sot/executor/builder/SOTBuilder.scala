@@ -1,19 +1,21 @@
 package parallelai.sot.executor.builder
 
 import parallelai.sot.engine.config.SchemaResourcePath
-import com.spotify.scio._
+
+//SOT
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.macros.SOTBuilder
-import com.typesafe.config.ConfigFactory
 import parallelai.sot.executor.model.SOTMacroConfig._
 import parallelai.sot.executor.model.SOTMacroJsonConfig
 import parallelai.sot.engine.runner.scio.PaiScioContext._
 import parallelai.sot.macros.SOTMacroHelper._
 import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
-import parallelai.sot.engine.serialization.avro.AvroUtils
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 
-//Shapeless imports
+//SCIO
+import com.spotify.scio._
+
+//Shapeless
 import shapeless._
 import syntax.singleton._
 import shapeless.record._

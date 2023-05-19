@@ -56,7 +56,7 @@
       "type": "transformation",
       "name": "mapper",
       "op": "map",
-      "func": "m => m.append('ts, Helper.fmt.print(Instant.now()))"
+      "func": "m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"
     },
     {
       "type": "sink",

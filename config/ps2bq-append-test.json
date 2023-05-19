@@ -125,7 +125,7 @@
       "type": "transformation",
       "name": "mapper2",
       "op": "map",
-      "func": "m => m.append('processingTime, Helper.fmt.print(Instant.now()))"
+      "func": "m => m.append('processingTime, Helper.fmt.print(Helper.Instant.now()))"
     },
     {
       "type": "sink",
