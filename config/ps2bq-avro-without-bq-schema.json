@@ -1,10 +1,12 @@
 {
+  "id": "schemaname",
   "name": "schemaname",
   "version": "version1",
   "schemas": [
     {
       "type": "avro",
       "id": "avroschema1",
+      "name": "avroschema1",
       "version": "version2",
       "definition": {
         "type": "record",
@@ -57,30 +59,38 @@
   "steps": [
     {
       "type": "source",
+      "id": "in",
       "name": "in",
       "schema": "avroschema1",
       "source": "pubsubsource1"
     },
     {
       "type": "transformation",
+      "id": "filter",
       "name": "filter",
       "op": "filter",
-      "func": "m => m.get('score) > 2"
+      "params": [["m => m.get('score) > 2"]],
+      "paramsEncoded": false
     },
     {
       "type": "transformation",
+      "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "func": "m => m.append('score2, m.get('score) * 0.23)"
+      "params": [["m => m.append('score2, m.get('score) * 0.23)"]],
+      "paramsEncoded": false
     },
     {
       "type": "transformation",
+      "id": "mapper2",
       "name": "mapper2",
       "op": "map",
-      "func": "m => m.append('processingTime, Helper.fmt.print(Instant.now()))"
+      "params": [["m => m.append('processingTime, Helper.fmt.print(Instant.now()))"]],
+      "paramsEncoded": false
     },
     {
       "type": "sink",
+      "id": "out",
       "name": "out",
       "source": "bigquerysource1"
     }

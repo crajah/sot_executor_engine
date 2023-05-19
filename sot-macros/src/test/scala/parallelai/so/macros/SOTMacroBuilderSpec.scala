@@ -23,7 +23,7 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
         )))
 
     val avroDef = AvroDefinition(`type` = "record", name = "MessageExtended", namespace = "parallelai.sot.avro", fields = avroFields)
-    val in = AvroSchema(`type` = "avro", id = "inschema1", version = "", definition = avroDef)
+    val in = AvroSchema(`type` = "avro", id = "inschema1", name = "inschema1", version = "", definition = avroDef)
 
     val bqFields = JsArray(JsObject(Map(
       "mode" -> JsString("REQUIRED"),
@@ -37,7 +37,7 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
       )))
 
     val bqDefinition = BigQueryDefinition(`type` = "bigquerydefinition", name = "BigQueryRow", fields = bqFields)
-    val out = BigQuerySchema(`type` = "bigquery", id = "outschema1", version = "", definition = bqDefinition)
+    val out = BigQuerySchema(`type` = "bigquery", id = "outschema1", name = "outschema1", version = "", definition = bqDefinition)
 
     val schemas = List(in, out)
 
@@ -54,13 +54,13 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
     )
 
     val steps = List(
-      SourceOp(`type` = "source", name = "in", schema = "inschema1", tap = "insource"),
-      TransformationOp(`type` = "transformation", name = "mapper1", op = "map", func = "m => BigQueryRow(m, (m.name, m.count))"),
-      TransformationOp(`type` = "transformation", name = "mapper2", op = "map", func = "m1 => BigQueryRow(m1, (m1.name, m1.count))"),
-      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), tap = "outsource")
+      SourceOp(`type` = "source", id = "in", name = "in", schema = "inschema1", tap = "insource"),
+      TransformationOp(`type` = "transformation", id = "mapper1", name = "mapper1", op = "map", params = List(List("m => BigQueryRow(m, (m.name, m.count))")), paramsEncoded = false),
+      TransformationOp(`type` = "transformation", id = "mapper2", name = "mapper2", op = "map", params = List(List("((Row(('events ->> List()) :: HNil)), ({(aggr, m) => Row(('events ->> aggr.get('events) :+ m.get('eventName)) :: HNil)}, {(aggr1, aggr2) => Row(('events ->> aggr1.get('events) ++ aggr2.get('events)) :: HNil)}))")), paramsEncoded = false),
+      SinkOp(`type` = "sink", id = "out", name = "out", schema = Some("outschema1"), tap = "outsource")
     )
 
-    val config = Config(name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
+    val config = Config(id = "", name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
 
     val expectedBlock =
       q"""
@@ -76,7 +76,7 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
             val getBuilder = new ScioBuilderPubSubToBigQuery(transform, inArgs, outArgs)
             val x = 1
        """
-//    assertEqualStructure(config, expectedBlock)
+    assertEqualStructure(config, expectedBlock)
 
   }
 

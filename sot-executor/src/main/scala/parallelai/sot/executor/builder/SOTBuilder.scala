@@ -42,6 +42,15 @@ import parallelai.sot.engine.generic.row.Nested
 import shapeless.record._
 import org.tensorflow._
 
+
+//// Windowing imports
+import org.joda.time.Duration
+import com.spotify.scio.values.WindowOptions
+import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+import org.apache.beam.sdk.transforms.windowing.Window.ClosingBehavior
+import org.apache.beam.sdk.transforms.windowing.TimestampCombiner
+import org.apache.beam.sdk.transforms.windowing._
+
 /**
   * To run this class with a default configuration of application.conf:
   * <pre>
