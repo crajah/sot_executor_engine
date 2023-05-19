@@ -1,44 +1,24 @@
 package parallelai.sot.executor.builder
 
-import java.io.{File, InputStream}
-import java.util.TimeZone
 import parallelai.sot.engine.config.SchemaResourcePath
 import com.spotify.scio._
-import com.spotify.scio.values.{SCollection, WindowOptions}
-import org.apache.beam.sdk.io.gcp.datastore.DatastoreIO
-import org.apache.beam.sdk.options.{PipelineOptions, StreamingOptions}
-import org.joda.time.{DateTimeZone, Duration, Instant}
-import org.joda.time.format.DateTimeFormat
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.macros.SOTBuilder
-
-import com.google.datastore.v1.{GqlQuery, Query}
-import com.spotify.scio.streaming.ACCUMULATING_FIRED_PANES
 import com.typesafe.config.ConfigFactory
-import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
-import org.apache.beam.sdk.transforms.windowing.{AfterProcessingTime, Repeatedly}
 import parallelai.sot.executor.model.SOTMacroConfig._
 import parallelai.sot.executor.model.SOTMacroJsonConfig
 import parallelai.sot.engine.runner.scio.PaiScioContext._
 import parallelai.sot.macros.SOTMacroHelper._
-import com.trueaccord.scalapb.GeneratedMessage
 import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
 import parallelai.sot.engine.serialization.avro.AvroUtils
-import parallelai.sot.engine.runner.Reader
-import parallelai.sot.engine.runner.Writer
-import parallelai.sot.engine.generic.helper.Helper
-import parallelai.sot.engine.runner.SCollectionStateMonad._
-import parallelai.sot.engine.generic.row.Row
-import scalaz.Scalaz.init
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
-import parallelai.sot.engine.generic.row.Syntax._
-import parallelai.sot.engine.generic.row.Nested
 
 //Shapeless imports
 import shapeless._
 import syntax.singleton._
 import shapeless.record._
 
+//Tensorflow
 import org.tensorflow._
 
 //Annotations
@@ -47,6 +27,21 @@ import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.bigquery.BigQueryType
+import com.trueaccord.scalapb.GeneratedMessage
+
+//Row
+import parallelai.sot.engine.generic.row.Row
+import parallelai.sot.engine.generic.row.Syntax._
+import parallelai.sot.engine.generic.row.Nested
+
+//Helper functions
+import parallelai.sot.engine.generic.helper.Helper
+
+//Runner
+import parallelai.sot.engine.runner.Reader
+import parallelai.sot.engine.runner.Writer
+import parallelai.sot.engine.runner.SCollectionStateMonad._
+import scalaz.Scalaz.init
 
 /**
   * To run this class with a default configuration of application.conf:
