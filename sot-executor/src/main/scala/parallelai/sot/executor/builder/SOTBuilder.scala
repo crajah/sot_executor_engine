@@ -2,7 +2,7 @@ package parallelai.sot.executor.builder
 
 import parallelai.sot.engine.config.SchemaResourcePath
 
-//SOT
+//// SOT
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.macros.SOTBuilder
 import parallelai.sot.executor.model.SOTMacroConfig._
@@ -12,18 +12,18 @@ import parallelai.sot.macros.SOTMacroHelper._
 import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 
-//SCIO
+//// SCIO
 import com.spotify.scio._
 
-//Shapeless
+//// Shapeless
 import shapeless._
 import syntax.singleton._
 import shapeless.record._
 
-//Tensorflow
+//// Tensorflow
 import org.tensorflow._
 
-//Annotations
+//// Annotations
 import parallelai.sot.engine.io.utils.annotations._
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
@@ -31,20 +31,19 @@ import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.bigquery.BigQueryType
 import com.trueaccord.scalapb.GeneratedMessage
 
-//Row
+//// Row
 import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.generic.row.Syntax._
 import parallelai.sot.engine.generic.row.Nested
 
-//Helper functions
+//// Helper functions
 import parallelai.sot.engine.generic.helper.Helper
 
-//Runner
+//// Runner
 import parallelai.sot.engine.runner.Reader
 import parallelai.sot.engine.runner.Writer
 import parallelai.sot.engine.runner.SCollectionStateMonad._
 import scalaz.Scalaz.init
-
 
 //// Windowing imports
 import org.joda.time.Duration

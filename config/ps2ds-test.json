@@ -76,7 +76,8 @@
       "id": "filter",
       "name": "filter",
       "op": "filter",
-      "func": [["m => m.get('score1) > 1"]]
+      "func": [["m => m.get('score1) > 1"]],
+      "paramsEncoded": false
     },
     {
       "type": "sink",
