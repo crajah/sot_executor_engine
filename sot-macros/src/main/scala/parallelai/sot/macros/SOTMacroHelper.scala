@@ -11,21 +11,21 @@ object SOTMacroHelper {
   /**
     * Lookup step for given operation
     */
-  def getOp(name: String, steps: List[OpType]): OpType = {
-    require(name.nonEmpty, "Operation name is empty")
+  def getOp(id: String, steps: List[OpType]): OpType = {
+    require(id.nonEmpty, "Operation id is empty")
 
-    val step = steps.find(_.name == name)
+    val step = steps.find(_.id == id)
 
-    require(step.isDefined, s"Cannot find $name in list of operations")
+    require(step.isDefined, s"Cannot find $id in list of operations")
 
     step.get
   }
 
   /**
-    * Lookup schema for the given name
+    * Lookup schema for the given id
     */
   def getSchema(id: String, schemas: List[Schema]): Schema = {
-    require(id.nonEmpty, "Schema name is empty")
+    require(id.nonEmpty, "Schema id is empty")
 
     val schema = schemas.find(_.id == id)
 
@@ -35,10 +35,10 @@ object SOTMacroHelper {
   }
 
   /**
-    * Lookup tap for the given name
+    * Lookup tap for the given id
     */
   def getTap(id: String, taps: List[TapDefinition]): TapDefinition = {
-    require(id.nonEmpty, "Source name is empty")
+    require(id.nonEmpty, "Source id is empty")
 
     val tap = taps.find(_.id == id)
 
@@ -47,25 +47,15 @@ object SOTMacroHelper {
     tap.get
   }
 
-  def parseOperation(operation: OpType, dag: Topology[String, DAGMapping], config: Config): Option[(Term, Option[List[Term]])] = {
+  def parseOperation(operation: OpType, dag: Topology[String, DAGMapping], config: Config): Option[(Term, List[List[Term]])] = {
 
     checkExpectedType(operation, dag)
 
     operation match {
       case op: TransformationOp =>
-        val name = op.op.parse[Term].get
-        val code = if (op.func.nonEmpty) Some(List(op.func.parse[Term].get)) else None
-        Some(name, code)
-      case op: TFPredictOp =>
-        val name = "predict".parse[Term].get
-        val fetchLit : List[Lit.String] = op.fetchOps.map(f => Lit.String(f)).toList
-        val fetchOps = Term.Assign(Term.Name("fetchOps"), Term.Apply(Term.Name("Seq"), fetchLit))
-        val modelBucket = Term.Assign(Term.Name("modelBucket"), Lit.String(op.modelBucket))
-        val modelPath = Term.Assign(Term.Name("modelPath"), Lit.String(op.modelPath))
-        val inFn = Term.Assign(Term.Name("inFn"), op.inFn.parse[Term].get)
-        val outFn = Term.Assign(Term.Name("outFn"), op.outFn.parse[Term].get)
-        val code = Some(List(modelBucket, modelPath, fetchOps, inFn, outFn))
-        Some(name, code)
+        val methodName = op.op.parse[Term].get
+        val params = op.params.map(paramClause => paramClause.map(_.parse[Term].get).toList).toList
+        Some(methodName, params)
       case _ => None
     }
 
@@ -73,9 +63,9 @@ object SOTMacroHelper {
 
   def checkExpectedType(op: OpType, dag: Topology[String, DAGMapping]) = {
 
-    if (dag.getSinkVertices().contains(op.name)) require(op.getClass == classOf[SinkOp], s"Operation ${op.name} should be a Sink")
-    else if (dag.getSourceVertices().contains(op.name)) require(op.getClass == classOf[SourceOp], s"Operation ${op.name} should be a Source")
-    else require(op.getClass == classOf[TransformationOp] | op.getClass == classOf[TFPredictOp], s"Operation ${op.name} should be a Transformation or a Predict")
+    if (dag.getSinkVertices().contains(op.id)) require(op.getClass == classOf[SinkOp], s"Operation ${op.id} should be a Sink")
+    else if (dag.getSourceVertices().contains(op.id)) require(op.getClass == classOf[SourceOp], s"Operation ${op.id} should be a Source")
+    else require(op.getClass == classOf[TransformationOp], s"Operation ${op.id} should be a Transformation")
 
   }
 
@@ -86,39 +76,46 @@ object SOTMacroHelper {
   def getOps(dag: Topology[String, DAGMapping],
              config: Config,
              tap: String,
-             ops: List[Option[(Term, Option[List[Term]])]]): List[Option[(Term, Option[List[Term]])]] = {
+             ops: List[Option[(Term, List[List[Term]])]]): List[Option[(Term, List[List[Term]])]] = {
     val nextStep = dag.edgeMap.get(tap)
     nextStep match {
       case Some(ns) =>
         val nextOperation = ns.head.to
         val operation = getOp(nextOperation, config.steps)
         val op = parseOperation(operation, dag, config)
-        getOps(dag, config, nextOperation, ops ++ List(op))
+        getOps(dag, config, nextOperation, ops :+ op)
       case None => ops
     }
   }
 
-  /**
-    * Parse expressions from a format List((ex1, a => b), (ex2, b => c))
-    * to in.ex1(a => b).ex2(b => c)
-    */
-  def parseStateMonadExpression(ops: List[(Term, Option[List[Term]])], q: Term = q"in"): Term = {
+  def parseStateMonadExpression(ops: List[(Term, List[List[Term]])], q: Term = q"in"): Term = {
     ops match {
       case Nil => q
       case head :: tail => {
         head match {
-          case (name, Some(expression)) =>
-            parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${Term.Apply(Term.Name(name.syntax), expression)})")
-          case (name, _) => parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${Term.Name(name.syntax)})")
+          case (methodName, paramClauses) => parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${applyTermClauses(methodName, paramClauses)})")
+          case (methodName, _) => parseStateMonadExpression(tail, q"${q}.flatMap(sColl => ${Term.Name(methodName.syntax)})")
         }
       }
     }
   }
 
+  def applyTermClauses(methodName: Term, paramClauses: List[List[Term]]): Term = {
+    applyTermClausesRecur(methodName, paramClauses.reverse)
+  }
+
+  def applyTermClausesRecur(methodName: Term, paramClauses: List[List[Term]]): Term = {
+    paramClauses match {
+      case firstClause :: Nil => Term.Apply(methodName, firstClause)
+      case h :: tail => Term.Apply(applyTermClausesRecur(methodName, tail), h)
+      case Nil => Term.Apply(methodName, List())
+    }
+  }
+
   def getSource(config: Config): (Option[Schema], TapDefinition) = {
     val dag = config.parseDAG()
-    val sourceOperationName = dag.getSourceVertices().head
-    val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
+    val sourceOpId = dag.getSourceVertices().head
+    val sourceOperation = SOTMacroHelper.getOp(sourceOpId, config.steps) match {
       case s: SourceOp => s
       case _ => throw new Exception("Unsupported source operation")
     }
@@ -128,15 +125,15 @@ object SOTMacroHelper {
 
   def getSinks(config: Config): List[(Option[Schema], TapDefinition)] = {
     val dag = config.parseDAG()
-    val sinkOperationNames = dag.getSinkVertices()
-    sinkOperationNames.map(sinkOperationName => {
-      val sinkOperation = SOTMacroHelper.getOp(sinkOperationName, config.steps) match {
+    val sinkOperationIds = dag.getSinkVertices()
+    sinkOperationIds.map(sinkOpId => {
+      val sinkOperation = SOTMacroHelper.getOp(sinkOpId, config.steps) match {
         case s: SinkOp => s
         case _ => throw new Exception("Unsupported sink operation")
       }
 
       val sinkSchema = sinkOperation.schema match {
-        case Some(schemaName) => Some(SOTMacroHelper.getSchema(schemaName, config.schemas))
+        case Some(schemaId) => Some(SOTMacroHelper.getSchema(schemaId, config.schemas))
         case None => None
       }
       (sinkSchema, SOTMacroHelper.getTap(sinkOperation.tap, config.taps))

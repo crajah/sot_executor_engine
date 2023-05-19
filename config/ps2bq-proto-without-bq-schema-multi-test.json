@@ -1,10 +1,12 @@
 {
+  "id": "schemaname",
   "name": "schemaname",
   "version": "version1",
   "schemas": [
     {
       "type": "protobuf",
       "id": "protoschema1",
+      "name": "protoschema1",
       "version": "version2",
       "definition": {
         "type": "protobufdefinition",
@@ -48,28 +50,34 @@
   "steps": [
     {
       "type": "source",
+      "id": "in",
       "name": "in",
       "schema": "protoschema1",
       "source": "pubsubsource1"
     },
     {
       "type": "transformation",
+      "id": "mapper",
       "name": "mapper",
       "op": "map",
-      "func": "m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"
+      "params": [["m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"]],
+      "paramsEncoded": false
     },
     {
       "type": "sink",
+      "id": "out",
       "name": "out",
       "source": "bigquerysource1"
     },
     {
       "type": "sink",
+      "id": "out2",
       "name": "out2",
       "source": "bigquerysource2"
     },
     {
       "type": "sink",
+      "id": "out3",
       "name": "out3",
       "source": "bigquerysource3"
     }

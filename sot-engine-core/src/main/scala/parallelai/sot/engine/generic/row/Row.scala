@@ -11,7 +11,7 @@ import shapeless.record._
 import shapeless.record.Record
 import syntax.singleton._
 
-trait Row {
+trait Row extends Serializable {
 
   type L <: HList
   val hl: L

@@ -45,6 +45,15 @@ import parallelai.sot.engine.runner.Writer
 import parallelai.sot.engine.runner.SCollectionStateMonad._
 import scalaz.Scalaz.init
 
+
+//// Windowing imports
+import org.joda.time.Duration
+import com.spotify.scio.values.WindowOptions
+import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
+import org.apache.beam.sdk.transforms.windowing.Window.ClosingBehavior
+import org.apache.beam.sdk.transforms.windowing.TimestampCombiner
+import org.apache.beam.sdk.transforms.windowing._
+
 /**
   * To run this class with a default configuration of application.conf:
   * <pre>

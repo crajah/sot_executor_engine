@@ -1,10 +1,12 @@
 {
+  "id": "schemaname",
   "name": "schemaname",
   "version": "version1",
   "schemas": [
     {
       "type": "avro",
       "id": "avroschema1",
+      "name": "avroschema1",
       "version": "version2",
       "definition": {
         "type": "record",
@@ -56,24 +58,29 @@
   "steps": [
     {
       "type": "source",
+      "id": "in",
       "name": "in",
       "schema": "avroschema1",
       "source": "pubsubsource1"
     },
     {
       "type": "transformation",
+      "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "func": "m => {val updated = m.append('id, Helper.random.nextInt());updated.project(projector(Col('id), Col('user), Col('score) ** Col('score1), Col('score) ** Col('score2), Col('eventTime)))}"
+      "func": [["m => {val updated = m.append('id, Helper.random.nextInt());updated.project(projector(Col('id), Col('user), Col('score) ** Col('score1), Col('score) ** Col('score2), Col('eventTime)))}"]],
+      "paramsEncoded": false
     },
     {
       "type": "transformation",
+      "id": "filter",
       "name": "filter",
       "op": "filter",
-      "func": "m => m.get('score1) > 1"
+      "func": [["m => m.get('score1) > 1"]]
     },
     {
       "type": "sink",
+      "id": "out",
       "name": "out",
       "source": "datastoresource1"
     }
