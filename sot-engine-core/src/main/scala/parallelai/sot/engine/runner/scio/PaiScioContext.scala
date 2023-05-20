@@ -35,9 +35,9 @@ object PaiScioContext extends Serializable {
     }
 
     def typedPubSubJSON[In <: HasJSONAnnotation : Manifest](project: String, topic: String)(implicit ev: io.circe.Decoder[In]): SCollection[In] = {
-      sc.pubsubTopic[Array[Byte]](s"projects/${project}/topics/${topic}", timestampAttribute = "timestamp_ms")
+      sc.pubsubTopic[String](s"projects/${project}/topics/${topic}", timestampAttribute = "timestamp_ms")
         .map { f =>
-          decode[In](new String(f)) match {
+          decode[In](f) match {
             case Right(in) => in
             case Left(p) => throw p.fillInStackTrace()
           }

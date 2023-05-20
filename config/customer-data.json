@@ -14,23 +14,66 @@
         "fields": [
           {
             "mode": "required",
-            "name": "userName",
-            "type": "String"
-          },
-          {
-            "mode": "required",
-            "name": "userId",
-            "type": "Long"
-          },
-          {
-            "mode": "required",
-            "name": "score",
-            "type": "Float"
-          },
-          {
-            "mode": "required",
-            "name": "eventTime",
-            "type": "Long"
+            "name": "payload",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "punter",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "required",
+                    "name": "account",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "required",
+                        "name": "username",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "required",
+                        "name": "playerId",
+                        "type": "String"
+                      }
+                    ]
+                  },
+                  {
+                    "mode": "required",
+                    "name": "customer",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "required",
+                        "name": "birthdate",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "required",
+                        "name": "firstName",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "required",
+                        "name": "gender",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "required",
+                        "name": "lastName",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "salutation",
+                        "type": "String"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
@@ -61,15 +104,7 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "params": [["m => {val updated = m.append('id, Helper.random.nextInt());updated.project(projector(Col('id), Col('userName), Col('userId), Col('score), Col('eventTime)))}"]],
-      "paramsEncoded": false
-    },
-    {
-      "type": "transformation",
-      "id": "filter",
-      "name": "filter",
-      "op": "filter",
-      "params": [["m => m.get('score) > 0.5"]],
+      "params": [["{m => val id = Col('payload) ->: Col('punter) ->: Col('account) ->: Col('playerId) ** Col('playerId);val firstName = Col('payload) ->: Col('punter) ->: Col('customer) ->: Col('firstName) ** Col('firstName);val lastName = Col('payload) ->: Col('punter) ->: Col('customer) ->: Col('lastName) ** Col('lastName);val userName = Col('payload) ->: Col('punter) ->: Col('account) ->: Col('username) ** Col('username);m.project(projector(id, firstName, lastName, userName))}"]],
       "paramsEncoded": false
     },
     {
@@ -86,10 +121,6 @@
     },
     {
       "from": "mapper1",
-      "to": "filter"
-    },
-    {
-      "from": "filter",
       "to": "out"
     }
   ]

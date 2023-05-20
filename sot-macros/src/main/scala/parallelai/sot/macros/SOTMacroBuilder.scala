@@ -151,19 +151,38 @@ object SOTMainMacroImpl {
     Seq(block)
   }
 
-  def jsonSchemaCodeGeneration(definition: JSONDefinition): Seq[Stat] = {
-    val listSchema = definition.fields.map { sc =>
-      s"${sc.name}: ${sc.`type`}".parse[Term.Param].get
+  def SOTFieldParser(fieldName: String, fieldType: String, fieldMode: String): Term.Param = {
+    fieldMode match {
+      case "nullable" => s"$fieldName: Option[$fieldType]".parse[Term.Param].get
+      case "repeated" => s"$fieldName: List[$fieldType]".parse[Term.Param].get
+      case "required" => s"$fieldName: $fieldType".parse[Term.Param].get
     }
+  }
 
-    val name = Type.Name(definition.name)
+  def SOTCaseClassParser(fields: List[JSONDefinitionField], name: String): List[(String, Term.Param)] = {
+    fields.flatMap {
+      f =>
+        f.`type` match {
+          case "record" =>
+            val newName = NameProvider.getUniqueName(name)
+            (name, SOTFieldParser(f.name, newName, f.mode)) :: SOTCaseClassParser(f.fields.get, newName)
+          case _ => List((name, SOTFieldParser(f.name, f.`type`, f.mode)))
+        }
+    }
+  }
 
-    val block =
-      q"""
+  def jsonSchemaCodeGeneration(definition: JSONDefinition): Seq[Defn.Class] = {
+    val schemaFields = SOTCaseClassParser(definition.fields, definition.name)
+
+    schemaFields.groupBy(_._1).map {
+      case (key, value) =>
+        val name = Type.Name(key)
+        val listSchema = value.map(_._2)
+        q"""
         case class $name ( ..$listSchema) extends parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
-      """
+        """
+    }.toList
 
-    Seq(block)
   }
 
   def avroSchemaCodeGenerator(definition: AvroDefinition): Seq[Stat] = {
