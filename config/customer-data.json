@@ -13,18 +13,22 @@
         "name": "Customer",
         "fields": [
           {
+            "mode": "required",
             "name": "userName",
             "type": "String"
           },
           {
+            "mode": "required",
             "name": "userId",
             "type": "Long"
           },
           {
+            "mode": "required",
             "name": "score",
             "type": "Float"
           },
           {
+            "mode": "required",
             "name": "eventTime",
             "type": "Long"
           }
@@ -36,12 +40,12 @@
     {
       "type": "pubsub",
       "id": "pubsubsource1",
-      "topic": "jsontest"
+      "topic": "crm-stg-df-customer"
     },
     {
       "type": "datastore",
       "id": "datastoresource1",
-      "kind": "dataflowwrite1"
+      "kind": "crm-stg-df-customer"
     }
   ],
   "steps": [
@@ -65,7 +69,7 @@
       "id": "filter",
       "name": "filter",
       "op": "filter",
-      "params": [["m => m.get('score) > 1.0"]],
+      "params": [["m => m.get('score) > 0.5"]],
       "paramsEncoded": false
     },
     {
