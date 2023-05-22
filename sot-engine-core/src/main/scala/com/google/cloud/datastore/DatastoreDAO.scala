@@ -8,8 +8,8 @@ import scala.collection.JavaConverters._
 
 class DatastoreDao[A](kind: String, projectId: String) extends Serializable {
 
-  val datastore = DatastoreOptions.getDefaultInstance().getService()
-  val keyFactory = datastore.newKeyFactory().setKind(kind)
+  lazy val datastore = DatastoreOptions.getDefaultInstance().getService()
+  lazy val keyFactory = datastore.newKeyFactory().setKind(kind)
 
   def dataStoreT: DatastoreType[A] = DatastoreType[A]
 
