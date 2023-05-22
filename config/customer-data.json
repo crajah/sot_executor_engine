@@ -101,6 +101,14 @@
     },
     {
       "type": "transformation",
+      "id": "filter1",
+      "name": "filter1",
+      "op": "filter",
+      "params": [["m => ! m.get('username).startsWith(\"__\")"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
@@ -121,6 +129,10 @@
     },
     {
       "from": "mapper1",
+      "to": "filter1"
+    },
+    {
+      "from": "filter1",
       "to": "out"
     }
   ]
