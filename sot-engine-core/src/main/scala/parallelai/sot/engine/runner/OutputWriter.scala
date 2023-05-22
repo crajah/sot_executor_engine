@@ -130,11 +130,14 @@ object SchemalessWriter {
 
 object DatastoreSchemalessWriter {
 
-  implicit def datastoreSchemalessWriter[OutR <: HList]: DatastoreSchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] =
-    new DatastoreSchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] {
-    def write(sColl: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils)(implicit h: IsHCons[OutR], toL: ToEntity[OutR]): Unit = {
+  implicit def datastoreSchemalessWriter[OutR <: HList](implicit
+                                                        h: IsHCons[OutR],
+                                                        toL: ToEntity[OutR]
+                                                       ): SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] =
+    new SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] {
+    def write(sColl: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
       val project = utils.getProject
-      sColl.map { case rec =>
+      sColl.map { rec =>
         val entity = DatastoreType.toEntityBuilder(rec.hl)
         val key = h.head(rec.hl)
         val keyEntity = key match {
@@ -185,14 +188,4 @@ object writer2 extends Poly2 {
       (sColl, utils)
   }
 
-  implicit def datastoreSchemalessWriter[TAP <: DatastoreTapDefinition, UTIL, ANNO, OutT <: HList]
-  (implicit
-   e: ToEntity[OutT],
-   h: IsHCons[OutT],
-   writer: DatastoreSchemalessWriter[TAP, UTIL, ANNO, OutT]
-  ) = at[(SCollection[Row.Aux[OutT]], UTIL), SchemalessTapDef[TAP, UTIL, ANNO]] {
-    case ((sColl, utils), tap) =>
-      writer.write(sColl, tap.tapDefinition, utils)
-      (sColl, utils)
-  }
 }
