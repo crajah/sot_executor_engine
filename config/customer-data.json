@@ -104,7 +104,7 @@
       "id": "filter1",
       "name": "filter1",
       "op": "filter",
-      "params": [["m => ! m.get('username).startsWith(\"__\")"]],
+      "params": [["m => ! m.get('payload).get('punter).get('account).get('username).startsWith(\"__\")"]],
       "paramsEncoded": false
     },
     {
@@ -112,7 +112,7 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "params": [["{m => val id = Col('payload) ->: Col('punter) ->: Col('account) ->: Col('playerId) ** Col('playerId);val firstName = Col('payload) ->: Col('punter) ->: Col('customer) ->: Col('firstName) ** Col('firstName);val lastName = Col('payload) ->: Col('punter) ->: Col('customer) ->: Col('lastName) ** Col('lastName);val userName = Col('payload) ->: Col('punter) ->: Col('account) ->: Col('username) ** Col('username);val mm = m.append('ts, Helper.fmt.print(Helper.Instant.now()));mm.project(projector(userName, id, firstName, lastName))}"]],
+      "params": [["{m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))}"]],
       "paramsEncoded": false
     },
     {
