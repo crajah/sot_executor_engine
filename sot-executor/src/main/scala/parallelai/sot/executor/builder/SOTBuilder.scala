@@ -57,6 +57,9 @@ import org.apache.beam.sdk.transforms.windowing.Window.ClosingBehavior
 import org.apache.beam.sdk.transforms.windowing.TimestampCombiner
 import org.apache.beam.sdk.transforms.windowing._
 
+import parallelai.sot.engine.io.bigquery._
+import parallelai.sot.engine.io.datastore._
+
 /**
   * To run this class with a default configuration of application.conf:
   * <pre>
