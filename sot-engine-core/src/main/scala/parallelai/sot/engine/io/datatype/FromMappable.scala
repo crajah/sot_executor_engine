@@ -1,4 +1,4 @@
-package parallelai.sot.engine.io.datastore
+package parallelai.sot.engine.io.datatype
 
 import shapeless._
 import shapeless.labelled.{FieldType, field}

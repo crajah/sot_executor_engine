@@ -5,13 +5,13 @@ import com.google.protobuf.ByteString
 import com.trueaccord.scalapb.GeneratedEnum
 import org.joda.time._
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder}
-import shapeless.datatype.mappable.{BaseMappableType, MappableType, ToMappable}
+import parallelai.sot.engine.io.datatype.{BaseMappableType, MappableType, ToMappable}
 import shapeless.labelled.FieldType
 import shapeless.{::, HList, Lazy, Witness}
 
 import scala.collection.JavaConverters._
 
-trait BaseBigQueryMappableTypeBQ[V] extends MappableTypeBQ[BigQueryMap, V] {
+trait BaseBigQueryMappableType[V] extends MappableType[BigQueryMap, V] {
   def from(value: Any): V
 
   def to(value: V): Any
@@ -43,31 +43,7 @@ trait BaseBigQueryMappableTypeBQ[V] extends MappableTypeBQ[BigQueryMap, V] {
 
 trait BigQueryMappableType {
 
-  implicit def nestedHListToMappable[K <: Symbol, H <: HList, T <: HList, M]
-  (implicit wit: Witness.Aux[K], mbt: BaseMappableTypeBQ[M],
-   toH: Lazy[ToMappableBQ[H, M]], toT: Lazy[ToMappableBQ[T, M]])
-  : ToMappableBQ[FieldType[K, H] :: T, M] = new ToMappableBQ[FieldType[K, H] :: T, M] {
-    override def apply(l: FieldType[K, H] :: T): M =
-      mbt.put(wit.value.name, toH.value(l.head), toT.value(l.tail))
-  }
-
-  implicit def nestedHListOptionToMappable[K <: Symbol, H <: HList, T <: HList, M]
-  (implicit wit: Witness.Aux[K], mbt: BaseMappableTypeBQ[M],
-   toH: Lazy[ToMappableBQ[H, M]], toT: Lazy[ToMappableBQ[T, M]])
-  : ToMappableBQ[FieldType[K, Option[H]] :: T, M] = new ToMappableBQ[FieldType[K, Option[H]] :: T, M] {
-    override def apply(l: FieldType[K, Option[H]] :: T): M =
-      mbt.put(wit.value.name, l.head.map(h => toH.value.apply(h)), toT.value(l.tail))
-  }
-
-  implicit def nestedHListListToMappable[K <: Symbol, H <: HList, T <: HList, M]
-  (implicit wit: Witness.Aux[K], mbt: BaseMappableTypeBQ[M],
-   toH: Lazy[ToMappableBQ[H, M]], toT: Lazy[ToMappableBQ[T, M]])
-  : ToMappableBQ[FieldType[K, List[H]] :: T, M] = new ToMappableBQ[FieldType[K, List[H]] :: T, M] {
-    override def apply(l: FieldType[K, List[H]] :: T): M =
-      mbt.put(wit.value.name, l.head.map(h => toH.value.apply(h)), toT.value(l.tail))
-  }
-
-  implicit val bigQueryBaseMappableType = new BaseMappableTypeBQ[BigQueryMap] {
+  implicit val bigQueryBaseMappableType = new BaseMappableType[BigQueryMap] {
     override def base: BigQueryMap = new java.util.LinkedHashMap[String, Any]()
 
     override def get(m: BigQueryMap, key: String): Option[BigQueryMap] =
@@ -93,7 +69,7 @@ trait BigQueryMappableType {
     }
   }
 
-  private def at[T](fromFn: Any => T, toFn: T => Any) = new BaseBigQueryMappableTypeBQ[T] {
+  private def at[T](fromFn: Any => T, toFn: T => Any) = new BaseBigQueryMappableType[T] {
     override def from(value: Any): T = fromFn(value)
 
     override def to(value: T): Any = toFn(value)

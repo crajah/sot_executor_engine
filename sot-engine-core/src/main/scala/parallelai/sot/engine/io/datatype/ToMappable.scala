@@ -1,4 +1,4 @@
-package parallelai.sot.engine.io.datastore
+package parallelai.sot.engine.io.datatype
 
 import shapeless._
 import shapeless.labelled.FieldType
@@ -68,7 +68,36 @@ trait LowPriorityToMappableSeq0 extends LowPriorityToMappableOption0 {
   }
 }
 
-object ToMappable extends LowPriorityToMappableSeq0 {
+//Implicits for nested HList
+trait LowPriorityNestedMappable extends LowPriorityToMappableSeq0 {
+
+  implicit def nestedHListToMappable[K <: Symbol, H <: HList, T <: HList, M]
+  (implicit wit: Witness.Aux[K], mbt: BaseMappableType[M],
+   toH: Lazy[ToMappable[H, M]], toT: Lazy[ToMappable[T, M]]): ToMappable[FieldType[K, H] :: T, M] =
+    new ToMappable[FieldType[K, H] :: T, M] {
+      override def apply(l: FieldType[K, H] :: T): M =
+        mbt.put(wit.value.name, toH.value(l.head), toT.value(l.tail))
+    }
+
+  implicit def nestedHListOptionToMappable[K <: Symbol, H <: HList, T <: HList, M]
+  (implicit wit: Witness.Aux[K], mbt: BaseMappableType[M],
+   toH: Lazy[ToMappable[H, M]], toT: Lazy[ToMappable[T, M]]): ToMappable[FieldType[K, Option[H]] :: T, M] =
+    new ToMappable[FieldType[K, Option[H]] :: T, M] {
+      override def apply(l: FieldType[K, Option[H]] :: T): M =
+        mbt.put(wit.value.name, l.head.map(h => toH.value.apply(h)), toT.value(l.tail))
+    }
+
+  implicit def nestedHListListToMappable[K <: Symbol, H <: HList, T <: HList, M]
+  (implicit wit: Witness.Aux[K], mbt: BaseMappableType[M],
+   toH: Lazy[ToMappable[H, M]], toT: Lazy[ToMappable[T, M]]): ToMappable[FieldType[K, List[H]] :: T, M] =
+    new ToMappable[FieldType[K, List[H]] :: T, M] {
+      override def apply(l: FieldType[K, List[H]] :: T): M =
+        mbt.put(wit.value.name, l.head.map(h => toH.value.apply(h)), toT.value(l.tail))
+    }
+
+}
+
+object ToMappable extends LowPriorityNestedMappable {
   implicit def hnilToMappable[M](implicit mbt: BaseMappableType[M])
   : ToMappable[HNil, M] = new ToMappable[HNil, M] {
     override def apply(l: HNil): M = mbt.base

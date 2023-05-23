@@ -1,6 +1,5 @@
 package parallelai.sot.engine.runner
 
-import com.google.api.services.bigquery.model.{TableRow, TableSchema}
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation
 import com.spotify.scio.values.SCollection
@@ -9,15 +8,16 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.{CreateDisposition, 
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
-import parallelai.sot.engine.io.bigquery.{BigQuerySchemaProvider, HListSchemaProvider, ToTableRow}
 import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, DatastoreTapDefinition, PubSubTapDefinition, TapDefinition}
 import parallelai.sot.engine.runner.scio.PaiScioContext._
 import shapeless.{HList, LabelledGeneric, Poly2}
-import parallelai.sot.engine.io.bigquery._
-import parallelai.sot.engine.io.datastore.{DatastoreType, ToEntity}
 import parallelai.sot.engine.io.utils.annotations._
-import shapeless.ops.hlist.IsHCons
 import com.google.datastore.v1.client.DatastoreHelper.makeKey
+
+import shapeless.ops.hlist.IsHCons
+
+import parallelai.sot.engine.io.datastore._
+import parallelai.sot.engine.io.bigquery._
 
 trait Writer[TAP, UTIL, ANNO, Out] extends Serializable {
   def write[TOUT <: HList](sc: SCollection[Row.Aux[TOUT]], tap: TAP, utils: UTIL)(implicit
@@ -57,23 +57,23 @@ object Writer {
 
   implicit def bigqueryWriter[T0 <: HasAnnotation : Manifest]: Writer[BigQueryTapDefinition, SOTUtils, HasAnnotation, T0] =
     new Writer[BigQueryTapDefinition, SOTUtils, HasAnnotation, T0] {
-    def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: BigQueryTapDefinition, utils: SOTUtils)(implicit
-                                                                                                                   gen: LabelledGeneric.Aux[T0, OutR]): Unit = {
-      val createDisposition = tap.createDisposition match {
-        case Some(cd) if cd == "CREATE_IF_NEEDED" => CreateDisposition.CREATE_IF_NEEDED
-        case Some(cd) if cd == "CREATE_NEVER" => CreateDisposition.CREATE_NEVER
-        case None => CreateDisposition.CREATE_IF_NEEDED
-      }
-      val writeDisposition = tap.writeDisposition match {
-        case Some(wd) if wd == "WRITE_TRUNCATE" => WriteDisposition.WRITE_TRUNCATE
-        case Some(wd) if wd == "WRITE_EMPTY" => WriteDisposition.WRITE_EMPTY
-        case Some(wd) if wd == "WRITE_APPEND" => WriteDisposition.WRITE_APPEND
-        case None => WriteDisposition.WRITE_EMPTY
-      }
+      def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: BigQueryTapDefinition, utils: SOTUtils)(implicit
+                                                                                                                     gen: LabelledGeneric.Aux[T0, OutR]): Unit = {
+        val createDisposition = tap.createDisposition match {
+          case Some(cd) if cd == "CREATE_IF_NEEDED" => CreateDisposition.CREATE_IF_NEEDED
+          case Some(cd) if cd == "CREATE_NEVER" => CreateDisposition.CREATE_NEVER
+          case None => CreateDisposition.CREATE_IF_NEEDED
+        }
+        val writeDisposition = tap.writeDisposition match {
+          case Some(wd) if wd == "WRITE_TRUNCATE" => WriteDisposition.WRITE_TRUNCATE
+          case Some(wd) if wd == "WRITE_EMPTY" => WriteDisposition.WRITE_EMPTY
+          case Some(wd) if wd == "WRITE_APPEND" => WriteDisposition.WRITE_APPEND
+          case None => WriteDisposition.WRITE_EMPTY
+        }
 
-      sCollection.map(x => gen.from(x.hl)).saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}", writeDisposition, createDisposition)
+        sCollection.map(x => gen.from(x.hl)).saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}", writeDisposition, createDisposition)
+      }
     }
-  }
 }
 
 object DatastoreWriter {
@@ -105,47 +105,44 @@ object SchemalessWriter {
                                                       ): SchemalessWriter[BigQueryTapDefinition, SOTUtils, Schemaless, OutR] =
     new SchemalessWriter[BigQueryTapDefinition, SOTUtils, Schemaless, OutR] {
 
-    def write(sColl: SCollection[Row.Aux[OutR]], tap: BigQueryTapDefinition, utils: SOTUtils): Unit = {
-      val createDisposition = tap.createDisposition match {
-        case Some(cd) if cd == "CREATE_IF_NEEDED" => CreateDisposition.CREATE_IF_NEEDED
-        case Some(cd) if cd == "CREATE_NEVER" => CreateDisposition.CREATE_NEVER
-        case None => CreateDisposition.CREATE_IF_NEEDED
-      }
-      val writeDisposition = tap.writeDisposition match {
-        case Some(wd) if wd == "WRITE_TRUNCATE" => WriteDisposition.WRITE_TRUNCATE
-        case Some(wd) if wd == "WRITE_EMPTY" => WriteDisposition.WRITE_EMPTY
-        case Some(wd) if wd == "WRITE_APPEND" => WriteDisposition.WRITE_APPEND
-        case None => WriteDisposition.WRITE_EMPTY
-      }
-      val schema = BigQuerySchemaProvider[OutR].getSchema
+      def write(sColl: SCollection[Row.Aux[OutR]], tap: BigQueryTapDefinition, utils: SOTUtils): Unit = {
+        val createDisposition = tap.createDisposition match {
+          case Some(cd) if cd == "CREATE_IF_NEEDED" => CreateDisposition.CREATE_IF_NEEDED
+          case Some(cd) if cd == "CREATE_NEVER" => CreateDisposition.CREATE_NEVER
+          case None => CreateDisposition.CREATE_IF_NEEDED
+        }
+        val writeDisposition = tap.writeDisposition match {
+          case Some(wd) if wd == "WRITE_TRUNCATE" => WriteDisposition.WRITE_TRUNCATE
+          case Some(wd) if wd == "WRITE_EMPTY" => WriteDisposition.WRITE_EMPTY
+          case Some(wd) if wd == "WRITE_APPEND" => WriteDisposition.WRITE_APPEND
+          case None => WriteDisposition.WRITE_EMPTY
+        }
+        val schema = BigQuerySchemaProvider[OutR].getSchema
 
-      sColl.map(m => {
-        val tr = new TableRow()
-        tr.putAll(toL(m.hl))
-        tr
-      }).saveAsBigQuery(s"${tap.dataset}.${tap.table}", schema, writeDisposition, createDisposition, null)
+        sColl.map(m => m.hl.toTableRow(toL)).saveAsBigQuery(s"${tap.dataset}.${tap.table}", schema, writeDisposition, createDisposition, null)
+      }
     }
-  }
 }
 
 object DatastoreSchemalessWriter {
 
   implicit def datastoreSchemalessWriter[OutR <: HList]: DatastoreSchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] =
     new DatastoreSchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] {
-    def write(sColl: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils)(implicit h: IsHCons[OutR], toL: ToEntity[OutR]): Unit = {
-      val project = utils.getProject
-      sColl.map { rec =>
-        val entity = DatastoreType.toEntityBuilder(rec.hl)
-        val key = h.head(rec.hl)
-        val keyEntity = key match {
-          case name: String => makeKey(tap.kind, name.asInstanceOf[AnyRef])
-          case id: Int => makeKey(tap.kind, id.asInstanceOf[AnyRef])
-        }
-        entity.setKey(keyEntity)
-        entity.build()
-      }.saveAsDatastore(project)
+      def write(sColl: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils)(implicit h: IsHCons[OutR], toL: ToEntity[OutR]): Unit = {
+
+        val project = utils.getProject
+        sColl.map { rec =>
+          val entity = rec.hl.toEntityBuilder
+          val key = h.head(rec.hl)
+          val keyEntity = key match {
+            case name: String => makeKey(tap.kind, name.asInstanceOf[AnyRef])
+            case id: Int => makeKey(tap.kind, id.asInstanceOf[AnyRef])
+          }
+          entity.setKey(keyEntity)
+          entity.build()
+        }.saveAsDatastore(project)
+      }
     }
-  }
 
 }
 

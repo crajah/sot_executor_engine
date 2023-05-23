@@ -5,7 +5,6 @@ import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.values.SCollection
 import com.trueaccord.scalapb.GeneratedMessage
-import parallelai.sot.engine.io.datastore.{DatastoreType, ToEntity}
 import parallelai.sot.engine.serialization.avro.AvroUtils
 import com.google.datastore.v1.client.DatastoreHelper.makeKey
 import parallelai.sot.engine.io.utils.annotations.{HasDatastoreAnnotation, HasJSONAnnotation}
@@ -14,6 +13,7 @@ import io.circe.generic.auto._
 import io.circe.parser._
 import org.slf4j.LoggerFactory
 
+import parallelai.sot.engine.io.datastore._
 
 object PaiScioContext extends Serializable {
 
