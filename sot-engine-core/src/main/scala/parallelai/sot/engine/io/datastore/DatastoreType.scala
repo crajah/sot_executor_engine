@@ -9,6 +9,7 @@ import shapeless._
 import shapeless.labelled.FieldType
 
 class DatastoreType[A] extends Serializable {
+
   def fromEntityBuilder[L <: HList](m: Entity.Builder)
                                    (implicit
                                     gen: LabelledGeneric.Aux[A, L],
@@ -37,5 +38,12 @@ class DatastoreType[A] extends Serializable {
 object DatastoreType {
 
   def apply[A]: DatastoreType[A] = new DatastoreType[A]
+
+  def at[V](fromFn: Value => V, toFn: V => Value): BaseDatastoreMappableType[V] =
+    new BaseDatastoreMappableType[V] {
+      override def from(value: Value): V = fromFn(value)
+
+      override def to(value: V): Value = toFn(value)
+    }
 
 }
