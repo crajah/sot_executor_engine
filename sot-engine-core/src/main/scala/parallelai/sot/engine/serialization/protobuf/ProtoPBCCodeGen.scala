@@ -26,7 +26,7 @@ object ProtoPBCCodeGen {
   def executeAll(schemaBase64: String): String = {
     val srcTarget = Files.createTempDirectory("scalapbCodeGen").toFile
 
-    val protoPath = new File("sot-executor/target/protobuf/")
+    val protoPath = new File("sot-engine-core/target/protobuf/")
     if (!protoPath.exists()) protoPath.mkdirs()
 
     // Base64 decode the schema
@@ -35,13 +35,13 @@ object ProtoPBCCodeGen {
     val schema = scalapbOptions + protoSchema
 
     // Write the schema to a file
-    val protoFile = new File("sot-executor/target/protobuf/gen.proto")
+    val protoFile = new File("sot-engine-core/target/protobuf/gen.proto")
     new PrintWriter(protoFile) { write(schema); close }
 
     // Generate the code to a source file
-    val scalapbPath = new File("sot-engine-core/src/main/resources/protobuf/")
-    val thridPartyPath = new File("sot-engine-core/src/main/resources/protobuf/third_party")
-    val result = execute(srcTarget, Set(protoFile), List(protoPath, scalapbPath, thridPartyPath))
+    val scalapbPath = new File(this.getClass.getResource("/protobuf").toURI)
+    val thirdPartyPath = new File(this.getClass.getResource("/protobuf/third_party").toURI)
+    val result = execute(srcTarget, Set(protoFile), List(protoPath, scalapbPath, thirdPartyPath))
 
     // Read the generated code
     if (result != 0) throw new IllegalArgumentException(s"Failed to generate proto case classes, return code $result")
