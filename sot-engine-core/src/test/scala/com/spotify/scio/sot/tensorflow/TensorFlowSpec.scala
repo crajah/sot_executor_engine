@@ -62,7 +62,7 @@ class TensorflowSpec extends PipelineSpec {
     (graph, const, helloworld)
   }
 
-  "Tensorflow" should "work for hello-wold" in {
+  "Tensorflow" should "work for hello-world" in {
     val (graph, const, helloworld) = createHelloWorldGraph
     val session = new Session(graph)
     val r = session.runner().fetch(const).run().get(0)

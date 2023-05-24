@@ -25,9 +25,9 @@ class RowTest extends WordSpec with Matchers {
 
       row.hl should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
 
-      row.get('a) should be (1)
-      row.get('b) should be ("b")
-      row.get('c) should be (1.0)
+      row.get('a) should be(1)
+      row.get('b) should be("b")
+      row.get('c) should be(1.0)
 
     }
 
@@ -39,17 +39,28 @@ class RowTest extends WordSpec with Matchers {
 
       row.hl should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: 'n ->> ('i ->> 1 :: HNil) :: HNil)
 
-      row.get('a) should be (1)
-      row.get('b) should be ("b")
-      row.get('c) should be (1.0)
-      row.get('n) should be ('i ->> 1 :: HNil)
-      row.get('n).get('i) should be (1)
+      row.get('a) should be(1)
+      row.get('b) should be("b")
+      row.get('c) should be(1.0)
+      row.get('n) should be('i ->> 1 :: HNil)
+      row.get('n).get('i) should be(1)
 
     }
 
   }
 
   "Row operations" should {
+
+    "concat two rows" in {
+
+      val r1 = Row('a ->> 1 :: 'b ->> "b" :: HNil)
+      val r2 = Row('c ->> 1.0 :: 'd ->> 2.0 :: HNil)
+
+      val rconcat = r1.concat(r2)
+
+      rconcat.hl should be ('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: 'd ->> 2.0 :: HNil)
+
+    }
 
     "append the row object with a new column" in {
 
@@ -323,7 +334,7 @@ class RowTest extends WordSpec with Matchers {
 
       val row = Row(ncc)
 
-    val selector = Witness('l1) ->: Witness('i) :: Witness('l1) ->: (Witness('l2) ->: Witness('l2s)) :: Witness('a) :: HNil
+      val selector = Witness('l1) ->: Witness('i) :: Witness('l1) ->: (Witness('l2) ->: Witness('l2s)) :: Witness('a) :: HNil
 
       val rowProjected = row.project(selector)
 
@@ -418,7 +429,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.project(pr)
 
-      rowProjected.get('winnings2) should be ("1.2")
+      rowProjected.get('winnings2) should be("1.2")
 
     }
 
@@ -445,7 +456,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.project(pr)
 
-      rowProjected.get('header2).get('activityId) should be (12L)
+      rowProjected.get('header2).get('activityId) should be(12L)
 
     }
 
@@ -453,7 +464,7 @@ class RowTest extends WordSpec with Matchers {
 
       import Syntax._
 
-      val wins = Col('state) ->:  Col('bets) ->: Col('payout) ->: Col('winnings) ** Col('winnings2)
+      val wins = Col('state) ->: Col('bets) ->: Col('payout) ->: Col('winnings) ** Col('winnings2)
       val customerRef = Col('state) ->: Col('bets) ->: Col('customerRef)
       val activityId = Col('header) ->: Col('activityId)
       val header = Col('header) ** Col('header2)
@@ -476,10 +487,10 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.project(pr)
 
-      rowProjected.get('activityId) should be (12L)
-      rowProjected.get('winnings2) should be ("1.2")
-      rowProjected.get('header2).get('activityId) should be (12L)
-      rowProjected.get('customerRef) should be ("custRef")
+      rowProjected.get('activityId) should be(12L)
+      rowProjected.get('winnings2) should be("1.2")
+      rowProjected.get('header2).get('activityId) should be(12L)
+      rowProjected.get('customerRef) should be("custRef")
 
     }
 

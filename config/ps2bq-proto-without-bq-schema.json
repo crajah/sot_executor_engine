@@ -44,7 +44,7 @@
       "id": "mapper",
       "name": "mapper",
       "op": "map",
-      "params": [["m => m.append('ts, Helper.fmt.print(Instant.now()))"]],
+      "params": [["m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"]],
       "paramsEncoded": false
     },
     {

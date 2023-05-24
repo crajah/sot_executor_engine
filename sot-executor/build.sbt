@@ -6,6 +6,7 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies ++= Seq(
+  circe,
   typesafeConfig,
   pureConfig,
   grizzledLogging,

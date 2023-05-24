@@ -5,13 +5,13 @@ import com.google.protobuf.ByteString
 import com.trueaccord.scalapb.GeneratedEnum
 import org.joda.time._
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatterBuilder}
-import shapeless.datatype.mappable.{BaseMappableType, MappableType, ToMappable}
+import parallelai.sot.engine.io.datatype.{BaseMappableType, MappableType, ToMappable}
 import shapeless.labelled.FieldType
 import shapeless.{::, HList, Lazy, Witness}
 
 import scala.collection.JavaConverters._
 
-trait BaseBigQueryMappableTypeBQ[V] extends MappableTypeBQ[BigQueryMap, V] {
+trait BaseBigQueryMappableType[V] extends MappableType[BigQueryMap, V] {
   def from(value: Any): V
 
   def to(value: V): Any
@@ -43,31 +43,7 @@ trait BaseBigQueryMappableTypeBQ[V] extends MappableTypeBQ[BigQueryMap, V] {
 
 trait BigQueryMappableType {
 
-  implicit def nestedHListToMappable[K <: Symbol, H <: HList, T <: HList, M]
-  (implicit wit: Witness.Aux[K], mbt: BaseMappableTypeBQ[M],
-   toH: Lazy[ToMappableBQ[H, M]], toT: Lazy[ToMappableBQ[T, M]])
-  : ToMappableBQ[FieldType[K, H] :: T, M] = new ToMappableBQ[FieldType[K, H] :: T, M] {
-    override def apply(l: FieldType[K, H] :: T): M =
-      mbt.put(wit.value.name, toH.value(l.head), toT.value(l.tail))
-  }
-
-  implicit def nestedHListOptionToMappable[K <: Symbol, H <: HList, T <: HList, M]
-  (implicit wit: Witness.Aux[K], mbt: BaseMappableTypeBQ[M],
-   toH: Lazy[ToMappableBQ[H, M]], toT: Lazy[ToMappableBQ[T, M]])
-  : ToMappableBQ[FieldType[K, Option[H]] :: T, M] = new ToMappableBQ[FieldType[K, Option[H]] :: T, M] {
-    override def apply(l: FieldType[K, Option[H]] :: T): M =
-      mbt.put(wit.value.name, l.head.map(h => toH.value.apply(h)), toT.value(l.tail))
-  }
-
-  implicit def nestedHListListToMappable[K <: Symbol, H <: HList, T <: HList, M]
-  (implicit wit: Witness.Aux[K], mbt: BaseMappableTypeBQ[M],
-   toH: Lazy[ToMappableBQ[H, M]], toT: Lazy[ToMappableBQ[T, M]])
-  : ToMappableBQ[FieldType[K, List[H]] :: T, M] = new ToMappableBQ[FieldType[K, List[H]] :: T, M] {
-    override def apply(l: FieldType[K, List[H]] :: T): M =
-      mbt.put(wit.value.name, l.head.map(h => toH.value.apply(h)), toT.value(l.tail))
-  }
-
-  implicit val bigQueryBaseMappableType = new BaseMappableTypeBQ[BigQueryMap] {
+  implicit val bigQueryBaseMappableType = new BaseMappableType[BigQueryMap] {
     override def base: BigQueryMap = new java.util.LinkedHashMap[String, Any]()
 
     override def get(m: BigQueryMap, key: String): Option[BigQueryMap] =
@@ -93,38 +69,32 @@ trait BigQueryMappableType {
     }
   }
 
-  private def at[T](fromFn: Any => T, toFn: T => Any) = new BaseBigQueryMappableTypeBQ[T] {
-    override def from(value: Any): T = fromFn(value)
-
-    override def to(value: T): Any = toFn(value)
-  }
-
   private def id[T](x: T): Any = x.asInstanceOf[Any]
 
-  implicit val booleanBigQueryMappableType = at[Boolean](_.toString.toBoolean, id)
-  implicit val intBigQueryMappableType = at[Int](_.toString.toInt, id)
-  implicit val longBigQueryMappableType = at[Long](_.toString.toLong, id)
-  implicit val floatBigQueryMappableType = at[Float](_.toString.toFloat, id)
-  implicit val doubleBigQueryMappableType = at[Double](_.toString.toDouble, id)
-  implicit val stringBigQueryMappableType = at[String](_.toString, id)
-  implicit val byteArrayBigQueryMappableType = at[Array[Byte]](
+  implicit val booleanBigQueryMappableType = BigQueryType.at[Boolean](_.toString.toBoolean, id)
+  implicit val intBigQueryMappableType = BigQueryType.at[Int](_.toString.toInt, id)
+  implicit val longBigQueryMappableType = BigQueryType.at[Long](_.toString.toLong, id)
+  implicit val floatBigQueryMappableType = BigQueryType.at[Float](_.toString.toFloat, id)
+  implicit val doubleBigQueryMappableType = BigQueryType.at[Double](_.toString.toDouble, id)
+  implicit val stringBigQueryMappableType = BigQueryType.at[String](_.toString, id)
+  implicit val byteArrayBigQueryMappableType = BigQueryType.at[Array[Byte]](
     x => BaseEncoding.base64().decode(x.toString),
     x => BaseEncoding.base64().encode(x))
 
   //TODO: check if this is correct
-  implicit val byteStringBigQueryMappableType = at[ByteString](
+  implicit val byteStringBigQueryMappableType = BigQueryType.at[ByteString](
     x => ByteString.copyFromUtf8(x.toString),
     x => x.toByteArray
   )
   import TimestampConverter._
 
-  implicit val timestampBigQueryMappableType = at[Instant](toInstant, fromInstant)
-  implicit val localDateBigQueryMappableType = at[LocalDate](toLocalDate, fromLocalDate)
-  implicit val localTimeBigQueryMappableType = at[LocalTime](toLocalTime, fromLocalTime)
+  implicit val timestampBigQueryMappableType = BigQueryType.at[Instant](toInstant, fromInstant)
+  implicit val localDateBigQueryMappableType = BigQueryType.at[LocalDate](toLocalDate, fromLocalDate)
+  implicit val localTimeBigQueryMappableType = BigQueryType.at[LocalTime](toLocalTime, fromLocalTime)
   implicit val localDateTimeBigQueryMappableType =
-    at[LocalDateTime](toLocalDateTime, fromLocalDateTime)
+    BigQueryType.at[LocalDateTime](toLocalDateTime, fromLocalDateTime)
 
-  implicit def emunExtractor[A <: GeneratedEnum] = at[A](toEnum, fromEnum)
+  implicit def emunExtractor[A <: GeneratedEnum] = BigQueryType.at[A](toEnum, fromEnum)
 }
 
 private object TimestampConverter {

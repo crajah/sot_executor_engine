@@ -53,6 +53,12 @@ object SOTMainMacroImpl {
           case _ => throw new Exception("Datastore does not support this definition")
         }
 
+      case json: JSONSchema =>
+        json.definition match {
+          case jsond: JSONDefinition => Some(jsonSchemaCodeGeneration(jsond))
+          case _ => throw new Exception("JSON does not support this definition")
+        }
+
       case _ =>
         throw new Exception("Unsupported Schema Type")
     }.flatten
@@ -68,9 +74,9 @@ object SOTMainMacroImpl {
     val sinkOp = SOTMacroHelper.getOp(sink, config.steps).asInstanceOf[SinkOp]
 
     val allConfStatements = confStatements ++ definitionsSchemasTypes
-    val  configObject = Seq(q"object conf { ..$allConfStatements }" )
+    val configObject = Seq(q"object conf { ..$allConfStatements }")
 
-    val syn = parsedSchemas ++ configObject  ++ transformations ++ statements
+    val syn = parsedSchemas ++ configObject ++ transformations ++ statements
 
     val code =
       q"""object $name {
@@ -139,10 +145,44 @@ object SOTMainMacroImpl {
 
     val block =
       q"""
-        case class $name ( ..$listSchema) extends HasDatastoreAnnotation
+        case class $name ( ..$listSchema) extends parallelai.sot.engine.io.utils.annotations.HasDatastoreAnnotation
       """
 
     Seq(block)
+  }
+
+  def SOTFieldParser(fieldName: String, fieldType: String, fieldMode: String): Term.Param = {
+    fieldMode match {
+      case "nullable" => s"$fieldName: Option[$fieldType]".parse[Term.Param].get
+      case "repeated" => s"$fieldName: List[$fieldType]".parse[Term.Param].get
+      case "required" => s"$fieldName: $fieldType".parse[Term.Param].get
+    }
+  }
+
+  def SOTCaseClassParser(fields: List[JSONDefinitionField], name: String): List[(String, Term.Param)] = {
+    fields.flatMap {
+      f =>
+        f.`type` match {
+          case "record" =>
+            val newName = NameProvider.getUniqueName(name)
+            (name, SOTFieldParser(f.name, newName, f.mode)) :: SOTCaseClassParser(f.fields.get, newName)
+          case _ => List((name, SOTFieldParser(f.name, f.`type`, f.mode)))
+        }
+    }
+  }
+
+  def jsonSchemaCodeGeneration(definition: JSONDefinition): Seq[Defn.Class] = {
+    val schemaFields = SOTCaseClassParser(definition.fields, definition.name)
+
+    schemaFields.groupBy(_._1).map {
+      case (key, value) =>
+        val name = Type.Name(key)
+        val listSchema = value.map(_._2)
+        q"""
+        case class $name ( ..$listSchema) extends parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
+        """
+    }.toList
+
   }
 
   def avroSchemaCodeGenerator(definition: AvroDefinition): Seq[Stat] = {
@@ -191,13 +231,13 @@ object SOTMainMacroImpl {
         Term.Apply(sinkConfigApply, Seq(q"conf.sinkTaps(${Lit.Int(i)})._2"))
     })
     val sinks = sinksDefs.tail.
-      foldLeft(Term.ApplyInfix(sinksDefs.head, Term.Name("::"), List(), List(Term.Name("HNil"))))((cumul: Term.ApplyInfix, t:Term.Apply) =>  Term.ApplyInfix(t, Term.Name("::"), List(), List(cumul)))
+      foldLeft(Term.ApplyInfix(sinksDefs.head, Term.Name("::"), List(), List(Term.Name("HNil"))))((cumul: Term.ApplyInfix, t: Term.Apply) => Term.ApplyInfix(t, Term.Name("::"), List(), List(cumul)))
 
 
     val sourceTapDef = Pat.Var.Term(Term.Name("source"))
     val sinkTapDef = Pat.Var.Term(Term.Name("sink"))
     Seq(q"val $sourceTapDef = $sourceTapTerm",
-        q"val sinks = $sinks"
+      q"val sinks = $sinks"
     )
   }
 
@@ -220,11 +260,12 @@ object SOTMainMacroImpl {
     q"${Lit.String(definitionName)} -> ${Term.ApplyType(Term.Name("SchemaType"), List(Type.Name(annotation), Type.Name(definitionName)))}"
 
   def getSchemaAnnotation(schema: Option[Schema]): String = schema match {
-    case Some(s) if s.`type` == "bigquery" => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
-    case Some(s) if s.`type` == "avro" => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
-    case Some(s) if s.`type` == "datastore" => "parallelai.sot.engine.io.datastore.HasDatastoreAnnotation"
-    case Some(s) if s.`type` == "protobuf" => "com.trueaccord.scalapb.GeneratedMessage"
-    case None => "com.google.api.client.json.GenericJson"
+    case Some(_: BigQuerySchema) => "com.spotify.scio.bigquery.types.BigQueryType.HasAnnotation"
+    case Some(_: AvroSchema) => "com.spotify.scio.avro.types.AvroType.HasAvroAnnotation"
+    case Some(_: DatastoreSchema) => "parallelai.sot.engine.io.utils.annotations.HasDatastoreAnnotation"
+    case Some(_: ProtobufSchema) => "com.trueaccord.scalapb.GeneratedMessage"
+    case Some(_: JSONSchema) => "parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation"
+    case None => "parallelai.sot.engine.io.utils.annotations.Schemaless"
     case Some(s) => throw new Exception("Unsupported Schema Type " + s.`type`)
   }
 
