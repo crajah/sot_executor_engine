@@ -112,7 +112,7 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "params": [["{m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))}"]],
+      "params": [["{m => val mm = Row('username ->> m.get('payload).get('punter).get('account).get('username) :: HNil).concat(m); mm.append('ts, Helper.fmt.print(Helper.Instant.now()))}"]],
       "paramsEncoded": false
     },
     {
