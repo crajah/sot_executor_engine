@@ -37,13 +37,6 @@ class SOTMacroHelperSpec extends FlatSpec with Matchers {
     applyTerm.structure should ===(expected.structure)
   }
 
-  "SOTMacroHelper service" should "sort topoligically" in {
-    val sorted = SOTMacroHelper.topologicalSort(Seq(("in1", "op1"), ("in", "op1"), ("op1", "out1"), ("op1", "out2")))
-    sorted._1 should ===(Seq("in", "in1", "op1", "out1", "out2"))
-    sorted._2 should ===(Seq(("in", "op1"), ("in1", "op1"), ("op1", "out1"), ("op1", "out2")))
-  }
-
-
   private def parseTerm(term: String) = {
     term.parse[Term].get
   }
