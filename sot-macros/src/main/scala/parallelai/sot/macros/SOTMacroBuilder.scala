@@ -123,6 +123,11 @@ object SOTMainMacroImpl {
             val opParsed = parseOperation(op, dag, config).get
             (opParsed._2, opParsed._3)
           }
+          case _: TFPredictOp => {
+            setNextStackId(idsStack, e2)
+            val opParsed = parseOperation(op, dag, config).get
+            (opParsed._2, opParsed._3)
+          }
           case sinkOp: SinkOp => {
             val sinkDef = sinks.find(_._1 == sinkOp.id).get
             val writeMethod = if (sinkDef._2.isDefined) "write" else "writeSchemaless"
@@ -261,24 +266,6 @@ object SOTMainMacroImpl {
       schemalessTap(sinkSchema, sinkTap)
     }
     Term.Apply(sinkConfigApply, Seq(q"$term(${Lit.Int(i)})._3"))
-    val sinksDefs = sinkTaps.view.zipWithIndex.map({
-      case ((sinkSchema, sinkTap), i) =>
-        val sinkConfigApply = if (sinkSchema.isDefined) {
-          typedTap(sinkSchema, sinkTap)
-        } else {
-          schemalessTap(sinkSchema, sinkTap)
-        }
-        Term.Apply(sinkConfigApply, Seq(q"conf.sinkTaps(${Lit.Int(i)})._2"))
-    })
-    val sinks = sinksDefs.tail.
-      foldLeft(Term.ApplyInfix(sinksDefs.head, Term.Name("::"), List(), List(Term.Name("HNil"))))((cumul: Term.ApplyInfix, t: Term.Apply) => Term.ApplyInfix(t, Term.Name("::"), List(), List(cumul)))
-
-
-    val sourceTapDef = Pat.Var.Term(Term.Name("source"))
-    val sinkTapDef = Pat.Var.Term(Term.Name("sink"))
-    Seq(q"val $sourceTapDef = $sourceTapTerm",
-      q"val sinks = $sinks"
-    )
   }
 
   private def schemalessTap(sinkSchema: Option[Schema], sinkTap: TapDefinition) = {

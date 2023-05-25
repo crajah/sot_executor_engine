@@ -22,15 +22,6 @@ object SCollectionStateMonad {
   type GroupedSCollection[K, L] = SCollection[Row.Aux[FieldType[Witness.`'_1`.T, K] :: FieldType[Witness.`'_2`.T, List[L]] :: HNil]]
   type JoinedSCollection[K, L1, L2] = SCollection[Row.Aux[FieldType[Witness.`'_1`.T, K] :: FieldType[Witness.`'_2`.T, (FieldType[Witness.`'_1`.T, L1] :: FieldType[Witness.`'_2`.T, L2] :: HNil)] :: HNil]]
 
-
-  //  def read[L <: HList, TAP <: TapDefinition, UTIL, ANNO, TIN <: ANNO : Manifest](tap: TapDef[TAP, UTIL, ANNO, TIN], utils: UTIL)
-  //                                                                                (implicit
-  //                                                                                 reader: Reader.Aux[TAP, UTIL, ANNO, TIN, L]
-  //                                                                                ): IndexedState[ScioContext, SCollection[Row.Aux[L]], Unit] =
-  //    IndexedState(sc => ( {
-  //      reader.read(sc, tap.tapDefinition, utils)
-  //    }, ()))
-
   def read[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO, In <: ANNO : Manifest]
   (sc: ScioContext, tap: TapDef[TAP, UTIL, ANNO, In], utils: UTIL)
   (implicit
@@ -44,14 +35,6 @@ object SCollectionStateMonad {
       (res, res)
     })
 
-  def readMany[S <: HList, SCOLS <: HList, UTIL](sources: S, utils: UTIL)
-                                                (implicit
-                                                 folder: LeftFolder.Aux[S, (ScioContext, HNil, UTIL), reader2.type, (ScioContext, SCOLS, UTIL)]
-                                                ): IndexedState[ScioContext, SCOLS, SCOLS] =
-    IndexedState(sc => {
-      val readSColls = sources.foldLeft((sc, HNil: HNil, utils))(reader2)(folder)._2
-      (readSColls, readSColls)
-    })
 
   def filter[SCOLS <: HList, SCOLOUT <: HList, L <: HList](sCollection: SCollection[Row.Aux[L]])
                                                           (f: Row.Aux[L] => Boolean)
@@ -149,24 +132,6 @@ object SCollectionStateMonad {
       (res, res)
     }
     )
-
-  //  def writeToSinks[S <: HList, SCOLS <: HList, L <: HList, OutT <: HList, UTILS](sCollection: SCollection[Row.Aux[L]])(sinks: S, utils: UTILS)
-  //                                                                                (implicit
-  //                                                                                 folder: LeftFolder[S, (SCollection[Row.Aux[L]], UTILS), writer2.type]
-  //                                                                                ): IndexedState[SCOLS, SCOLS, SCOLS] =
-  //    IndexedState(sColls => {
-  //      sinks.foldLeft((sCollection, utils))(writer2)(folder)
-  //      (sColls, sColls)
-  //    })
-
-  //  def writeToSinks[S <: HList, SCOLS <: HList, L <: HList, OutT <: HList, UTILS](sCollection: SCollection[Row.Aux[L]])(sinks: S, utils: UTILS)
-  //                                                                                (implicit
-  //                                                                                 folder: LeftFolder[S, (SCollection[Row.Aux[L]], UTILS), writer2.type]
-  //                                                                                ): IndexedState[SCOLS, SCOLS, SCOLS] =
-  //    IndexedState(sColls => {
-  //      sinks.foldLeft((sCollection, utils))(writer2)(folder)
-  //      (sColls, sColls)
-  //    })
 
     def write[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO, In <: ANNO : Manifest](sCollection: SCollection[Row.Aux[L]])
                                                                                                                     (tap: TapDef[TAP, UTIL, ANNO, In], utils: UTIL)
