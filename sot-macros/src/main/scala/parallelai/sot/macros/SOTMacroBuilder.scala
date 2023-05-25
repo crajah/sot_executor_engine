@@ -104,7 +104,7 @@ object SOTMainMacroImpl {
 
   private def getMonadTransformations(config: Config, dag: Topology[String, DAGMapping], q: Term): Term = {
 
-    val tsorted = topologicalSortDag(dag)._2
+    val tsorted = dag.topologicalSort()._2
     val sinks = getSinks(config)
     val idsStack = mutable.Map[String, Int]()
     val srcSteps = getSources(config).zipWithIndex.map({

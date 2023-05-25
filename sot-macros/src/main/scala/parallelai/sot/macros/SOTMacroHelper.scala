@@ -126,7 +126,7 @@ object SOTMacroHelper {
 
   def getSources(config: Config): List[(String, Option[Schema], TapDefinition)] = {
     val dag = config.parseDAG()
-    val sourceIdsSorted = topologicalSortDag(dag)._1.intersect(dag.getSourceVertices().toSeq) // topological order preserved
+    val sourceIdsSorted = dag.topologicalSort()._1.intersect(dag.getSourceVertices().toSeq) // topological order preserved
     sourceIdsSorted.map(id => {
       val sourceOp = SOTMacroHelper.getOp(id, config.steps) match {
         case s: SourceOp => s
@@ -139,7 +139,7 @@ object SOTMacroHelper {
 
   def getSinks(config: Config): List[(String, Option[Schema], TapDefinition)] = {
     val dag = config.parseDAG()
-    val sinkIdsSorted = topologicalSortDag(dag)._1.intersect(dag.getSinkVertices().toSeq)
+    val sinkIdsSorted = dag.topologicalSort()._1.intersect(dag.getSinkVertices().toSeq)
     sinkIdsSorted.map(sinkOpId => {
       val sinkOp = SOTMacroHelper.getOp(sinkOpId, config.steps) match {
         case s: SinkOp => s
@@ -152,29 +152,6 @@ object SOTMacroHelper {
       }
       (sinkOp.id, sinkSchema, SOTMacroHelper.getTap(sinkOp.tap, config.taps))
     }).toList
-  }
-
-  def topologicalSort[A : Ordering](edges: Seq[(A, A)]): (Seq[A], Seq[(A, A)]) = {
-    @tailrec
-    def tsort(toPreds: Map[A, SortedSet[A]], done: Seq[A], doneEdges: Seq[(A, A)]): (Seq[A],Seq[(A, A)]) = {
-      val (noPreds, hasPreds) = toPreds.partition { _._2.isEmpty }
-      if (noPreds.isEmpty) {
-        if (hasPreds.isEmpty) (done, doneEdges) else sys.error(hasPreds.toString)
-      } else {
-        val found = noPreds.map { _._1 } .to[SortedSet]
-        val aToA = hasPreds.map { case (k, v) => v.intersect(found).map((_, k)) }
-        val updatedDoneEdges = doneEdges ++ aToA.flatten
-        tsort(hasPreds.mapValues { _ -- found }, done ++ found, updatedDoneEdges)
-      }
-    }
-
-    val toPred = edges.foldLeft(SortedMap[A, SortedSet[A]]()) { (acc, e) =>
-      acc + (e._1 -> acc.getOrElse(e._1, SortedSet[A]())) + (e._2 -> (acc.getOrElse(e._2, SortedSet[A]()) + e._1))    }
-    tsort(toPred, Seq(), Seq())
-  }
-
-  def topologicalSortDag(dag: Topology[String, DAGMapping]): (Seq[String], Seq[(String, String)]) = {
-    topologicalSort(dag.edges.map(e => (e.from, e.to)).toSeq.sorted)
   }
 
 }
