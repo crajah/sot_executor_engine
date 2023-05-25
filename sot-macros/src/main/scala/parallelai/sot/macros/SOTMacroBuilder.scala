@@ -1,6 +1,8 @@
 package parallelai.sot.macros
 
+
 import scala.collection.immutable.Seq
+import scala.collection.mutable
 import scala.meta._
 import parallelai.sot.engine.config.SchemaResourcePath
 import parallelai.sot.engine.serialization.protobuf.ProtoPBCCodeGen
@@ -61,12 +63,6 @@ object SOTMainMacroImpl {
 
     val transformations = transformationsCodeGenerator(config, dag)
 
-    val source = dag.getSourceVertices().head
-    val sourceOp = SOTMacroHelper.getOp(source, config.steps).asInstanceOf[SourceOp]
-
-    val sink = dag.getSinkVertices().head
-    val sinkOp = SOTMacroHelper.getOp(sink, config.steps).asInstanceOf[SinkOp]
-
     val allConfStatements = confStatements ++ definitionsSchemasTypes
     val  configObject = Seq(q"object conf { ..$allConfStatements }" )
 
@@ -85,15 +81,15 @@ object SOTMainMacroImpl {
     * Generates the code for the all the operations
     */
   def transformationsCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Class] = {
-    val transformations = getMonadTransformations(config, dag, q"init[ScioContext].flatMap(a => read(conf.source, sotUtils))")
+    val transformations = getMonadTransformations(config, dag, q"init[HNil]")
 
     Seq(
       q"""
        class Builder extends Serializable() {
          def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
            val job = ${transformations}
-           .flatMap(a => writeToSinks(conf.sinks, sotUtils))
-           job.run(sc)._1
+
+           job.run(HNil)._1
            val result = sc.close()
            if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
          }
@@ -102,18 +98,45 @@ object SOTMainMacroImpl {
   }
 
   private def getMonadTransformations(config: Config, dag: Topology[String, DAGMapping], q: Term): Term = {
-    val sourceOperationName = dag.getSourceVertices().head
 
-    val sourceOperation = SOTMacroHelper.getOp(sourceOperationName, config.steps) match {
-      case s: SourceOp => s
-      case _ => throw new Exception("Unsupported source operation")
-    }
+    val tsorted = topologicalSortDag(dag)._2
+    val sinks = getSinks(config)
+    val idsStack = mutable.Map[String, Int]()
+    val srcSteps = getSources(config).zipWithIndex.map({
+      case (srcOp,i) => {
+        setNextStackId(idsStack, srcOp._1)
+        (Term.Name("read"), List(List(Term.Name("sc"), buildTap(Term.Name("conf.sourceTaps"), srcOp._2, srcOp._3, i), Term.Name("sotUtils"))))
+      }
+    })
 
-    val sourceOpCode = SOTMacroHelper.parseOperation(sourceOperation, dag, config)
-    val ops = SOTMacroHelper.getOps(dag, config, sourceOperationName, List(sourceOpCode)).flatten
+    val ops = tsorted.map({
+      case (e1, e2) => {
+        val op = getOp(e2, config.steps)
+        val stepParsed =  op match {
+          case _: TransformationOp => {
+            setNextStackId(idsStack, e2)
+            val opParsed = parseOperation(op, dag, config).get
+            (opParsed._2, opParsed._3)
+          }
+          case sinkOp: SinkOp => {
+            val sinkDef = sinks.find(_._1 == sinkOp.id).get
+            val writeMethod = if (sinkDef._2.isDefined) "write" else "writeSchemaless"
+            (Term.Name(writeMethod), List(List(buildTap(Term.Name("conf.sinkTaps"), sinkDef._2, sinkDef._3, sinks.indexOf(sinkDef)), Term.Name("sotUtils"))))
+          }
+        }
+        val inEdgeIndex = idsStack.get(e1)
+        val idTerm = Term.Name("_" + inEdgeIndex.get)
+        (stepParsed._1, List(List(q"sColls.at(Nat.${idTerm})")) ::: stepParsed._2)
+      }
+    }).toList
 
+    parseStateMonadExpression(srcSteps ++ ops, q)
+  }
 
-    SOTMacroHelper.parseStateMonadExpression(ops, q)
+  private def setNextStackId(idsStack: mutable.Map[String, Int], id: String) = {
+    val values = idsStack.values
+    val newId = if (values.isEmpty) 0 else values.max + 1
+    idsStack.put(id, newId)
   }
 
   def bigQuerySchemaCodeGenerator(definition: BigQueryDefinition): Seq[Stat] = {
@@ -174,31 +197,31 @@ object SOTMainMacroImpl {
   }
 
   def schemaTypeValDecl(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Val] = {
-    val (sourceSchema, sourceTap) = getSource(config)
-    val sinkTaps = getSinks(config)
+    val sources = buildTaps(getSources(config), Term.Name("conf.sourceTaps"))
+    val sinks = buildTaps(getSinks(config), Term.Name("conf.sinkTaps"))
 
-    val sourceConfigApply = typedTap(sourceSchema, sourceTap)
-
-    val sourceTapTerm = Term.Apply(sourceConfigApply, Seq(Term.Name("conf.sourceTap")))
-
-    val sinksDefs = sinkTaps.view.zipWithIndex.map({
-      case ((sinkSchema, sinkTap), i) =>
-        val sinkConfigApply = if (sinkSchema.isDefined) {
-          typedTap(sinkSchema, sinkTap)
-        } else {
-          schemalessTap(sinkSchema, sinkTap)
-        }
-        Term.Apply(sinkConfigApply, Seq(q"conf.sinkTaps(${Lit.Int(i)})._2"))
-    })
-    val sinks = sinksDefs.tail.
-      foldLeft(Term.ApplyInfix(sinksDefs.head, Term.Name("::"), List(), List(Term.Name("HNil"))))((cumul: Term.ApplyInfix, t:Term.Apply) =>  Term.ApplyInfix(t, Term.Name("::"), List(), List(cumul)))
-
-
-    val sourceTapDef = Pat.Var.Term(Term.Name("source"))
-    val sinkTapDef = Pat.Var.Term(Term.Name("sink"))
-    Seq(q"val $sourceTapDef = $sourceTapTerm",
+    Seq(q"val sources = $sources",
         q"val sinks = $sinks"
     )
+  }
+
+  private def buildTaps(taps: List[(String, Option[Schema], TapDefinition)], term: Term.Name) = {
+    val sinksDefs = taps.view.zipWithIndex.map({
+      case ((_, sinkSchema, sinkTap), i) =>
+        buildTap(term, sinkSchema, sinkTap, i)
+    })
+    val sinks = sinksDefs.tail.
+      foldLeft(Term.ApplyInfix(sinksDefs.head, Term.Name("::"), List(), List(Term.Name("HNil"))))((cumul: Term.ApplyInfix, t: Term.Apply) => Term.ApplyInfix(t, Term.Name("::"), List(), List(cumul)))
+    sinks
+  }
+
+  private def buildTap(term: Term.Name, sinkSchema: Option[Schema], sinkTap: TapDefinition, i: Int) = {
+    val sinkConfigApply = if (sinkSchema.isDefined) {
+      typedTap(sinkSchema, sinkTap)
+    } else {
+      schemalessTap(sinkSchema, sinkTap)
+    }
+    Term.Apply(sinkConfigApply, Seq(q"$term(${Lit.Int(i)})._3"))
   }
 
   private def schemalessTap(sinkSchema: Option[Schema], sinkTap: TapDefinition) = {

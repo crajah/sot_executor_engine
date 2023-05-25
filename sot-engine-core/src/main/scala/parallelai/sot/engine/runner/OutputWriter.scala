@@ -99,7 +99,7 @@ object SchemalessWriter {
 }
 
 object writer2 extends Poly2 {
-  implicit def writer0[TAP <: TapDefinition, UTIL, ANNO, Out, OutR <: HList, OutT <: HList]
+  implicit def writer[TAP <: TapDefinition, UTIL, ANNO, Out, OutR <: HList, OutT <: HList]
   (implicit
    gen2: LabelledGeneric.Aux[Out, OutR],
    ev: OutT =:= OutR,
