@@ -53,7 +53,19 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "streaming_word_extract28"
+      "table": "streaming_word_extract34"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource2",
+      "dataset": "bigquerytest",
+      "table": "streaming_word_extract35"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource3",
+      "dataset": "bigquerytest",
+      "table": "streaming_word_extract36"
     }
   ],
   "steps": [
@@ -93,6 +105,18 @@
       "id": "out",
       "name": "out",
       "source": "bigquerysource1"
+    },
+    {
+      "type": "sink",
+      "id": "out1",
+      "name": "out1",
+      "source": "bigquerysource2"
+    },
+    {
+      "type": "sink",
+      "id": "out2",
+      "name": "out2",
+      "source": "bigquerysource3"
     }
   ],
   "dag": [
@@ -109,8 +133,16 @@
       "to": "mapper1"
     },
     {
+      "from": "filter",
+      "to": "out2"
+    },
+    {
       "from": "mapper2",
       "to": "out"
+    },
+    {
+      "from": "mapper2",
+      "to": "out1"
     }
   ]
 }

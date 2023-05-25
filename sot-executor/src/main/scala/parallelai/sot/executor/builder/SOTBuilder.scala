@@ -77,7 +77,7 @@ object SOTBuilder {
 
   object conf {
     val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
-    val sourceTap = getSource(jobConfig)._2
+    val sourceTaps = getSources(jobConfig)
     val sinkTaps = getSinks(jobConfig)
   }
 

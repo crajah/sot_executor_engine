@@ -8,6 +8,7 @@ object Common {
   lazy val macroSettings = Seq(
     addCompilerPlugin(paradise),
     scalacOptions += "-Xplugin-require:macroparadise",
+//    scalacOptions += "-Xlog-implicits",
     libraryDependencies += scalameta
   )
 

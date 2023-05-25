@@ -7,7 +7,7 @@ object Dependencies {
   val paradiseVersion = "3.0.0-M9"
   val trueAccordVersion = "0.6.6"
   val twitterBijectionVersion = "0.9.5"
-  val spotifyVersion = "0.4.4"
+  val spotifyScioVersion = "0.4.5"
   val shapelessDataTypeDataVersion = "0.1.7"
   val tensorflowVersion = "1.3.0"
   val gcloudVersion = "1.6.0"
@@ -55,11 +55,12 @@ object Dependencies {
   val twitterBijectionCore = "com.twitter" %% "bijection-core" % twitterBijectionVersion
   val twitterBijectionAvro = "com.twitter" %% "bijection-avro" % twitterBijectionVersion
 
-  val spotifyCore = "com.spotify" %% "scio-core" % spotifyVersion
-  val spotifyBigTable = "com.spotify" %% "scio-bigtable" % spotifyVersion
-  val spotifyExtra = "com.spotify" %% "scio-extra" % spotifyVersion
-  val spotifyTensorflow = "com.spotify" %% "scio-tensorflow" % spotifyVersion
-  val spotifyTest = "com.spotify" %% "scio-test" % spotifyVersion
+  val spotifyCore = "com.spotify" %% "scio-core" % spotifyScioVersion
+
+  val spotifyBigTable = "com.spotify" %% "scio-bigtable" % spotifyScioVersion
+  val spotifyExtra = "com.spotify" %% "scio-extra" % spotifyScioVersion
+  val spotifyTensorflow = "com.spotify" %% "scio-tensorflow" % spotifyScioVersion
+  val spotifyTest = "com.spotify" %% "scio-test" % spotifyScioVersion
 
   val tensorflow = "org.tensorflow" % "tensorflow" % tensorflowVersion
 
