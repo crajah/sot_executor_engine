@@ -19,46 +19,41 @@ import shapeless.ops.hlist.IsHCons
 import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.io.bigquery._
 
-trait Writer[TAP, UTIL, ANNO, Out] extends Serializable {
-  def write[TOUT <: HList](sc: SCollection[Row.Aux[TOUT]], tap: TAP, utils: UTIL)(implicit
-                                                                                  gen: LabelledGeneric.Aux[Out, TOUT]): Unit
-}
-
-trait DatastoreWriter[TAP, UTIL, ANNO, Out] extends Serializable {
-  def write[TOUT <: HList](sc: SCollection[Row.Aux[TOUT]], tap: TAP, utils: UTIL)(implicit
-                                                                                  gen: LabelledGeneric.Aux[Out, TOUT],
-                                                                                  e: ToEntity[TOUT],
-                                                                                  h: IsHCons[TOUT]): Unit
+trait Writer[TAP, UTIL, ANNO, Out, TOUT <: HList] extends Serializable {
+  def write(sc: SCollection[Row.Aux[TOUT]], tap: TAP, utils: UTIL): Unit
 }
 
 object Writer {
-  def apply[TAP, UTIL, ANNO, Out](implicit reader: Writer[TAP, UTIL, ANNO, Out]) = reader
+  def apply[TAP, UTIL, ANNO, Out, TOUT <: HList](implicit reader: Writer[TAP, UTIL, ANNO, Out, TOUT]) = reader
 
-  implicit def pubSubWriterAvro[T0 <: HasAvroAnnotation : Manifest]: Writer[PubSubTapDefinition, SOTUtils, HasAvroAnnotation, T0] =
-    new Writer[PubSubTapDefinition, SOTUtils, HasAvroAnnotation, T0] {
-    def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils)(implicit
-                                                                                                                 gen: LabelledGeneric.Aux[T0, OutR]): Unit = {
-      utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
-      utils.setupPubsubTopic()
-      sCollection.map(x => gen.from(x.hl)).saveAsTypedPubSubAvro(utils.getProject, tap.topic)
+  implicit def pubSubWriterAvro[T0 <: HasAvroAnnotation : Manifest, OutR <: HList](implicit
+                                                                                   gen: LabelledGeneric.Aux[T0, OutR]):
+  Writer[PubSubTapDefinition, SOTUtils, HasAvroAnnotation, T0, OutR] =
+    new Writer[PubSubTapDefinition, SOTUtils, HasAvroAnnotation, T0, OutR] {
+      def write(sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils): Unit = {
+        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
+        utils.setupPubsubTopic()
+        sCollection.map(x => gen.from(x.hl)).saveAsTypedPubSubAvro(utils.getProject, tap.topic)
+      }
     }
-  }
 
-  implicit def pubSubWriterProto[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0] : Manifest](implicit
-                                                                                                            messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]): Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0] =
-    new Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0] {
-    def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils)(implicit
-                                                                                                                 gen: LabelledGeneric.Aux[T0, OutR]): Unit = {
-      utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
-      utils.setupPubsubTopic()
-      sCollection.map(x => gen.from(x.hl)).saveAsTypedPubSubProto(utils.getProject, tap.topic)
+  implicit def pubSubWriterProto[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0] : Manifest, OutR <: HList](implicit
+                                                                                                                           gen: LabelledGeneric.Aux[T0, OutR],
+                                                                                                                           messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]):
+  Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0, OutR] =
+    new Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0, OutR] {
+      def write(sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils): Unit = {
+        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
+        utils.setupPubsubTopic()
+        sCollection.map(x => gen.from(x.hl)).saveAsTypedPubSubProto(utils.getProject, tap.topic)
+      }
     }
-  }
 
-  implicit def bigqueryWriter[T0 <: HasAnnotation : Manifest]: Writer[BigQueryTapDefinition, SOTUtils, HasAnnotation, T0] =
-    new Writer[BigQueryTapDefinition, SOTUtils, HasAnnotation, T0] {
-      def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: BigQueryTapDefinition, utils: SOTUtils)(implicit
-                                                                                                                     gen: LabelledGeneric.Aux[T0, OutR]): Unit = {
+  implicit def bigqueryWriter[T0 <: HasAnnotation : Manifest, OutR <: HList](implicit
+                                                                             gen: LabelledGeneric.Aux[T0, OutR]):
+  Writer[BigQueryTapDefinition, SOTUtils, HasAnnotation, T0, OutR] =
+    new Writer[BigQueryTapDefinition, SOTUtils, HasAnnotation, T0, OutR] {
+      def write(sCollection: SCollection[Row.Aux[OutR]], tap: BigQueryTapDefinition, utils: SOTUtils): Unit = {
         val createDisposition = tap.createDisposition match {
           case Some(cd) if cd == "CREATE_IF_NEEDED" => CreateDisposition.CREATE_IF_NEEDED
           case Some(cd) if cd == "CREATE_NEVER" => CreateDisposition.CREATE_NEVER
@@ -74,28 +69,22 @@ object Writer {
         sCollection.map(x => gen.from(x.hl)).saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}", writeDisposition, createDisposition)
       }
     }
-}
 
-object DatastoreWriter {
-
-  implicit def datastoreWriter[T0 <: HasDatastoreAnnotation : Manifest]: DatastoreWriter[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0] =
-    new DatastoreWriter[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0] {
-    def write[OutR <: HList](sCollection: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils)(implicit
-                                                                                                                    gen: LabelledGeneric.Aux[T0, OutR],
-                                                                                                                    e: ToEntity[OutR],
-                                                                                                                    h: IsHCons[OutR]): Unit = {
-      sCollection.map(x => (h.head(x.hl), gen.from(x.hl))).saveAsTypedDatastore(utils.getProject, tap.kind)
+  implicit def datastoreWriter[T0 <: HasDatastoreAnnotation : Manifest, OutR <: HList](implicit
+                                                                                       gen: LabelledGeneric.Aux[T0, OutR],
+                                                                                       e: ToEntity[OutR],
+                                                                                       h: IsHCons[OutR]):
+  Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] =
+    new Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] {
+      def write(sCollection: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
+        sCollection.map(x => (h.head(x.hl), gen.from(x.hl))).saveAsTypedDatastore(utils.getProject, tap.kind)
+      }
     }
-  }
 
 }
 
 trait SchemalessWriter[TAP, UTIL, ANNO, OutR <: HList] extends Serializable {
   def write(sc: SCollection[Row.Aux[OutR]], tap: TAP, utils: UTIL): Unit
-}
-
-trait DatastoreSchemalessWriter[TAP, UTIL, ANNO, OutR <: HList] extends Serializable {
-  def write(sc: SCollection[Row.Aux[OutR]], tap: TAP, utils: UTIL)(implicit h: IsHCons[OutR], toL: ToEntity[OutR]): Unit
 }
 
 object SchemalessWriter {
@@ -122,13 +111,11 @@ object SchemalessWriter {
         sColl.map(m => m.hl.toTableRow(toL)).saveAsBigQuery(s"${tap.dataset}.${tap.table}", schema, writeDisposition, createDisposition, null)
       }
     }
-}
 
-object DatastoreSchemalessWriter {
-
-  implicit def datastoreSchemalessWriter[OutR <: HList]: DatastoreSchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] =
-    new DatastoreSchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] {
-      def write(sColl: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils)(implicit h: IsHCons[OutR], toL: ToEntity[OutR]): Unit = {
+  implicit def datastoreSchemalessWriter[OutR <: HList](implicit h: IsHCons[OutR], toL: ToEntity[OutR]):
+  SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] =
+    new SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] {
+      def write(sColl: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
 
         val project = utils.getProject
         sColl.map { rec =>
@@ -153,20 +140,7 @@ object writer2 extends Poly2 {
    gen: LabelledGeneric.Aux[Out, OutR],
    h: IsHCons[OutR],
    ev: OutT =:= OutR,
-   writer: Writer[TAP, UTIL, ANNO, Out]
-  ) = at[(SCollection[Row.Aux[OutT]], UTIL), TapDef[TAP, UTIL, ANNO, Out]] {
-    case ((sColl, utils), tap) =>
-      writer.write(sColl.map(r => Row[OutR](ev(r.hl))), tap.tapDefinition, utils)
-      (sColl, utils)
-  }
-
-  implicit def datastoreWriter[TAP <: DatastoreTapDefinition, UTIL, ANNO <: HasDatastoreAnnotation, Out, OutR <: HList, OutT <: HList]
-  (implicit
-   gen2: LabelledGeneric.Aux[Out, OutR],
-   e: ToEntity[OutR],
-   h: IsHCons[OutR],
-   ev: OutT =:= OutR,
-   writer: DatastoreWriter[TAP, UTIL, ANNO, Out]
+   writer: Writer[TAP, UTIL, ANNO, Out, OutR]
   ) = at[(SCollection[Row.Aux[OutT]], UTIL), TapDef[TAP, UTIL, ANNO, Out]] {
     case ((sColl, utils), tap) =>
       writer.write(sColl.map(r => Row[OutR](ev(r.hl))), tap.tapDefinition, utils)
@@ -176,17 +150,6 @@ object writer2 extends Poly2 {
   implicit def schemalessWriter[TAP <: TapDefinition, UTIL, ANNO, OutT <: HList]
   (implicit
    writer: SchemalessWriter[TAP, UTIL, ANNO, OutT]
-  ) = at[(SCollection[Row.Aux[OutT]], UTIL), SchemalessTapDef[TAP, UTIL, ANNO]] {
-    case ((sColl, utils), tap) =>
-      writer.write(sColl, tap.tapDefinition, utils)
-      (sColl, utils)
-  }
-
-  implicit def datastoreSchemalessWriter[TAP <: DatastoreTapDefinition, UTIL, ANNO, OutT <: HList]
-  (implicit
-   e: ToEntity[OutT],
-   h: IsHCons[OutT],
-   writer: DatastoreSchemalessWriter[TAP, UTIL, ANNO, OutT]
   ) = at[(SCollection[Row.Aux[OutT]], UTIL), SchemalessTapDef[TAP, UTIL, ANNO]] {
     case ((sColl, utils), tap) =>
       writer.write(sColl, tap.tapDefinition, utils)
