@@ -97,7 +97,7 @@
       "id": "mapper2",
       "name": "mapper2",
       "op": "map",
-      "params": [["m => m.append('processingTime, Helper.fmt.print(Instant.now()))"]],
+      "params": [["m => m.append('processingTime, Helper.fmt.print(Helper.Instant.now()))"]],
       "paramsEncoded": false
     },
     {

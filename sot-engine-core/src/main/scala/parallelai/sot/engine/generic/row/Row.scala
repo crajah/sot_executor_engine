@@ -40,6 +40,9 @@ trait Row extends Serializable {
     Row(updater(hl, field[k.T](v)))
   }
 
+  def concat[B <: HList](b: Row.Aux[B])
+                                    (implicit p: Prepend[L, B]): Row.Aux[p.Out] = Row(p(hl, b.hl))
+
   def update[W](k: WitnessWith[FSL], value: W)
                (implicit modifier: Modifier[L, k.T, k.instance.Out, W]): Row.Aux[modifier.Out] = Row(modifier(hl, _ => value))
 

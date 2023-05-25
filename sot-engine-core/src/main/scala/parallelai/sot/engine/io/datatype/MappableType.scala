@@ -1,6 +1,6 @@
-package parallelai.sot.engine.io.bigquery
+package parallelai.sot.engine.io.datatype
 
-trait BaseMappableTypeBQ[M] extends Serializable {
+trait BaseMappableType[M] extends Serializable {
   def base: M
   def get(m: M, key: String): Option[M]
   def getAll(m: M, key: String): Seq[M]
@@ -9,7 +9,7 @@ trait BaseMappableTypeBQ[M] extends Serializable {
   def put(key: String, values: Seq[M], tail: M): M
 }
 
-trait MappableTypeBQ[M, V] extends Serializable {
+trait MappableType[M, V] extends Serializable {
   def get(m: M, key: String): Option[V]
   def getAll(m: M, key: String): Seq[V]
   def put(key: String, value: V, tail: M): M

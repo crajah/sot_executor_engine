@@ -11,12 +11,13 @@ import org.scalacheck._
 import shapeless._
 import shapeless.datatype.record._
 
-object DatastoreTypeSpec extends Properties("DatastoreType") {
-  
+object DatastoreTypeTest extends Properties("DatastoreType") {
+
   import parallelai.sot.engine.io.datastore.Records._
   import parallelai.sot.engine.io.utils.SerializableUtils._
 
   implicit def compareByteArrays(x: Array[Byte], y: Array[Byte]) = java.util.Arrays.equals(x, y)
+
   implicit def compareIntArrays(x: Array[Int], y: Array[Int]) = java.util.Arrays.equals(x, y)
 
   def roundTrip[A, L <: HList](m: A)
@@ -28,10 +29,10 @@ object DatastoreTypeSpec extends Properties("DatastoreType") {
     val t = ensureSerializable(DatastoreType[A])
     val rm = RecordMatcher[A]
     all(
-      t.fromEntityBuilder(t.toEntityBuilder(gen.to(m))).exists(rm(_, m)),
-      t.fromEntity(t.toEntity(gen.to(m))).exists(rm(_, m)),
+      t.fromEntityBuilder(t.toEntityBuilder(m)).exists(rm(_, m)),
       t.fromEntity(t.toEntity(m)).exists(rm(_, m)),
-      t.fromEntityBuilder(t.toEntityBuilder(m)).exists(rm(_, m))
+      t.fromEntityBuilder(t.toEntityBuilder(m)).exists(rm(_, m)),
+      t.fromEntity(t.toEntity(m)).exists(rm(_, m))
     )
   }
 
@@ -44,6 +45,6 @@ object DatastoreTypeSpec extends Properties("DatastoreType") {
 
   implicit val uriDatastoreType = DatastoreType.at[URI](
     v => URI.create(v.getStringValue), u => makeValue(u.toString).build())
-  property("custom") = forAll { m: Custom => roundTrip(m)}
+  property("custom") = forAll { m: Custom => roundTrip(m) }
 
 }

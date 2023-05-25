@@ -47,12 +47,12 @@
     {
       "type": "pubsub",
       "id": "pubsubsource1",
-      "topic": "p2pin"
+      "topic": "p2pds"
     },
     {
       "type": "datastore",
       "id": "datastoresource1",
-      "kind": "kind1"
+      "kind": "dataflowwrite"
     }
   ],
   "steps": [
@@ -68,7 +68,7 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "params": [["m => (m.teamName, m.score.toInt)"]],
+      "func": [["m => {val updated = m.append('id, Helper.random.nextInt());updated.project(projector(Col('id), Col('user), Col('score) ** Col('score1), Col('score) ** Col('score2), Col('eventTime)))}"]],
       "paramsEncoded": false
     },
     {
@@ -76,23 +76,7 @@
       "id": "filter",
       "name": "filter",
       "op": "filter",
-      "params": [["m => m.score > 2"]],
-      "paramsEncoded": false
-    },
-    {
-      "type": "transformation",
-      "id": "mapper2",
-      "name": "mapper2",
-      "op": "map",
-      "params": [["m => 'teamscores ->> m._1 :: 'score1 ->> m._2.toString :: 'score2 ->> (m._2 * 0.123) :: HNil"]],
-      "paramsEncoded": false
-    },
-    {
-      "type": "transformation",
-      "id": "sumByKey",
-      "name": "sumByKey",
-      "op": "sumByKey",
-      "params": [[""]],
+      "func": [["m => m.get('score1) > 1"]],
       "paramsEncoded": false
     },
     {
@@ -105,22 +89,14 @@
   "dag": [
     {
       "from": "in",
-      "to": "filter"
-    },
-    {
-      "from": "filter",
       "to": "mapper1"
     },
     {
       "from": "mapper1",
-      "to": "sumByKey"
+      "to": "filter"
     },
     {
-      "from": "sumByKey",
-      "to": "mapper2"
-    },
-    {
-      "from": "mapper2",
+      "from": "filter",
       "to": "out"
     }
   ]

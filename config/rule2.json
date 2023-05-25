@@ -115,7 +115,7 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "params": [["m => {val winnings = Col('state) ->: Col('bets) ->: Col('payout) ->: Col('winnings);val customerRef = Col('state) ->: Col('bets) ->: Col('customerRef);val outComeName = Col('supportingState) ->: Col('outcome) ->: Col('outcomeName) ** Col('outComeName);val marketName = Col('supportingState) ->: Col('outcome) ->: Col('marketName);val eventName = Col('supportingState) ->: Col('outcome) ->: Col('eventName);val catRef = Col('supportingState) ->:  Col('outcome) ->: Col('categoryRef);val stateBetsId = Col('state) ->: Col('bets) ->: Col('id) ** Col('stateBetsId);val currency = Col('state) ->: Col('bets) ->: Col('stake) ->: Col('currencyRef) ** Col('currency);val stake = Col('state) ->: Col('bets) ->: Col('stake) ->: Col('amount) ** Col('stake);m.project(projector(customerRef, winnings, outComeName, marketName, eventName, catRef, stateBetsId, currency, stake))}"]],
+      "params": [["m => {val userid = m.get('state).get('bets).apply(0).get('externalUID).apply(1).get('id);val winnings = Col('state) ->: Col('bets) ->: Col('payout) ->: Col('winnings);val customerRef = Col('state) ->: Col('bets) ->: Col('customerRef);val outComeName = Col('supportingState) ->: Col('outcome) ->: Col('outcomeName) ** Col('outComeName);val marketName = Col('supportingState) ->: Col('outcome) ->: Col('marketName);val eventName = Col('supportingState) ->: Col('outcome) ->: Col('eventName);val catRef = Col('supportingState) ->:  Col('outcome) ->: Col('categoryRef);val stateBetsId = Col('state) ->: Col('bets) ->: Col('id) ** Col('stateBetsId);val currency = Col('state) ->: Col('bets) ->: Col('stake) ->: Col('currencyRef) ** Col('currency);val stake = Col('state) ->: Col('bets) ->: Col('stake) ->: Col('amount) ** Col('stake);val projected = m.project(projector(customerRef, winnings, outComeName, marketName, eventName, catRef, stateBetsId, currency, stake));projected.append('userid, userid)}"]],
       "paramsEncoded": false
     },
     {
@@ -123,7 +123,7 @@
       "id": "filter3",
       "name": "filter3",
       "op": "filter",
-      "params": [["m => m.get('winnings).toDouble > m.get('stake).toDouble * 1.30"]],
+      "params": [["m => m.get('winnings).toDouble > 10.0 && m.get('winnings).toDouble > m.get('stake).toDouble * 1.30"]],
       "paramsEncoded": false
     },
     {
@@ -131,7 +131,7 @@
       "id": "mapper2",
       "name": "mapper2",
       "op": "map",
-      "params": [["m => {val message = \"Congratulations. You won \" + m.get('winnings) + \" \" + m.get('currency) + \". On a bet placed on \" + m.get('eventName) + \" for \" + m.get('outComeName) + \" to \" + m.get('marketName) + \".\";m.append('message, message).append('ts, Helper.fmt.print(Instant.now()))}"]],
+      "params": [["m => {val message = \"Congratulations! You won \" + m.get('winnings) + \" \" + m.get('currency) + \" on a bet placed on \" + m.get('eventName).replaceAll(\"\\\\|\", \"\") + \" for \" + m.get('outComeName).replaceAll(\"\\\\|\", \"\") + \" to \" + m.get('marketName).replaceAll(\"\\\\|\", \"\") + \".\";m.append('message, message).append('ts, Helper.fmt.print(Helper.Instant.now())).remove('userid)}"]],
       "paramsEncoded": false
     },
     {

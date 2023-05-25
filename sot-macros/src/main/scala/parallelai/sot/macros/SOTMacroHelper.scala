@@ -59,6 +59,16 @@ object SOTMacroHelper {
         val methodName = op.op.parse[Term].get
         val params = op.params.map(paramClause => paramClause.map(_.parse[Term].get).toList).toList
         Some(op.id, methodName, params)
+      case op: TFPredictOp =>
+        val name = "predict".parse[Term].get
+        val fetchLit : List[Lit.String] = op.fetchOps.map(f => Lit.String(f)).toList
+        val fetchOps = Term.Assign(Term.Name("fetchOps"), Term.Apply(Term.Name("Seq"), fetchLit))
+        val modelBucket = Term.Assign(Term.Name("modelBucket"), Lit.String(op.modelBucket))
+        val modelPath = Term.Assign(Term.Name("modelPath"), Lit.String(op.modelPath))
+        val inFn = Term.Assign(Term.Name("inFn"), op.inFn.parse[Term].get)
+        val outFn = Term.Assign(Term.Name("outFn"), op.outFn.parse[Term].get)
+        val code = List(List(modelBucket, modelPath, fetchOps, inFn, outFn))
+        Some(op.id, name, code)
       case _ => None
     }
 
@@ -68,7 +78,7 @@ object SOTMacroHelper {
 
     if (dag.getSinkVertices().contains(op.id)) require(op.getClass == classOf[SinkOp], s"Operation ${op.id} should be a Sink")
     else if (dag.getSourceVertices().contains(op.id)) require(op.getClass == classOf[SourceOp], s"Operation ${op.id} should be a Source")
-    else require(op.getClass == classOf[TransformationOp], s"Operation ${op.id} should be a Transformation")
+    else require(op.getClass == classOf[TransformationOp] | op.getClass == classOf[TFPredictOp], s"Operation ${op.id} should be a Transformation or a Predict")
 
   }
 

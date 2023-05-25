@@ -1,18 +1,16 @@
 package parallelai.sot.engine.io.bigquery
 
-import com.google.api.services.bigquery.model.{TableRow, TableSchema}
+import com.google.api.services.bigquery.model.TableSchema
 import shapeless._
 
 import scala.collection.JavaConverters._
 
-class BigQueryType extends Serializable {
+object BigQueryType {
 
-  def toTableRow[L <: HList](a: L)
-                            (implicit toL: ToTableRow[L])
-  : TableRow = {
-    val tr = new TableRow()
-    tr.putAll(toL(a))
-    tr
+  def at[T](fromFn: Any => T, toFn: T => Any) = new BaseBigQueryMappableType[T] {
+    override def from(value: Any): T = fromFn(value)
+
+    override def to(value: T): Any = toFn(value)
   }
 
 }

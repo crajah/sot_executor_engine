@@ -1,10 +1,12 @@
 {
+  "id": "schemaname",
   "name": "schemaname",
   "version": "version1",
   "schemas": [
     {
       "type": "avro",
       "id": "avroschema1",
+      "name": "avroschema1",
       "version": "version2",
       "definition": {
         "type": "record",
@@ -28,6 +30,7 @@
     {
       "type": "bigquery",
       "id": "bigqueryschema1",
+      "name": "bigqueryschema1",
       "version": "version3",
       "definition": {
         "type": "bigquerydefinition",
@@ -60,12 +63,14 @@
   "steps": [
     {
       "type": "source",
+      "id": "in",
       "name": "in",
       "schema": "avroschema1",
       "source": "pubsubsource1"
     },
     {
       "type": "tfpredict",
+      "id": "predict1",
       "name": "predict1",
       "modelBucket": "lb-tf-models",
       "modelPath": "inception_v1",
@@ -75,6 +80,7 @@
     },
     {
       "type": "sink",
+      "id": "out",
       "name": "out",
       "schema": "bigqueryschema1",
       "source": "bigquerysource1"

@@ -1,0 +1,139 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "jsonschema1",
+      "name": "jsonschema1Name",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "Customer",
+        "fields": [
+          {
+            "mode": "required",
+            "name": "payload",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "punter",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "required",
+                    "name": "account",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "required",
+                        "name": "username",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "required",
+                        "name": "playerId",
+                        "type": "String"
+                      }
+                    ]
+                  },
+                  {
+                    "mode": "required",
+                    "name": "customer",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "required",
+                        "name": "birthdate",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "required",
+                        "name": "firstName",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "required",
+                        "name": "gender",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "required",
+                        "name": "lastName",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "salutation",
+                        "type": "String"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource1",
+      "topic": "crm-stg-df-customer"
+    },
+    {
+      "type": "datastore",
+      "id": "datastoresource1",
+      "kind": "crm-stg-df-customer-nested"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "jsonschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "transformation",
+      "id": "filter1",
+      "name": "filter1",
+      "op": "filter",
+      "params": [["m => ! m.get('payload).get('punter).get('account).get('username).startsWith(\"__\")"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "mapper1",
+      "name": "mapper1",
+      "op": "map",
+      "params": [["{m => val mm = Row('username ->> m.get('payload).get('punter).get('account).get('username) :: HNil).concat(m); mm.append('ts, Helper.fmt.print(Helper.Instant.now()))}"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "source": "datastoresource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "mapper1"
+    },
+    {
+      "from": "mapper1",
+      "to": "filter1"
+    },
+    {
+      "from": "filter1",
+      "to": "out"
+    }
+  ]
+}
