@@ -11,10 +11,12 @@ public interface SOTOptions extends PipelineOptions {
     @Description("Whether to keep jobs running after local process exit")
     @Default.Boolean(false)
     boolean getKeepJobsRunning();
+
     void setKeepJobsRunning(boolean keepJobsRunning);
 
     @Description("Number of workers to use when executing the injector pipeline")
     @Default.Integer(1)
     int getInjectorNumWorkers();
+
     void setInjectorNumWorkers(int numWorkers);
 }

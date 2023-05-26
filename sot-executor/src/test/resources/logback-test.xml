@@ -24,6 +24,11 @@
         <appender-ref ref="A1"/>
     </root>
 
+    <logger name="parallelai.sot" additivity="false">
+        <level value="INFO" />
+        <appender-ref ref="ACCESS" />
+    </logger>
+
     <logger name="parallelai.sot.executor.bolts.AvroDecoderBolt" additivity="false">
         <level value="OFF" />
         <appender-ref ref="ACCESS" />

@@ -14,42 +14,43 @@ import syntax.singleton._
 trait Row extends Serializable {
 
   type L <: HList
-  val hl: L
+
+  val hList: L
 
   type FSL[K] = Selector[L, K]
 
   def updatedAt[V, W, Out <: HList](n: Nat, value: V)(implicit
-                                                      replacer: ReplaceAt.Aux[L, n.N, V, (W, Out)]): Out = replacer(hl, value)._2
+                                                      replacer: ReplaceAt.Aux[L, n.N, V, (W, Out)]): Out = replacer(hList, value)._2
 
-  def appendList[V <: HList, Out <: HList](v: V)(implicit prep: Prepend.Aux[L, V, Out]) = Row[Out](prep(hl, v))
+  def appendList[V <: HList, Out <: HList](v: V)(implicit prep: Prepend.Aux[L, V, Out]) = Row[Out](prep(hList, v))
 
   def keys(implicit keys: Keys[L]): keys.Out = keys()
 
-  def get(k: Witness)(implicit selector: Selector[L, k.T]): selector.Out = selector(hl)
+  def get(k: Witness)(implicit selector: Selector[L, k.T]): selector.Out = selector(hList)
 
   def project[T <: HList, W <: HList, Out <: HList](v: T)(implicit m: WitnessType.Aux[T, W], selector: SelectAll.Aux[L, W, Out], isKeyDuplicated: IsKeyDuplicated[Out]): Row.Aux[Out]  = {
-    Row[selector.Out](isKeyDuplicated(selector(hl)))
+    Row[selector.Out](isKeyDuplicated(selector(hList)))
   }
 
   def projectTyped[K <: HList](implicit selector: SelectAll[L, K]): Row.Aux[selector.Out] = {
-    Row[selector.Out](selector(hl))
+    Row[selector.Out](selector(hList))
   }
 
   def append[V, Out <: HList](k: Witness, v: V)(implicit updater: Updater.Aux[L, FieldType[k.T, V], Out],
                                                 lk: LacksKey[L, k.T]): Row.Aux[Out] = {
-    Row(updater(hl, field[k.T](v)))
+    Row(updater(hList, field[k.T](v)))
   }
 
   def concat[B <: HList](b: Row.Aux[B])
-                                    (implicit p: Prepend[L, B]): Row.Aux[p.Out] = Row(p(hl, b.hl))
+                                    (implicit p: Prepend[L, B]): Row.Aux[p.Out] = Row(p(hList, b.hList))
 
   def update[W](k: WitnessWith[FSL], value: W)
-               (implicit modifier: Modifier[L, k.T, k.instance.Out, W]): Row.Aux[modifier.Out] = Row(modifier(hl, _ => value))
+               (implicit modifier: Modifier[L, k.T, k.instance.Out, W]): Row.Aux[modifier.Out] = Row(modifier(hList, _ => value))
 
   def updateWith[W](k: WitnessWith[FSL])(f: k.instance.Out => W)
-                   (implicit modifier: Modifier[L, k.T, k.instance.Out, W]): Row.Aux[modifier.Out] = Row(modifier(hl, f))
+                   (implicit modifier: Modifier[L, k.T, k.instance.Out, W]): Row.Aux[modifier.Out] = Row(modifier(hList, f))
 
-  def remove[V, Out <: HList](k: Witness)(implicit remover: Remover.Aux[L, k.T, (V, Out)]): Row.Aux[Out] = Row(remover(hl)._2)
+  def remove[V, Out <: HList](k: Witness)(implicit remover: Remover.Aux[L, k.T, (V, Out)]): Row.Aux[Out] = Row(remover(hList)._2)
 
 }
 
@@ -68,7 +69,6 @@ object Row {
   def apply[Repr <: HList](gen: Repr): Row.Aux[Repr] =
     new Row {
       type L = Repr
-      val hl = gen
+      val hList = gen
     }
-
 }

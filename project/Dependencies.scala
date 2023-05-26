@@ -5,6 +5,7 @@ object Dependencies {
   val scala212 = "2.12.2"
   val metaVersion = "1.8.0"
   val paradiseVersion = "3.0.0-M9"
+  val monocleVersion = "1.4.0"
   val trueAccordVersion = "0.6.6"
   val twitterBijectionVersion = "0.9.5"
   val spotifyScioVersion = "0.4.5"
@@ -23,9 +24,22 @@ object Dependencies {
   val mockito = "org.mockito" % "mockito-all" % "1.10.19"
   val grizzledLogging = "org.clapper" %% "grizzled-slf4j" % "1.3.1"
   val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.2.3"
+  val testContainers = "com.dimafeng" %% "testcontainers-scala" % "0.8.0"
 
   val typesafeConfig = "com.typesafe" % "config" % "1.3.2"
   val pureConfig = "com.github.pureconfig" %% "pureconfig" % "0.8.0"
+
+  val monocle = "com.github.julien-truffaut" %% "monocle-core" % monocleVersion
+  val monocleMacro = "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion
+
+  val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.16"
+
+  val catsCore = "org.typelevel" %% "cats-core" % "1.0.0-RC1"
+  val catsEffect = "org.typelevel" %% "cats-effect" % "0.5"
+
+  val monixEval = "io.monix" %% "monix-eval" % "3.0.0-8084549"
+
+  val refined = "eu.timepit" %% "refined" % "0.8.4"
 
   val sprayJson = "io.spray" %% "spray-json" % "1.3.3"
   val circe = "io.circe" %% "circe-core" % "0.8.0"
@@ -35,10 +49,9 @@ object Dependencies {
 
   val shapeless = "com.chuusai" %% "shapeless" % "2.3.2"
 
-  val scalaz = "org.scalaz" % "scalaz-core_2.11" % "7.2.16"
-
   val gcloudDatastore = "com.google.cloud" % "google-cloud-datastore" % gcloudVersion
   val gcloudStorage = "com.google.cloud" % "google-cloud-storage" % gcloudVersion
+  val gcloudHttpClient = "com.google.http-client" % "google-http-client" % "1.22.0"
 
   val kafka = ("org.apache.kafka" %% "kafka" % "0.10.1.1")
     .exclude("javax.jms", "jms")
@@ -50,7 +63,7 @@ object Dependencies {
     .exclude("org.apache.zookeeper", "zookeeper")
     .exclude("com.101tec", "zkclient")
 
-  val protoc = "com.github.os72" % "protoc-jar" % "3.4.0"
+  val protoc = "com.github.os72" % "protoc-jar" % "3.4.0.1"
 
   val twitterBijectionCore = "com.twitter" %% "bijection-core" % twitterBijectionVersion
   val twitterBijectionAvro = "com.twitter" %% "bijection-avro" % twitterBijectionVersion
@@ -68,5 +81,5 @@ object Dependencies {
   val shapelessDataTypeCore = "me.lyh" %% "shapeless-datatype-core" % shapelessDataTypeDataVersion
   val shapelessDataTypeDatastore = "me.lyh" %% "shapeless-datatype-datastore_1.3" % shapelessDataTypeDataVersion
 
-  val avro = "org.apache.avro" % "avro" % "1.7.7"
+  val avro = "org.apache.avro" % "avro" % "1.8.2"
 }

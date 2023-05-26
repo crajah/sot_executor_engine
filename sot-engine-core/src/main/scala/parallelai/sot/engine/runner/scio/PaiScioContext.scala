@@ -12,8 +12,7 @@ import shapeless.{HList, LabelledGeneric}
 import io.circe.generic.auto._
 import io.circe.parser._
 import org.slf4j.LoggerFactory
-
-import parallelai.sot.engine.io.datastore._
+import parallelai.sot.engine.io.datastore.{DatastoreType, ToEntity}
 
 object PaiScioContext extends Serializable {
 

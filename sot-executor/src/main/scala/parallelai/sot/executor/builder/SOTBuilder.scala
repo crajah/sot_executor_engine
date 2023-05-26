@@ -1,5 +1,6 @@
 package parallelai.sot.executor.builder
 
+import org.apache.beam.sdk.options.PipelineOptions
 import parallelai.sot.engine.config.SchemaResourcePath
 
 //// SOT
@@ -82,11 +83,16 @@ object SOTBuilder {
   }
 
   val genericBuilder = new Builder()
+
   def main(cmdArg: Array[String]): Unit = {
     val (sotOptions, sotArgs) = ScioContext.parseArguments[SOTOptions](cmdArg)
-    val sotUtils = new SOTUtils(sotOptions)
-    val sc = ScioContext(sotOptions)
+    execute(sotOptions, sotArgs)
+  }
+
+  def execute[P <: PipelineOptions](pipelineOptions: P, args: Args): Unit = {
+    val sotUtils = new SOTUtils(pipelineOptions)
+    val sc = ScioContext(pipelineOptions)
     val builder = genericBuilder
-    builder.execute(sotUtils, sc, sotArgs)
+    builder.execute(sotUtils, sc, args)
   }
 }

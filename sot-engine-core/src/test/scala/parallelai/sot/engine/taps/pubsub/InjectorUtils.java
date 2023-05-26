@@ -39,16 +39,15 @@ class InjectorUtils {
   /**
    * Builds a new Pubsub client and returns it.
    */
-  public static Pubsub getClient(final HttpTransport httpTransport,
-                                 final JsonFactory jsonFactory)
-           throws IOException {
+  public static Pubsub getClient(final HttpTransport httpTransport, final JsonFactory jsonFactory) throws IOException {
       checkNotNull(httpTransport);
       checkNotNull(jsonFactory);
-      GoogleCredential credential =
-          GoogleCredential.getApplicationDefault(httpTransport, jsonFactory);
+      GoogleCredential credential = GoogleCredential.getApplicationDefault(httpTransport, jsonFactory);
+
       if (credential.createScopedRequired()) {
           credential = credential.createScoped(PubsubScopes.all());
       }
+
       if (credential.getClientAuthentication() != null) {
         System.out.println("\n***Warning! You are not using service account credentials to "
           + "authenticate.\nYou need to use service account credentials for this example,"
@@ -57,11 +56,10 @@ class InjectorUtils {
           + "https://developers.google.com/identity/protocols/application-default-credentials.");
         System.exit(1);
       }
-      HttpRequestInitializer initializer =
-          new RetryHttpInitializerWrapper(credential);
-      return new Pubsub.Builder(httpTransport, jsonFactory, initializer)
-              .setApplicationName(APP_NAME)
-              .build();
+
+      HttpRequestInitializer initializer = new RetryHttpInitializerWrapper(credential);
+
+      return new Pubsub.Builder(httpTransport, jsonFactory, initializer).setApplicationName(APP_NAME).build();
   }
 
   /**
