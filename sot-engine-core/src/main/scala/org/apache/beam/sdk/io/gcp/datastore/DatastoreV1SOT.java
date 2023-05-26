@@ -73,6 +73,7 @@ public class DatastoreV1SOT {
         }
 
         public Write removeDuplicatesWithinCommits(Boolean dedupCommits) {
+            checkNotNull(dedupCommits, "dedupCommits removeDuplicatesWithinCommits");
             return new Write(projectId, localhost, dedupCommits);
         }
 
@@ -181,6 +182,7 @@ public class DatastoreV1SOT {
                 this.instant = instant;
             }
         }
+
         private static final Logger LOG = LoggerFactory.getLogger(DatastoreWriterFn.class);
         private final ValueProvider<String> projectId;
         @Nullable
@@ -189,7 +191,6 @@ public class DatastoreV1SOT {
         private final DatastoreV1.V1DatastoreFactory datastoreFactory;
         // Current batch of mutations to be written.
         private final List<MutationTimestamped> mutationsTimestamped = new ArrayList<>();
-        private final List<Mutation> mutations = new ArrayList<>();
         private int mutationsSize = 0;  // Accumulated size of protos in mutations.
         private DatastoreV1.WriteBatcher writeBatcher;
 
@@ -214,6 +215,7 @@ public class DatastoreV1SOT {
             this.localhost = localhost;
             this.datastoreFactory = datastoreFactory;
             this.writeBatcher = writeBatcher;
+            this.dedupCommits = dedupCommits;
         }
 
         @StartBundle
@@ -226,24 +228,20 @@ public class DatastoreV1SOT {
         public void processElement(ProcessContext c) throws Exception {
             Mutation write = c.element();
             int size = write.getSerializedSize();
-            if (mutations.size() > 0
+            if (mutationsTimestamped.size() > 0
                     && mutationsSize + size >= DatastoreV1.DATASTORE_BATCH_UPDATE_BYTES_LIMIT) {
                 flushBatch();
             }
             mutationsTimestamped.add(new MutationTimestamped(c.element(), c.timestamp()));
             mutationsSize += size;
             if (mutationsTimestamped.size() >= writeBatcher.nextBatchSize(System.currentTimeMillis())) {
-                if (dedupCommits) {
-                    dedupeMutations();
-                }
                 flushBatch();
-                mutationsTimestamped.clear();
             }
         }
 
         @FinishBundle
         public void finishBundle() throws Exception {
-            if (!mutations.isEmpty()) {
+            if (!mutationsTimestamped.isEmpty()) {
                 flushBatch();
             }
         }
@@ -264,7 +262,9 @@ public class DatastoreV1SOT {
                     seenKeys.put(k, m);
                 }
             }
-            mutations.addAll(seenKeys.values().stream().map(m-> m.mutation).collect(Collectors.toList()));
+            mutationsTimestamped.clear();
+            mutationsSize = seenKeys.size();
+            mutationsTimestamped.addAll(seenKeys.values());
         }
 
         private Key getKey(Mutation m) {
@@ -299,7 +299,12 @@ public class DatastoreV1SOT {
          *                            backing off between retries fails.
          */
         private void flushBatch() throws DatastoreException, IOException, InterruptedException {
-            LOG.debug("Writing batch of {} mutations", mutations.size());
+
+            if (dedupCommits) {
+                dedupeMutations();
+            }
+
+            LOG.debug("Writing batch of {} mutations", mutationsTimestamped.size());
 
             Sleeper sleeper = Sleeper.DEFAULT;
             BackOff backoff = BUNDLE_WRITE_BACKOFF.backoff();
@@ -307,7 +312,7 @@ public class DatastoreV1SOT {
             while (true) {
                 // Batch upsert entities.
                 CommitRequest.Builder commitRequest = CommitRequest.newBuilder();
-                commitRequest.addAllMutations(mutations);
+                commitRequest.addAllMutations(mutationsTimestamped.stream().map(m -> m.mutation).collect(Collectors.toList()));
                 commitRequest.setMode(CommitRequest.Mode.NON_TRANSACTIONAL);
                 long startTime = System.currentTimeMillis(), endTime;
 
@@ -315,7 +320,7 @@ public class DatastoreV1SOT {
                     datastore.commit(commitRequest.build());
                     endTime = System.currentTimeMillis();
 
-                    writeBatcher.addRequestLatency(endTime, endTime - startTime, mutations.size());
+                    writeBatcher.addRequestLatency(endTime, endTime - startTime, mutationsTimestamped.size());
 
                     // Break if the commit threw no exception.
                     break;
@@ -325,12 +330,12 @@ public class DatastoreV1SOT {
                          * the latency of successful requests. DEADLINE_EXCEEDED can be taken into
                          * consideration, though. */
                         endTime = System.currentTimeMillis();
-                        writeBatcher.addRequestLatency(endTime, endTime - startTime, mutations.size());
+                        writeBatcher.addRequestLatency(endTime, endTime - startTime, mutationsTimestamped.size());
                     }
 
                     // Only log the code and message for potentially-transient errors. The entire exception
                     // will be propagated upon the last retry.
-                    LOG.error("Error writing batch of {} mutations to Datastore ({}): {}", mutations.size(),
+                    LOG.error("Error writing batch of {} mutations to Datastore ({}): {}", mutationsTimestamped.size(),
                             exception.getCode(), exception.getMessage());
                     if (!BackOffUtils.next(sleeper, backoff)) {
                         LOG.error("Aborting after {} retries.", MAX_RETRIES);
@@ -338,8 +343,8 @@ public class DatastoreV1SOT {
                     }
                 }
             }
-            LOG.debug("Successfully wrote {} mutations", mutations.size());
-            mutations.clear();
+            LOG.debug("Successfully wrote {} mutations", mutationsTimestamped.size());
+            mutationsTimestamped.clear();
             mutationsSize = 0;
         }
 
