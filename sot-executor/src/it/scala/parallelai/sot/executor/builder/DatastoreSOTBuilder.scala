@@ -25,7 +25,7 @@ import parallelai.sot.macros.SOTMacroHelper._
   * </pre>
   */
 object DatastoreSOTBuilder extends Logging {
-  val datastore = Datastore(Project(projectId), Kind("testkind1"))
+  val datastore = Datastore(Project(), Kind())
 
   @AvroType.toSchema
   case class Message(user: String, teamName: String, score: Int, eventTime: Long, eventTimeStr: String)

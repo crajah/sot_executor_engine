@@ -20,7 +20,7 @@ class DatastoreContainerITSpec extends WordSpec with MustMatchers {
     }
 
     "bind ports" in {
-      val container = new DatastoreContainer("davidainslie/gcloud-datastore:latest", datastorePort = 8001)
+      val container = new DatastoreContainer("davidainslie/gcloud-datastore:latest", port = 8001)
 
       container.portBindings mustBe Seq("8001:8081")
     }

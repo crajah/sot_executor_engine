@@ -1,7 +1,6 @@
 package parallelai.sot.engine.io.datastore
 
 import java.net.URI
-import java.util.UUID
 import org.scalatest.Suite
 import com.google.cloud.datastore.{KeyQuery, Query}
 import com.google.cloud.{NoCredentials, ServiceOptions}
@@ -12,14 +11,14 @@ import parallelai.sot.engine.Project
 trait DatastoreContainerSpec {
   this: Suite with ContainersSpec =>
 
-  lazy val project: Project = Project(UUID.randomUUID().toString)
+  lazy val project: Project = Project()
 
-  lazy val kind: Kind = Kind(UUID.randomUUID().toString)
+  lazy val kind: Kind = Kind()
 
-  lazy val datastoreContainer: DatastoreContainer = new DatastoreContainer
+  lazy val datastoreContainer: DatastoreContainer = new DatastoreContainer(projectId = project.id)
 
   lazy val datastore = Datastore(project, kind,
-                                 host = Some(new URI(s"http://${datastoreContainer.containerIpAddress}:${datastoreContainer.datastorePort}")),
+                                 host = Some(new URI(s"http://${datastoreContainer.containerIpAddress}:${datastoreContainer.port}")),
                                  credentials = Some(NoCredentials.getInstance),
                                  retry = Some(ServiceOptions.getNoRetrySettings))
 
