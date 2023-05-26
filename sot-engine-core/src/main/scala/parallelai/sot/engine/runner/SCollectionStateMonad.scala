@@ -137,10 +137,10 @@ object SCollectionStateMonad {
                                                                                                                     (tap: TapDef[TAP, UTIL, ANNO, In], utils: UTIL)
                                                                                                                     (implicit
                                                                                                                      gen: LabelledGeneric.Aux[In, L],
-                                                                                                                     writer: Writer[TAP, UTIL, ANNO, In]
+                                                                                                                     writer: Writer[TAP, UTIL, ANNO, In, L]
                                                                                                                     ): IndexedState[SCOLS, SCOLS, SCOLS] =
       IndexedState(sColls => {
-        writer.write(sCollection, tap.tapDefinition, utils)(gen)
+        writer.write(sCollection, tap.tapDefinition, utils)
         (sColls, sColls)
       })
 

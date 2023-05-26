@@ -68,7 +68,7 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "func": [["m => {val updated = m.append('id, Helper.random.nextInt());updated.project(projector(Col('id), Col('user), Col('score) ** Col('score1), Col('score) ** Col('score2), Col('eventTime)))}"]],
+      "params": [["m => {val updated = m.append('id, Helper.random.nextInt());updated.project(projector(Col('id), Col('user), Col('score) ** Col('score1), Col('score) ** Col('score2), Col('eventTime)))}"]],
       "paramsEncoded": false
     },
     {
@@ -76,7 +76,7 @@
       "id": "filter",
       "name": "filter",
       "op": "filter",
-      "func": [["m => m.get('score1) > 1"]],
+      "params": [["m => m.get('score1) > 1"]],
       "paramsEncoded": false
     },
     {
