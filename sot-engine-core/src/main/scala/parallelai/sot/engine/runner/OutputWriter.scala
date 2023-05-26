@@ -9,7 +9,7 @@ import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, DatastoreTapDefinition, PubSubTapDefinition, TapDefinition}
-import parallelai.sot.engine.runner.scio.PaiScioContext._
+import com.spotify.scio.sot.PaiScioContext._
 import shapeless.{HList, LabelledGeneric, Poly2}
 import parallelai.sot.engine.io.utils.annotations._
 import com.google.datastore.v1.client.DatastoreHelper.makeKey
@@ -77,7 +77,7 @@ object Writer {
   Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] =
     new Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
-        sCollection.map(x => (h.head(x.hl), gen.from(x.hl))).saveAsTypedDatastore(utils.getProject, tap.kind)
+        sCollection.map(x => (h.head(x.hl), gen.from(x.hl))).saveAsDatastoreWithSchema(utils.getProject, tap.kind, tap.dedupCommits)
       }
     }
 
@@ -116,18 +116,7 @@ object SchemalessWriter {
   SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] =
     new SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] {
       def write(sColl: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
-
-        val project = utils.getProject
-        sColl.map { rec =>
-          val entity = rec.hl.toEntityBuilder
-          val key = h.head(rec.hl)
-          val keyEntity = key match {
-            case name: String => makeKey(tap.kind, name.asInstanceOf[AnyRef])
-            case id: Int => makeKey(tap.kind, id.asInstanceOf[AnyRef])
-          }
-          entity.setKey(keyEntity)
-          entity.build()
-        }.saveAsDatastore(project)
+        sColl.map(x => (h.head(x.hl), x.hl)).saveAsDatastoreSchemaless(utils.getProject, tap.kind, tap.dedupCommits)
       }
     }
 

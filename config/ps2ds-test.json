@@ -52,7 +52,8 @@
     {
       "type": "datastore",
       "id": "datastoresource1",
-      "kind": "dataflowwrite"
+      "kind": "dataflowwrite",
+      "dedupCommits": true
     }
   ],
   "steps": [
