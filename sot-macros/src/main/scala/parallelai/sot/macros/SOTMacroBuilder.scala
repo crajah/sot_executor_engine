@@ -134,9 +134,9 @@ object SOTMainMacroImpl {
             (Term.Name(writeMethod), List(List(buildTap(Term.Name("conf.sinkTaps"), sinkDef._2, sinkDef._3, sinks.indexOf(sinkDef)), Term.Name("sotUtils"))))
           }
         }
-        val inEdgeIndex = idsStack.get(e1)
-        val idTerm = Term.Name("_" + inEdgeIndex.get)
-        (stepParsed._1, List(List(q"sColls.at(Nat.${idTerm})")) ::: stepParsed._2)
+        val inEdgeIndex = idsStack.get(e1).get
+        val idTerm = Term.Apply(Term.Name("Nat" + inEdgeIndex), List())
+        (stepParsed._1, List(List(q"sColls.at(${idTerm})")) ::: stepParsed._2)
       }
     }).toList
 

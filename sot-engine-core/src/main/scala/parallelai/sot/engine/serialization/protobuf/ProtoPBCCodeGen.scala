@@ -9,8 +9,7 @@ import protocbridge.{JvmGenerator, Target}
 import scalapb.ScalaPbCodeGenerator
 
 object ProtoPBCCodeGen {
-
-  val scalapbOptions =
+  val scalapbOptions: String =
     """
       |import "scalapb/scalapb.proto";
       |

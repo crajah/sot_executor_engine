@@ -45,14 +45,26 @@ import com.spotify.scio.avro.types.AvroType
   *   ".com.google.api.client.googleapis.json.GoogleJsonResponseException: 429 Too Many Requests".
   * </pre>
   *
+  * Once you've set up your credentials, run the Injector like this":
+  * {{{ Injector <project-name> <topic-name> <serializer> <true | false> }}}
+  *
+  * The pubsub topic will be created if it does not exist.
+  * <p>
+  * To run the injector in write-to-file-mode, set the topic name to "none" and specify the filename:
+  * {{{ Injector <project-name> none <filename> }}}
+  * <p>
   * To run this class with a default configuration of application.conf:
   * <pre>
   *   sbt clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector project-name topic-name (avro | proto) (true | false)"
+  *   e.g.
+  *   sbt clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector bi-crm-poc p2pin avro false"
   * </pre>
   *
   * If there is no application.conf then compilation will fail, but you can supply your own conf as a Java option e.g. -Dconfig.resource=application-ps2ps-test.conf
   * <pre>
   *  sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector project-name topic-name (avro | proto) (true | false)"
+  *  e.g.
+  *  sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-engine-core/test:runMain parallelai.sot.engine.taps.pubsub.Injector bi-crm-poc p2pin avro false"
   * </pre>
   * NOTE That application configurations can also be set/overridden via system and environment properties.
   */
