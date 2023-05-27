@@ -8,7 +8,7 @@ import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.macros.SOTBuilder
 import parallelai.sot.executor.model.SOTMacroConfig._
 import parallelai.sot.executor.model.SOTMacroJsonConfig
-import parallelai.sot.engine.runner.scio.PaiScioContext._
+import com.spotify.scio.sot.PaiScioContext._
 import parallelai.sot.macros.SOTMacroHelper._
 import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}

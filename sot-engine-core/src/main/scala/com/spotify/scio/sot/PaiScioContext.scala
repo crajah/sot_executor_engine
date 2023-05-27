@@ -1,18 +1,20 @@
-package parallelai.sot.engine.runner.scio
+package com.spotify.scio.sot
 
+import com.google.datastore.v1.Entity
+import com.google.datastore.v1.client.DatastoreHelper.makeKey
 import com.spotify.scio.ScioContext
 import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.values.SCollection
 import com.trueaccord.scalapb.GeneratedMessage
-import parallelai.sot.engine.serialization.avro.AvroUtils
-import com.google.datastore.v1.client.DatastoreHelper.makeKey
-import parallelai.sot.engine.io.utils.annotations.{HasDatastoreAnnotation, HasJSONAnnotation}
-import shapeless.{HList, LabelledGeneric}
-import io.circe.generic.auto._
 import io.circe.parser._
 import org.slf4j.LoggerFactory
 import parallelai.sot.engine.io.datastore.{DatastoreType, ToEntity}
+import org.apache.beam.sdk.io.gcp.datastore.DatastoreIOSOT
+import parallelai.sot.engine.io.datastore._
+import parallelai.sot.engine.io.utils.annotations.{HasDatastoreAnnotation, HasJSONAnnotation}
+import parallelai.sot.engine.serialization.avro.AvroUtils
+import shapeless.{HList, LabelledGeneric}
 
 object PaiScioContext extends Serializable {
 
@@ -60,9 +62,27 @@ object PaiScioContext extends Serializable {
     }
   }
 
+  implicit class KVHListPaiScioSCollection[Out <: HList, Key](c: SCollection[(Key, Out)]) {
+
+    def saveAsDatastoreSchemaless(project: String, kind: String, dedupCommits: Boolean)(implicit
+                                                                                        toL: ToEntity[Out]): Unit = {
+      c.map { case (key, rec) =>
+        val entity = rec.toEntityBuilder
+        val keyEntity = key match {
+          case name: String => makeKey(kind, name.asInstanceOf[AnyRef])
+          case id: Int => makeKey(kind, id.asInstanceOf[AnyRef])
+        }
+        entity.setKey(keyEntity)
+        entity.build()
+      }.applyInternal(DatastoreIOSOT.v1.write.withProjectId(project).removeDuplicatesWithinCommits(dedupCommits))
+    }
+
+  }
+
   implicit class KVPaiScioSCollection[Out <: HasDatastoreAnnotation : Manifest, Key](c: SCollection[(Key, Out)]) {
-    def saveAsTypedDatastore[L <: HList](project: String, kind: String)(implicit gen: LabelledGeneric.Aux[Out, L],
-                                                                        toL: ToEntity[L]): Unit = {
+
+    def saveAsDatastoreWithSchema[L <: HList](project: String, kind: String, dedupCommits: Boolean)(implicit gen: LabelledGeneric.Aux[Out, L],
+                                                                                          toL: ToEntity[L]): Unit = {
       val dataStoreT: DatastoreType[Out] = DatastoreType[Out]
 
       c.map { case (key, rec) =>
@@ -73,7 +93,7 @@ object PaiScioContext extends Serializable {
         }
         entity.setKey(keyEntity)
         entity.build()
-      }.saveAsDatastore(project)
+      }.applyInternal(DatastoreIOSOT.v1.write.withProjectId(project).removeDuplicatesWithinCommits(dedupCommits))
     }
   }
 

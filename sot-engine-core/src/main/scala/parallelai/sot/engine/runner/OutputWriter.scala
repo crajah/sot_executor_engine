@@ -9,7 +9,7 @@ import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, DatastoreTapDefinition, PubSubTapDefinition, TapDefinition}
-import parallelai.sot.engine.runner.scio.PaiScioContext._
+import com.spotify.scio.sot.PaiScioContext._
 import shapeless.{HList, LabelledGeneric, Poly2}
 import parallelai.sot.engine.io.utils.annotations._
 import com.google.datastore.v1.client.DatastoreHelper.makeKey
@@ -77,7 +77,7 @@ object Writer {
   Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] =
     new Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
-        sCollection.map(x => (h.head(x.hList), gen.from(x.hList))).saveAsTypedDatastore(utils.getProject, tap.kind)
+        sCollection.map(x => (h.head(x.hList), gen.from(x.hList))).saveAsDatastoreWithSchema(utils.getProject, tap.kind, tap.dedupCommits)
       }
     }
 
