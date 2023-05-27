@@ -23,7 +23,7 @@ class RowTest extends WordSpec with Matchers {
 
       val row = Row(fcc)
 
-      row.hl should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
+      row.hList should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
 
       row.get('a) should be(1)
       row.get('b) should be("b")
@@ -37,7 +37,7 @@ class RowTest extends WordSpec with Matchers {
 
       val row = Row(ncc)
 
-      row.hl should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: 'n ->> ('i ->> 1 :: HNil) :: HNil)
+      row.hList should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: 'n ->> ('i ->> 1 :: HNil) :: HNil)
 
       row.get('a) should be(1)
       row.get('b) should be("b")
@@ -58,7 +58,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rconcat = r1.concat(r2)
 
-      rconcat.hl should be ('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: 'd ->> 2.0 :: HNil)
+      rconcat.hList should be ('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: 'd ->> 2.0 :: HNil)
 
     }
 
@@ -70,7 +70,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowAppended = row.append('d, 2.0)
 
-      rowAppended.hl should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: 'd ->> 2.0 :: HNil)
+      rowAppended.hList should be('a ->> 1 :: 'b ->> "b" :: 'c ->> 1.0 :: 'd ->> 2.0 :: HNil)
 
       rowAppended.get('a) should be(1)
       rowAppended.get('b) should be("b")
@@ -87,7 +87,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowAppended = row.remove('a)
 
-      rowAppended.hl should be('b ->> "b" :: 'c ->> 1.0 :: HNil)
+      rowAppended.hList should be('b ->> "b" :: 'c ->> 1.0 :: HNil)
 
       rowAppended.get('b) should be("b")
       rowAppended.get('c) should be(1.0)
@@ -104,7 +104,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowUpdated = row.update('a, 2)
 
-      rowUpdated.hl should be('a ->> 2 :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
+      rowUpdated.hList should be('a ->> 2 :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
 
       rowUpdated.get('a) should be(2)
       rowUpdated.get('b) should be("b")
@@ -123,7 +123,7 @@ class RowTest extends WordSpec with Matchers {
       val rowUpdated = row.updateWith('a)(_ + 20)
 
 
-      rowUpdated.hl should be('a ->> 21 :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
+      rowUpdated.hList should be('a ->> 21 :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
 
       rowUpdated.get('a) should be(21)
       rowUpdated.get('b) should be("b")
@@ -142,7 +142,7 @@ class RowTest extends WordSpec with Matchers {
       //a gets converted from int to string
       val rowUpdated = row.update('a, "2")
 
-      rowUpdated.hl should be('a ->> "2" :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
+      rowUpdated.hList should be('a ->> "2" :: 'b ->> "b" :: 'c ->> 1.0 :: HNil)
 
       rowUpdated.get('a) should be("2")
       rowUpdated.get('b) should be("b")
@@ -170,7 +170,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.projectTyped[HList.`'a, 'b`.T]
 
-      rowProjected.hl should be('a ->> 1 :: 'b ->> "b" :: HNil)
+      rowProjected.hList should be('a ->> 1 :: 'b ->> "b" :: HNil)
 
       rowProjected.get('a) should be(1)
       rowProjected.get('b) should be("b")
@@ -189,7 +189,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.projectTyped[v1]
 
-      rowProjected.hl should be('a ->> 1 :: 'n ->> ('i ->> 1 :: HNil) :: HNil)
+      rowProjected.hList should be('a ->> 1 :: 'n ->> ('i ->> 1 :: HNil) :: HNil)
 
       rowProjected.get('a) should be(1)
       rowProjected.get('n).get('i) should be(1)
@@ -220,7 +220,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.projectTyped[selector]
 
-      rowProjected.hl should be('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
+      rowProjected.hList should be('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
 
       rowProjected.get('iii) should be(32423)
       rowProjected.get('l3).get('iii) should be(32423)
@@ -251,7 +251,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.project(selector)
 
-      rowProjected.hl should be('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
+      rowProjected.hList should be('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
 
       rowProjected.get('iii) should be(32423)
       rowProjected.get('l3).get('iii) should be(32423)
@@ -287,7 +287,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.project(selector)
 
-      rowProjected.hl should be('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
+      rowProjected.hList should be('iii ->> 32423 :: 'l3 ->> ('iii ->> 32423 :: HNil) :: 'a ->> 123 :: HNil)
 
       rowProjected.get('iii) should be(32423)
       rowProjected.get('l3).get('iii) should be(32423)
@@ -312,7 +312,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.project(selector)
 
-      rowProjected.hl should be('i ->> 3333 :: 'ii ->> 1 :: HNil)
+      rowProjected.hList should be('i ->> 3333 :: 'ii ->> 1 :: HNil)
 
       rowProjected.get('i) should be(3333)
       rowProjected.get('ii) should be(1)
@@ -338,7 +338,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.project(selector)
 
-      rowProjected.hl should be('i ->> 3333 :: 'l2s ->> "s1" :: 'a ->> 123 :: HNil)
+      rowProjected.hList should be('i ->> 3333 :: 'l2s ->> "s1" :: 'a ->> 123 :: HNil)
 
       rowProjected.get('i) should be(3333)
       rowProjected.get('l2s) should be("s1")
@@ -367,7 +367,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.project(selector)
 
-      rowProjected.hl should be('i ->> 3333 :: 'l2s ->> "s1" :: 'a ->> 123 :: HNil)
+      rowProjected.hList should be('i ->> 3333 :: 'l2s ->> "s1" :: 'a ->> 123 :: HNil)
 
       rowProjected.get('i) should be(3333)
       rowProjected.get('l2s) should be("s1")
@@ -398,7 +398,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowProjected = row.project(pr)
 
-      rowProjected.hl should be('customerRef ->> "custRef" :: 'winnings ->> "1.2" :: 'activityId ->> 12L :: HNil)
+      rowProjected.hList should be('customerRef ->> "custRef" :: 'winnings ->> "1.2" :: 'activityId ->> 12L :: HNil)
 
       rowProjected.get('customerRef) should be("custRef")
       rowProjected.get('winnings) should be("1.2")
@@ -509,7 +509,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowAppended = row.append('d, 2.0)
 
-      val fccAppended = Row.to[FlatCaseClassAppended].from(rowAppended.hl)
+      val fccAppended = Row.to[FlatCaseClassAppended].from(rowAppended.hList)
 
       fccAppended should be(FlatCaseClassAppended(1, "b", 1.0, 2.0))
 
@@ -525,7 +525,7 @@ class RowTest extends WordSpec with Matchers {
 
       val rowAppended = row.append('m, Option(1L))
 
-      val nccAppended = Row.to[NestedCaseClassAppended].from(rowAppended.hl)
+      val nccAppended = Row.to[NestedCaseClassAppended].from(rowAppended.hList)
 
       nccAppended should be(NestedCaseClassAppended(1, "b", 1.0, NestedRecord(1), Some(1L)))
 

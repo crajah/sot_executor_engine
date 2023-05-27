@@ -1,15 +1,12 @@
 package parallelai.sot.engine.io.datastore
 
-import org.scalatest.FunSuite
-
 import java.net.URI
-
-import com.google.datastore.v1.client.DatastoreHelper._
+import shapeless._
+import shapeless.datatype.record._
 import org.scalacheck.Prop.{all, forAll}
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck._
-import shapeless._
-import shapeless.datatype.record._
+import com.google.datastore.v1.client.DatastoreHelper._
 
 object DatastoreTypeTest extends Properties("DatastoreType") {
 

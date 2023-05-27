@@ -102,7 +102,7 @@ object SCollectionStateMonad {
                                                                                       ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val res = prepend(sColls, sCollection.groupBy(f).map({
-        case (k: K, it: Iterable[Row.Aux[L]]) => fromTuple((k, it.toList.map(_.hl)))
+        case (k: K, it: Iterable[Row.Aux[L]]) => fromTuple((k, it.toList.map(_.hList)))
       }) :: HNil)
       (res, res)
     })
@@ -180,8 +180,6 @@ object IsPair {
     type V1 = VV1
     type V2 = VV2
 
-    def apply(l: SCollection[Row.Aux[L]]): SCollection[(VV1, VV2)] = l.map(r => (at0(values(r.hl)), at1(values(r.hl))))
+    def apply(l: SCollection[Row.Aux[L]]): SCollection[(VV1, VV2)] = l.map(r => (at0(values(r.hList)), at1(values(r.hList))))
   }
-
-
 }

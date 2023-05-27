@@ -2,7 +2,7 @@ import scala.language.postfixOps
 
 lazy val configResources = file("config")
 
-val assembySettings = assemblyMergeStrategy in assembly := {
+lazy val assembySettings = assemblyMergeStrategy in assembly := {
   case PathList("javax", "servlet", xs @ _*) => MergeStrategy.first
   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
   case PathList(ps @ _*) if ps.last endsWith ".class" => MergeStrategy.first
@@ -45,10 +45,12 @@ lazy val `sot-macros` = (project in file("./sot-macros"))
   )
 
 lazy val `sot-executor` = (project in file("./sot-executor"))
-  .dependsOn(`sot-engine-core` % "test->test;compile->compile", `sot-macros`)
+  .dependsOn(`sot-containers` % "it->it;test->test;compile->compile", `sot-engine-core` % "it->it;test->test;compile->compile", `sot-macros`)
+  .configs(IntegrationTest)
   .settings(
     Common.settings,
     Common.macroSettings,
+    Defaults.itSettings,
     assembySettings,
     unmanagedResourceDirectories in Compile += configResources
   )

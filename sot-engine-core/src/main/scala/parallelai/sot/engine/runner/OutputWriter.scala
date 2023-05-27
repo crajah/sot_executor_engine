@@ -33,7 +33,7 @@ object Writer {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils): Unit = {
         utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
         utils.setupPubsubTopic()
-        sCollection.map(x => gen.from(x.hl)).saveAsTypedPubSubAvro(utils.getProject, tap.topic)
+        sCollection.map(x => gen.from(x.hList)).saveAsTypedPubSubAvro(utils.getProject, tap.topic)
       }
     }
 
@@ -45,7 +45,7 @@ object Writer {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils): Unit = {
         utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
         utils.setupPubsubTopic()
-        sCollection.map(x => gen.from(x.hl)).saveAsTypedPubSubProto(utils.getProject, tap.topic)
+        sCollection.map(x => gen.from(x.hList)).saveAsTypedPubSubProto(utils.getProject, tap.topic)
       }
     }
 
@@ -66,7 +66,7 @@ object Writer {
           case None => WriteDisposition.WRITE_EMPTY
         }
 
-        sCollection.map(x => gen.from(x.hl)).saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}", writeDisposition, createDisposition)
+        sCollection.map(x => gen.from(x.hList)).saveAsTypedBigQuery(s"${tap.dataset}.${tap.table}", writeDisposition, createDisposition)
       }
     }
 
@@ -77,7 +77,7 @@ object Writer {
   Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] =
     new Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
-        sCollection.map(x => (h.head(x.hl), gen.from(x.hl))).saveAsTypedDatastore(utils.getProject, tap.kind)
+        sCollection.map(x => (h.head(x.hList), gen.from(x.hList))).saveAsTypedDatastore(utils.getProject, tap.kind)
       }
     }
 
@@ -108,7 +108,7 @@ object SchemalessWriter {
         }
         val schema = BigQuerySchemaProvider[OutR].getSchema
 
-        sColl.map(m => m.hl.toTableRow(toL)).saveAsBigQuery(s"${tap.dataset}.${tap.table}", schema, writeDisposition, createDisposition, null)
+        sColl.map(m => m.hList.toTableRow(toL)).saveAsBigQuery(s"${tap.dataset}.${tap.table}", schema, writeDisposition, createDisposition, null)
       }
     }
 
@@ -119,8 +119,8 @@ object SchemalessWriter {
 
         val project = utils.getProject
         sColl.map { rec =>
-          val entity = rec.hl.toEntityBuilder
-          val key = h.head(rec.hl)
+          val entity = rec.hList.toEntityBuilder
+          val key = h.head(rec.hList)
           val keyEntity = key match {
             case name: String => makeKey(tap.kind, name.asInstanceOf[AnyRef])
             case id: Int => makeKey(tap.kind, id.asInstanceOf[AnyRef])
@@ -143,7 +143,7 @@ object writer2 extends Poly2 {
    writer: Writer[TAP, UTIL, ANNO, Out, OutR]
   ) = at[(SCollection[Row.Aux[OutT]], UTIL), TapDef[TAP, UTIL, ANNO, Out]] {
     case ((sColl, utils), tap) =>
-      writer.write(sColl.map(r => Row[OutR](ev(r.hl))), tap.tapDefinition, utils)
+      writer.write(sColl.map(r => Row[OutR](ev(r.hList))), tap.tapDefinition, utils)
       (sColl, utils)
   }
 
