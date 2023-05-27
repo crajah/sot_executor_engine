@@ -97,14 +97,6 @@
       "paramsEncoded": false
     },
     {
-      "type": "transformation",
-      "id": "filter",
-      "name": "filter",
-      "op": "filter",
-      "params": [["m => m.get('score1) > 1"]],
-      "paramsEncoded": false
-    },
-    {
       "type": "sink",
       "id": "out",
       "name": "out",
@@ -119,10 +111,6 @@
     },
     {
       "from": "mapper1",
-      "to": "filter"
-    },
-    {
-      "from": "filter",
       "to": "out"
     }
   ]
