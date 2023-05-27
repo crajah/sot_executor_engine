@@ -108,7 +108,7 @@ object SchemalessWriter {
         }
         val schema = BigQuerySchemaProvider[OutR].getSchema
 
-        sColl.map(m => m.hl.toTableRow(toL)).saveAsBigQuery(s"${tap.dataset}.${tap.table}", schema, writeDisposition, createDisposition, null)
+        sColl.map(m => m.hList.toTableRow(toL)).saveAsBigQuery(s"${tap.dataset}.${tap.table}", schema, writeDisposition, createDisposition, null)
       }
     }
 
