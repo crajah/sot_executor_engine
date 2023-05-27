@@ -22,7 +22,7 @@ object SystemConfig extends Logging {
 
   private def typesafeConfig: Config = {
     val typesafeConfig = ConfigFactory.load(getClass.getClassLoader).resolve()
-    debug(s"Read config:\n${typesafeConfig.root().render()}")
+    info(s"Read configurations:\n${typesafeConfig.root().render()}")
     typesafeConfig
   }
 }

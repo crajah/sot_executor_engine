@@ -1,15 +1,11 @@
 package parallelai.sot.engine.io.datastore
 
+import scala.collection.JavaConverters._
+import org.joda.time.{DateTimeConstants, Instant}
 import com.google.datastore.v1.client.DatastoreHelper._
 import com.google.datastore.v1.{Entity, Value}
 import com.google.protobuf.{ByteString, Timestamp}
-import parallelai.sot.engine.io.datatype.{BaseMappableType, MappableType, ToMappable}
-import org.joda.time.{DateTimeConstants, Instant}
 import parallelai.sot.engine.io.datatype.{BaseMappableType, MappableType}
-import shapeless.labelled.FieldType
-import shapeless._
-
-import scala.collection.JavaConverters._
 
 trait BaseDatastoreMappableType[V] extends MappableType[Entity.Builder, V] {
   def from(value: Value): V

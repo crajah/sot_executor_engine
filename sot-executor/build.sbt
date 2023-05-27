@@ -10,6 +10,8 @@ libraryDependencies ++= Seq(
   typesafeConfig,
   pureConfig,
   grizzledLogging,
+  monocle,
+  monocleMacro,
   kafka,
   twitterBijectionCore,
   twitterBijectionAvro,
@@ -21,6 +23,7 @@ libraryDependencies ++= Seq(
   shapelessDataTypeCore,
   shapelessDataTypeBigQuery,
   gcloudDatastore,
+  gcloudHttpClient,
   logbackClassic,
   scalacheck
 )
