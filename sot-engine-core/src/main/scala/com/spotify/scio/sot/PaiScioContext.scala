@@ -11,54 +11,105 @@ import io.circe.parser._
 import org.slf4j.LoggerFactory
 import parallelai.sot.engine.io.datastore.{DatastoreType, ToEntity}
 import org.apache.beam.sdk.io.gcp.datastore.DatastoreIOSOT
+import parallelai.sot.engine.config.gcp.SOTPubsubTopicOptions.PubsubTopicFactory
+import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.io.utils.annotations.{HasDatastoreAnnotation, HasJSONAnnotation}
 import parallelai.sot.engine.serialization.avro.AvroUtils
+import parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition
 import shapeless.{HList, LabelledGeneric}
 
 object PaiScioContext extends Serializable {
 
+  def getSubscription(tap: PubSubTapDefinition, utils: SOTUtils) =
+    s"projects/${utils.getProject}/subscriptions/${utils.getJobName}-${tap.topic}-${tap.id}-managed"
+
   implicit class PaiScioContext(sc: ScioContext) {
-    def typedPubSubAvro[In <: HasAvroAnnotation : Manifest](project: String, topic: String): SCollection[In] = {
+    def typedPubSubAvro[In <: HasAvroAnnotation : Manifest](tap: PubSubTapDefinition, utils: SOTUtils): SCollection[In] = {
       val avroT = AvroType[In]
       val schema = avroT.schema
       val fromGenericRecord = avroT.fromGenericRecord
       val schemaString = schema.toString
 
-      sc.pubsubTopic[Array[Byte]](s"projects/${project}/topics/${topic}", timestampAttribute = "timestamp_ms")
-        .map(f => fromGenericRecord(AvroUtils.decodeAvro(f, schemaString)))
+      if (tap.managedSubscription.isDefined && tap.managedSubscription.get) {
+        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
+        val subscriptionName = getSubscription(tap, utils)
+        utils.setPubsubSubscription(subscriptionName)
+        utils.setupPubsubSubscription()
+        sc.pubsubSubscription[Array[Byte]](utils.getPubsubSubscription, timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
+          .map(f => fromGenericRecord(AvroUtils.decodeAvro(f, schemaString)))
+      } else {
+        sc.pubsubTopic[Array[Byte]](s"projects/${utils.getProject}/topics/${tap.topic}", timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
+          .map(f => fromGenericRecord(AvroUtils.decodeAvro(f, schemaString)))
+      }
     }
 
-    def typedPubSubProto[In <: GeneratedMessage with com.trueaccord.scalapb.Message[In] : Manifest](project: String, topic: String)(implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[In]): SCollection[In] = {
+    def typedPubSubProto[In <: GeneratedMessage with com.trueaccord.scalapb.Message[In] : Manifest](tap: PubSubTapDefinition, utils: SOTUtils)(implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[In]): SCollection[In] = {
 
-      sc.pubsubTopic[Array[Byte]](s"projects/${project}/topics/${topic}", timestampAttribute = "timestamp_ms")
-        .map(f => messageCompanion.parseFrom(f))
+      if (tap.managedSubscription.isDefined && tap.managedSubscription.get) {
+        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
+        val subscriptionName = getSubscription(tap, utils)
+        utils.setPubsubSubscription(subscriptionName)
+        utils.setupPubsubSubscription()
+        sc.pubsubSubscription[Array[Byte]](utils.getPubsubSubscription, timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
+          .map(f => messageCompanion.parseFrom(f))
+      } else {
+        sc.pubsubTopic[Array[Byte]](s"projects/${utils.getProject}/topics/${tap.topic}", timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
+          .map(f => messageCompanion.parseFrom(f))
+      }
     }
 
-    def typedPubSubJSON[In <: HasJSONAnnotation : Manifest](project: String, topic: String)(implicit ev: io.circe.Decoder[In]): SCollection[In] = {
-      sc.pubsubTopic[String](s"projects/${project}/topics/${topic}", timestampAttribute = "timestamp_ms")
-        .map { f =>
-          decode[In](f) match {
-            case Right(in) => in
-            case Left(p) => throw p.fillInStackTrace()
+    def typedPubSubJSON[In <: HasJSONAnnotation : Manifest](tap: PubSubTapDefinition, utils: SOTUtils)(implicit ev: io.circe.Decoder[In]): SCollection[In] = {
+
+      if (tap.managedSubscription.isDefined && tap.managedSubscription.get) {
+        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
+        val subscriptionName = getSubscription(tap, utils)
+        utils.setPubsubSubscription(subscriptionName)
+        utils.setupPubsubSubscription()
+        sc.pubsubSubscription[String](s"projects/${utils.getProject}/topics/${tap.topic}", timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
+          .map { f =>
+            decode[In](f) match {
+              case Right(in) => in
+              case Left(p) => throw p.fillInStackTrace()
+            }
           }
-        }
+      } else {
+        sc.pubsubTopic[String](s"projects/${utils.getProject}/topics/${tap.topic}", timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
+          .map { f =>
+            decode[In](f) match {
+              case Right(in) => in
+              case Left(p) => throw p.fillInStackTrace()
+            }
+          }
+      }
     }
   }
 
   implicit class PaiScioSCollectionAvro[Out <: HasAvroAnnotation : Manifest](c: SCollection[Out]) {
-    def saveAsTypedPubSubAvro(project: String, topic: String): Unit = {
+    def saveAsTypedPubSubAvro(tap: PubSubTapDefinition, utils: SOTUtils): Unit = {
       val avroT = AvroType[Out]
       val schemaOut = avroT.schema
       val toGenericRecordOut = avroT.toGenericRecord
       val schemaStringOut = schemaOut.toString
-      c.map(r => AvroUtils.encodeAvro(toGenericRecordOut(r), schemaStringOut)).saveAsPubsub(s"projects/${project}/topics/${topic}")
+
+      //setup topic if it does not exist
+      utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
+      utils.setupPubsubTopic()
+
+      c.map(r => AvroUtils.encodeAvro(toGenericRecordOut(r), schemaStringOut)).saveAsPubsub(s"projects/${utils.getProject}/topics/${tap.topic}",
+        timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
     }
   }
 
   implicit class PaiScioSCollectionProto[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0]](c: SCollection[T0]) {
-    def saveAsTypedPubSubProto(project: String, topic: String)(implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]): Unit = {
-      c.map(r => messageCompanion.toByteArray(r)).saveAsPubsub(s"projects/${project}/topics/${topic}")
+    def saveAsTypedPubSubProto(tap: PubSubTapDefinition, utils: SOTUtils)(implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]): Unit = {
+
+      //setup topic if it does not exist
+      utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
+      utils.setupPubsubTopic()
+
+      c.map(r => messageCompanion.toByteArray(r)).saveAsPubsub(s"projects/${utils.getProject}/topics/${tap.topic}",
+        timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
     }
   }
 
@@ -82,7 +133,7 @@ object PaiScioContext extends Serializable {
   implicit class KVPaiScioSCollection[Out <: HasDatastoreAnnotation : Manifest, Key](c: SCollection[(Key, Out)]) {
 
     def saveAsDatastoreWithSchema[L <: HList](project: String, kind: String, dedupCommits: Boolean)(implicit gen: LabelledGeneric.Aux[Out, L],
-                                                                                          toL: ToEntity[L]): Unit = {
+                                                                                                    toL: ToEntity[L]): Unit = {
       val dataStoreT: DatastoreType[Out] = DatastoreType[Out]
 
       c.map { case (key, rec) =>

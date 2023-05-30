@@ -32,7 +32,7 @@ object Reader {
       type In = rdr.Out
 
       def read(sc: ScioContext, tap: PubSubTapDefinition, utils: SOTUtils)(implicit m: Manifest[T0]): SCollection[Row.Aux[rdr.Out]] = {
-        sc.typedPubSubAvro[T0](utils.getProject, tap.topic).map(a => Row[rdr.Out](rdr(gen.to(a))))
+        sc.typedPubSubAvro[T0](tap, utils).map(a => Row[rdr.Out](rdr(gen.to(a))))
       }
     }
 
@@ -44,7 +44,7 @@ object Reader {
       type In = rdr.Out
 
       def read(sc: ScioContext, tap: PubSubTapDefinition, utils: SOTUtils)(implicit m: Manifest[T0]): SCollection[Row.Aux[rdr.Out]] = {
-        sc.typedPubSubProto[T0](utils.getProject, tap.topic).map(a => Row[rdr.Out](rdr(gen.to(a))))
+        sc.typedPubSubProto[T0](tap, utils).map(a => Row[rdr.Out](rdr(gen.to(a))))
       }
     }
 
@@ -56,7 +56,7 @@ object Reader {
       type In = rdr.Out
 
       def read(sc: ScioContext, tap: PubSubTapDefinition, utils: SOTUtils)(implicit m: Manifest[T0]): SCollection[Row.Aux[rdr.Out]] = {
-        sc.typedPubSubJSON[T0](utils.getProject, tap.topic).map(a => Row[rdr.Out](rdr(gen.to(a))))
+        sc.typedPubSubJSON[T0](tap, utils).map(a => Row[rdr.Out](rdr(gen.to(a))))
       }
     }
 
