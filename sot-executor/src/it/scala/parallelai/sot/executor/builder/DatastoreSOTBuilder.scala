@@ -10,7 +10,6 @@ import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.{Args, ScioContext}
 import parallelai.sot.engine.config.SchemaResourcePath
 import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
-import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.io.TapDef
 import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.runner.SCollectionStateMonad._
@@ -31,9 +30,9 @@ object DatastoreSOTBuilder extends Logging {
   @AvroType.toSchema
   case class MessageExtended(user: String, teamName: String, score: Int, eventTime: Long, eventTimeStr: String, count: Int)
 
-  implicit val gen = LabelledGeneric[Message]
+  implicit val messageGen: LabelledGeneric[Message] = LabelledGeneric[Message]
 
-  implicit val messageExtendedGen = LabelledGeneric[MessageExtended]
+  implicit val messageExtendedGen: LabelledGeneric[MessageExtended] = LabelledGeneric[MessageExtended]
 
   object conf {
     val jobConfig: SOTMacroConfig.Config =
@@ -65,15 +64,7 @@ object DatastoreSOTBuilder extends Logging {
         read(sc, source, sotUtils)
       } flatMap { sColls =>
         map(sColls.at(Nat._0)) { m =>
-          datastore[Message, m.L]("blah") map { persistedM =>
-            info(s"Persisted Message = $persistedM")
-            val updatedM = m.append('count, persistedM.score)
-
-            val messageExtended = Row.to[MessageExtended].from(updatedM.hList)
-            info(s"Message Extended = $messageExtended")
-
-            updatedM
-          } get
+          m.append('count, datastore.get[Message]("blah").map(_.score).getOrElse(1))
         }
       } flatMap { sColls =>
         write(sColls.at(Nat._1))(sinks.head, sotUtils)
