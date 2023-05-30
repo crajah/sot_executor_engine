@@ -2,17 +2,17 @@ package parallelai.sot.containers
 
 import java.util.concurrent.TimeUnit
 import org.scalatest.Suite
-import com.dimafeng.testcontainers.{Container, ForAllTestContainer, ForEachTestContainer}
+import com.dimafeng.testcontainers.{ForAllTestContainer, ForEachTestContainer}
 
-trait ContainersSpec {
-  val container: Container
+trait ContainersFixture {
+  val container: com.dimafeng.testcontainers.Container
 
   def setup(): Unit = ()
 
   def teardown(): Unit = ()
 }
 
-trait ForAllContainersSpec extends ContainersSpec with ForAllTestContainer {
+trait ForAllContainersFixture extends ContainersFixture with ForAllTestContainer {
   self: Suite =>
 
   /**
@@ -20,17 +20,17 @@ trait ForAllContainersSpec extends ContainersSpec with ForAllTestContainer {
     */
   override def afterStart(): Unit = {
     TimeUnit.SECONDS.sleep(3)
-    super.afterStart()
     setup()
+    super.afterStart()
   }
 
   override def beforeStop(): Unit = {
-    super.beforeStop()
     teardown()
+    super.beforeStop()
   }
 }
 
-trait ForEachContainersSpec extends ContainersSpec with ForEachTestContainer {
+trait ForEachContainersFixture extends ContainersFixture with ForEachTestContainer {
   self: Suite =>
 
   /**
@@ -38,12 +38,12 @@ trait ForEachContainersSpec extends ContainersSpec with ForEachTestContainer {
     */
   override def afterStart(): Unit = {
     TimeUnit.SECONDS.sleep(3)
-    super.afterStart()
     setup()
+    super.afterStart()
   }
 
   override def beforeStop(): Unit = {
-    super.beforeStop()
     teardown()
+    super.beforeStop()
   }
 }

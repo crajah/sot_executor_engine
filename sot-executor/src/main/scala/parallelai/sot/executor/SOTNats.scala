@@ -1,9 +1,7 @@
-package parallelai.sot.executor.builder
+package parallelai.sot.executor
 
 import parallelai.sot.macros.SOTNatsMacro
 import shapeless.{Nat, Succ}
 
 @SOTNatsMacro
-object SOTNats {
-
-}
+object SOTNats

@@ -37,7 +37,13 @@ class Datastore private(project: Project,
   def get[A, L <: HList](id: Long)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
     get(keyFactory.newKey(id))
 
+  def apply[A, L <: HList](id: Long)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
+    get(keyFactory.newKey(id))
+
   def get[A, L <: HList](id: String)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
+    get(keyFactory.newKey(id))
+
+  def apply[A, L <: HList](id: String)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
     get(keyFactory.newKey(id))
 
   def get[A, L <: HList](key: Key)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] = Option {

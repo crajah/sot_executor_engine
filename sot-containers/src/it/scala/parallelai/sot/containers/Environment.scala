@@ -23,7 +23,7 @@ object Environment extends Logging {
       freePort
     } else {
       ports += port
-      info(s"Currently port $port is free - all ports looked up are now: [${ports.mkString(", ")}]")
+      info(s"Currently port $port is free - giving all lookup ports as: [${ports.mkString(", ")}]")
       port
     }
   }

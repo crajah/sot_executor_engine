@@ -97,6 +97,12 @@
       "type": "pubsub",
       "id": "pubsubsource2",
       "topic": "p2pout"
+    },
+    {
+      "type": "datastore",
+      "id": "datastoresource1",
+      "kind": "dataflowwrite",
+      "dedupCommits": true
     }
   ],
   "steps": [
