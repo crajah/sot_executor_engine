@@ -34,24 +34,6 @@ class Datastore private(project: Project,
   def put(entity: Entity): Entity =
     datastore.put(entity)
 
-  def get[A, L <: HList](id: Long)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
-    get(keyFactory.newKey(id))
-
-  def apply[A, L <: HList](id: Long)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
-    get(keyFactory.newKey(id))
-
-  def get[A, L <: HList](id: String)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
-    get(keyFactory.newKey(id))
-
-  def apply[A, L <: HList](id: String)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
-    get(keyFactory.newKey(id))
-
-  def get[A, L <: HList](key: Key)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] = Option {
-    datastore.get(key, ReadOption.eventualConsistency())
-  } flatMap { entity =>
-    fromEntity(entity)
-  }
-
   def run[T](query: Query[T], options: Seq[ReadOption] = Seq(ReadOption.eventualConsistency())): QueryResults[T] =
     datastore.run(query, options: _*)
 
@@ -83,4 +65,18 @@ object Datastore {
             credentials: Option[Credentials] = None,
             retry: Option[RetrySettings] = None) =
     new Datastore(project, kind, host, credentials, retry)
+
+  implicit class DatastoreOps[L <: HList](datastore: Datastore) {
+    def get[A](id: String)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
+      get(datastore.keyFactory.newKey(id))
+
+    def get[A](id: Int)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
+      get(datastore.keyFactory.newKey(id))
+
+    def get[A](key: Key)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] = Option {
+      datastore.datastore.get(key, ReadOption.eventualConsistency())
+    } flatMap { entity =>
+      fromEntity(entity)
+    }
+  }
 }

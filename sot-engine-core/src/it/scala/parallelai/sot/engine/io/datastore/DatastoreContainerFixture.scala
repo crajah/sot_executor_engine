@@ -20,11 +20,7 @@ trait DatastoreContainerFixture {
                                  credentials = Some(NoCredentials.getInstance),
                                  retry = Some(ServiceOptions.getNoRetrySettings))
 
-  override def setup(): Unit = reset()
-
-  override def teardown(): Unit = reset()
-
-  private def reset(): Unit = {
+  override def teardown(): Unit = {
     val queryAllKeys: KeyQuery = Query.newKeyQueryBuilder().setKind(kind.value).build()
     val result = datastore.run(queryAllKeys)
 

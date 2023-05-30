@@ -144,11 +144,10 @@ object SOTMainMacroImpl {
             val opParsed = parseOperation(op, dag, config).get
             (opParsed._2, opParsed._3)
 
-          case sinkOp: SinkOp => {
+          case sinkOp: SinkOp =>
             val sinkDef = sinks.find(_._1 == sinkOp.id).get
             val writeMethod = if (sinkDef._2.isDefined) "write" else "writeSchemaless"
             (Term.Name(writeMethod), List(List(buildTap(Term.Name("conf.sinkTaps"), sinkDef._2, sinkDef._3, sinks.indexOf(sinkDef)), Term.Name("sotUtils"))))
-          }
         }
 
         val inEdgeIndex = idsStack(e1)
