@@ -62,7 +62,7 @@ import parallelai.sot.engine.io.bigquery._
 import parallelai.sot.engine.io.datastore._
 
 // SOT Nats
-import parallelai.sot.executor.builder.SOTNats._
+import parallelai.sot.executor.SOTNats._
 
 /**
   * To run this class with a default configuration of application.conf:
@@ -78,24 +78,24 @@ import parallelai.sot.executor.builder.SOTNats._
   */
 @SOTBuilder
 object SOTBuilder {
-
   object conf {
     val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
     val sourceTaps = getSources(jobConfig)
     val sinkTaps = getSinks(jobConfig)
   }
 
-  val genericBuilder = new Builder()
-
   def main(cmdArg: Array[String]): Unit = {
-    val (sotOptions, sotArgs) = ScioContext.parseArguments[SOTOptions](cmdArg)
-    execute(sotOptions, sotArgs)
+    val (sotOptions, sotArgs) = executionContext(cmdArg)
+    execute(new Job, sotOptions, sotArgs)
   }
 
-  def execute[P <: PipelineOptions](pipelineOptions: P, args: Args): Unit = {
+  def executionContext(cmdArg: Array[String]): (SOTOptions, Args) =
+    ScioContext.parseArguments[SOTOptions](cmdArg)
+
+  def execute[P <: PipelineOptions](job: Job, pipelineOptions: P, args: Args): Unit = {
     val sotUtils = new SOTUtils(pipelineOptions)
     val sc = ScioContext(pipelineOptions)
-    val builder = genericBuilder
-    builder.execute(sotUtils, sc, args)
+
+    job.execute(sotUtils, sc, args)
   }
 }

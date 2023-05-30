@@ -32,5 +32,8 @@ libraryDependencies ++= Seq(
   scalatest % Test,
   mockito % Test,
   scalacheckShapeless % Test,
-  spotifyTest % Test
+  spotifyTest % Test,
+  avro4sCore % IntegrationTest,
+  avro4sJson % IntegrationTest,
+  avro4sMacros % IntegrationTest
 )

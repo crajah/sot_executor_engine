@@ -12,15 +12,15 @@ import org.apache.beam.sdk.values.{KV, PCollection}
 import org.scalatest.{MustMatchers, WordSpec}
 import com.spotify.scio.ScioContext
 import com.spotify.scio.values.SCollection
-import parallelai.sot.containers.ForAllContainersSpec
-import parallelai.sot.containers.io.datastore.DatastoreContainer
+import parallelai.sot.containers.{Container, ForAllContainersFixture}
+import parallelai.sot.engine.ProjectFixture
 import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.scio.PipelineSpec
-import parallelai.sot.executor.builder.Message._
+import parallelai.sot.executor.builder.FirstMessage._
 
-class DatastoreITSpec extends WordSpec with MustMatchers with PipelineSpec with ForAllContainersSpec with DatastoreContainerSpec {
-  override val container: DatastoreContainer = datastoreContainer
+class DatastoreITSpec extends WordSpec with MustMatchers with PipelineSpec with ForAllContainersFixture with ProjectFixture with DatastoreContainerFixture {
+  override val container: Container = datastoreContainer
 
   "Datastore SOT Builder" should {
     "utilise Beam directly" in pipe { pipeline =>
@@ -63,20 +63,20 @@ class DatastoreITSpec extends WordSpec with MustMatchers with PipelineSpec with 
     }
 
     "utilise Scio and transform custom data via map" in pipe { pipeline =>
-      val message = Message("user", "teamName", score = 3)
+      val message = FirstMessage("user", "teamName", score = 3)
 
-      val inputP: PCollection[Message] = pipeline.apply(Create.of(message)).setCoder(SerializableCoder.of(classOf[Message]))
+      val inputP: PCollection[FirstMessage] = pipeline.apply(Create.of(message)).setCoder(SerializableCoder.of(classOf[FirstMessage]))
       val input = ScioContext().wrap(inputP)
 
-      val output: SCollection[Message] = input map score.set(5)
+      val output: SCollection[FirstMessage] = input map score.set(5)
 
       output must containSingleValue(score.set(5)(message))
     }
 
     "utilise Scio and transform custom data as a Row via map" in pipe { pipeline =>
-      val message = Message("user", "teamName", score = 3)
+      val message = FirstMessage("user", "teamName", score = 3)
 
-      val inputP: PCollection[Message] = pipeline.apply(Create.of(message)).setCoder(SerializableCoder.of(classOf[Message]))
+      val inputP: PCollection[FirstMessage] = pipeline.apply(Create.of(message)).setCoder(SerializableCoder.of(classOf[FirstMessage]))
       val input = ScioContext().wrap(inputP)
 
       val output: SCollection[Row] = input map(Row(_))
@@ -91,9 +91,9 @@ class DatastoreITSpec extends WordSpec with MustMatchers with PipelineSpec with 
     }
 
     "utilise Scio and transform custom data as a Row via map including 'step' transformations" in pipe { pipeline =>
-      val message = Message("user", "teamName", score = 3)
+      val message = FirstMessage("user", "teamName", score = 3)
 
-      val inputP: PCollection[Message] = pipeline.apply(Create.of(message)).setCoder(SerializableCoder.of(classOf[Message]))
+      val inputP: PCollection[FirstMessage] = pipeline.apply(Create.of(message)).setCoder(SerializableCoder.of(classOf[FirstMessage]))
       val input = ScioContext().wrap(inputP)
 
       val output: SCollection[Row] = input map { m =>
@@ -107,9 +107,9 @@ class DatastoreITSpec extends WordSpec with MustMatchers with PipelineSpec with 
     }
 
     "utilise Scio and transform custom data as a Row via map including 'Datastore step' transformations" in pipe { pipeline =>
-      val message = Message("user", "teamName", score = 3)
+      val message = FirstMessage("user", "teamName", score = 3)
 
-      val inputP: PCollection[Message] = pipeline.apply(Create.of(message)).setCoder(SerializableCoder.of(classOf[Message]))
+      val inputP: PCollection[FirstMessage] = pipeline.apply(Create.of(message)).setCoder(SerializableCoder.of(classOf[FirstMessage]))
       val input = ScioContext().wrap(inputP)
 
       datastore.put("blah", message)
@@ -126,9 +126,9 @@ class DatastoreITSpec extends WordSpec with MustMatchers with PipelineSpec with 
     }
 
     "utilise Scio and transform custom data as a Row via map and map including 'Datastore step' transformations" in pipe { pipeline =>
-      val message = Message("user", "teamName", score = 3)
+      val message = FirstMessage("user", "teamName", score = 3)
 
-      val inputP: PCollection[Message] = pipeline.apply(Create.of(message)).setCoder(SerializableCoder.of(classOf[Message]))
+      val inputP: PCollection[FirstMessage] = pipeline.apply(Create.of(message)).setCoder(SerializableCoder.of(classOf[FirstMessage]))
       val input = ScioContext().wrap(inputP)
 
       datastore.put("blah", message)
@@ -148,12 +148,12 @@ class DatastoreITSpec extends WordSpec with MustMatchers with PipelineSpec with 
   }
 }
 
-case class Message(user: String, teamName: String, score: Int)
+case class FirstMessage(user: String, teamName: String, score: Int)
 
-case class MessageExtended(user: String, teamName: String, score: Int, count: Int)
+case class SecondMessage(user: String, teamName: String, score: Int, count: Int)
 
-object Message {
-  implicit val messageGen = LabelledGeneric[Message]
+object FirstMessage {
+  implicit val messageGen = LabelledGeneric[FirstMessage]
 
-  val score: Lens[Message, Int] = GenLens[Message](_.score)
+  val score: Lens[FirstMessage, Int] = GenLens[FirstMessage](_.score)
 }

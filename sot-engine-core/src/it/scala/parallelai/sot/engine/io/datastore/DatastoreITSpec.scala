@@ -4,8 +4,8 @@ import shapeless._
 import shapeless.labelled.FieldType
 import org.scalatest.{MustMatchers, WordSpec}
 import com.google.cloud.datastore.Entity
-import parallelai.sot.containers.ForAllContainersSpec
-import parallelai.sot.containers.io.datastore.DatastoreContainer
+import parallelai.sot.containers.{Container, ForAllContainersFixture}
+import parallelai.sot.engine.ProjectFixture
 
 /**
   * Requires a local instance of Google Datastore e.g.
@@ -36,12 +36,12 @@ import parallelai.sot.containers.io.datastore.DatastoreContainer
   * By using [[https://github.com/testcontainers/testcontainers-scala]] we can mix in a Docker Container rule which requires a "container" (or containers) to configured for a test,
   * i.e. we can configure and start up containers programmatically as use in this specification.
   */
-class DatastoreITSpec extends WordSpec with MustMatchers with ForAllContainersSpec with DatastoreContainerSpec {
+class DatastoreITSpec extends WordSpec with MustMatchers with ForAllContainersFixture with ProjectFixture with DatastoreContainerFixture {
   case class Foo(one: String, two: String)
 
   implicit val fooGen = LabelledGeneric[Foo]
 
-  override val container: DatastoreContainer = datastoreContainer
+  override val container: Container = datastoreContainer
 
   "Datastore" should {
     "persist data by ID of type Long" in {

@@ -1,13 +1,10 @@
-package parallelai.so.macros
-
-import org.scalatest.compatible.Assertion
-import org.scalatest.{FlatSpec, Matchers}
-import parallelai.sot.executor.model.SOTMacroConfig
-import parallelai.sot.executor.model.SOTMacroConfig._
-import parallelai.sot.macros.SOTMainMacroImpl
-import spray.json.{JsArray, JsObject, JsString}
+package parallelai.sot.macros
 
 import scala.meta.{Term, _}
+import spray.json.{JsArray, JsObject, JsString}
+import org.scalatest.compatible.Assertion
+import org.scalatest.{FlatSpec, Matchers}
+import parallelai.sot.executor.model.SOTMacroConfig._
 
 class SOTMacroBuilderSpec extends FlatSpec with Matchers {
 

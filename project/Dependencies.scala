@@ -12,6 +12,7 @@ object Dependencies {
   val shapelessDataTypeDataVersion = "0.1.7"
   val tensorflowVersion = "1.3.0"
   val gcloudVersion = "1.6.0"
+  val avro4sVersion = "1.8.0"
 
   val scalameta = "org.scalameta" %% "scalameta" % metaVersion
   val contrib = "org.scalameta" %% "contrib" % metaVersion
@@ -33,13 +34,6 @@ object Dependencies {
   val monocleMacro = "com.github.julien-truffaut" %% "monocle-macro" % monocleVersion
 
   val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.16"
-
-  val catsCore = "org.typelevel" %% "cats-core" % "1.0.0-RC1"
-  val catsEffect = "org.typelevel" %% "cats-effect" % "0.5"
-
-  val monixEval = "io.monix" %% "monix-eval" % "3.0.0-8084549"
-
-  val refined = "eu.timepit" %% "refined" % "0.8.4"
 
   val sprayJson = "io.spray" %% "spray-json" % "1.3.3"
   val circe = "io.circe" %% "circe-core" % "0.8.0"
@@ -82,4 +76,8 @@ object Dependencies {
   val shapelessDataTypeDatastore = "me.lyh" %% "shapeless-datatype-datastore_1.3" % shapelessDataTypeDataVersion
 
   val avro = "org.apache.avro" % "avro" % "1.8.2"
+
+  val avro4sCore = "com.sksamuel.avro4s" %% "avro4s-core" % avro4sVersion
+  val avro4sJson = "com.sksamuel.avro4s" %% "avro4s-json" % avro4sVersion
+  val avro4sMacros = "com.sksamuel.avro4s" %% "avro4s-macros" % avro4sVersion
 }
