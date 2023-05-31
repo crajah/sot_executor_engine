@@ -31,9 +31,7 @@ object Writer {
   Writer[PubSubTapDefinition, SOTUtils, HasAvroAnnotation, T0, OutR] =
     new Writer[PubSubTapDefinition, SOTUtils, HasAvroAnnotation, T0, OutR] {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils): Unit = {
-        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
-        utils.setupPubsubTopic()
-        sCollection.map(x => gen.from(x.hList)).saveAsTypedPubSubAvro(utils.getProject, tap.topic)
+        sCollection.map(x => gen.from(x.hList)).saveAsTypedPubSubAvro(tap, utils)
       }
     }
 
@@ -43,9 +41,7 @@ object Writer {
   Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0, OutR] =
     new Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0, OutR] {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils): Unit = {
-        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
-        utils.setupPubsubTopic()
-        sCollection.map(x => gen.from(x.hList)).saveAsTypedPubSubProto(utils.getProject, tap.topic)
+        sCollection.map(x => gen.from(x.hList)).saveAsTypedPubSubProto(tap, utils)
       }
     }
 

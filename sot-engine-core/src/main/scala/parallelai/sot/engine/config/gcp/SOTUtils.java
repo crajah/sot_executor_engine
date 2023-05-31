@@ -99,6 +99,20 @@ public class SOTUtils {
     }
 
     /**
+     * Sets up the Google Pub/Sub subscription only.
+     */
+    public void setupPubsubSubscription() throws IOException {
+        SOTPubsubTopicAndSubscriptionOptions pubsubOptions = options.as(SOTPubsubTopicAndSubscriptionOptions.class);
+        if (!pubsubOptions.getPubsubTopic().isEmpty()) {
+            pendingMessages.add("**********************Set Up Pubsub************************");
+            if (!pubsubOptions.getPubsubSubscription().isEmpty()) {
+                setupPubsubSubscription(pubsubOptions.getPubsubTopic(), pubsubOptions.getPubsubSubscription());
+                pendingMessages.add("The Pub/Sub subscription has been set up: " + pubsubOptions.getPubsubSubscription());
+            }
+        }
+    }
+
+    /**
      * Sets up the Google Cloud Pub/Sub topic and subscription.
      * <p>
      * <p>If the topic doesn't exist, a new topic with the given name will be created.
@@ -124,8 +138,24 @@ public class SOTUtils {
         return options.as(GcpOptions.class).getProject();
     }
 
+    public String getJobName() {
+        return options.as(GcpOptions.class).getJobName();
+    }
+
+    public String getPubsubTopic() {
+        return options.as(SOTPubsubTopicAndSubscriptionOptions.class).getPubsubTopic();
+    }
+
+    public String getPubsubSubscription() {
+        return options.as(SOTPubsubTopicAndSubscriptionOptions.class).getPubsubSubscription();
+    }
+
     public void setPubsubTopic(String topic) {
         options.as(SOTPubsubTopicAndSubscriptionOptions.class).setPubsubTopic(topic);
+    }
+
+    public void setPubsubSubscription(String subscription) {
+        options.as(SOTPubsubTopicAndSubscriptionOptions.class).setPubsubSubscription(subscription);
     }
 
     /**
@@ -168,7 +198,7 @@ public class SOTUtils {
     }
 
     /**
-     * Tears down external resources that can be deleted upon the example's completion.
+     * Tears down external resources that can be deleted upon completion.
      */
     private void tearDown() {
         pendingMessages.add("*************************Tear Down*************************");
