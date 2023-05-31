@@ -1,0 +1,148 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "id": "avroschema1",
+      "name": "avroschema1",
+      "version": "version2",
+      "definition": {
+        "type": "record",
+        "name": "Message",
+        "namespace": "parallelai.sot.avro",
+        "fields": [
+          {
+            "name": "user",
+            "type": "string",
+            "doc": "Name of the user"
+          },
+          {
+            "name": "teamName",
+            "type": "string",
+            "doc": "Name of the team"
+          },
+          {
+            "name": "score",
+            "type": "long",
+            "doc": "User score"
+          },
+          {
+            "name": "eventTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "eventTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "doc": "A basic schema for storing user records"
+      }
+    }
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource1",
+      "topic": "p2pin"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "streaming_word_extract34"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource2",
+      "dataset": "bigquerytest",
+      "table": "streaming_word_extract35"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource3",
+      "dataset": "bigquerytest",
+      "table": "streaming_word_extract36"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "avroschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "transformation",
+      "id": "filter",
+      "name": "filter",
+      "op": "filter",
+      "params": [["m => m.get('score) > 2"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "mapper1",
+      "name": "mapper1",
+      "op": "map",
+      "params": [["m => m.append('score2, m.get('score) * 0.23)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "mapper2",
+      "name": "mapper2",
+      "op": "map",
+      "params": [["m => Row(('processingTime, Helper.fmt.print(Helper.Instant.now())))"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "source": "bigquerysource1"
+    },
+    {
+      "type": "sink",
+      "id": "out1",
+      "name": "out1",
+      "source": "bigquerysource2"
+    },
+    {
+      "type": "sink",
+      "id": "out2",
+      "name": "out2",
+      "source": "bigquerysource3"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "filter"
+    },
+    {
+      "from": "mapper1",
+      "to": "mapper2"
+    },
+    {
+      "from": "filter",
+      "to": "mapper1"
+    },
+    {
+      "from": "filter",
+      "to": "out2"
+    },
+    {
+      "from": "mapper2",
+      "to": "out"
+    },
+    {
+      "from": "mapper2",
+      "to": "out1"
+    }
+  ]
+}

@@ -2,14 +2,17 @@ package parallelai.sot.engine.io
 
 import com.google.api.services.bigquery.model.{TableRow, TableSchema}
 import parallelai.sot.engine.io.datatype.{CanNest, FromMappable, ToMappable}
+import parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition
 import shapeless._
 
 import scala.collection.JavaConverters._
 
 package object bigquery extends BigQueryMappableType with Serializable {
+
+
   type BigQueryMap = java.util.Map[String, Any]
   type FromTableRow[L <: HList] = FromMappable[L, BigQueryMap]
-  type ToTableRow[L <: HList] = ToMappable[L, BigQueryMap]
+  type ToTableRow[L <: HList] = ToMappable[BigQueryTapDefinition, L, BigQueryMap]
 
   implicit object BigQueryCanNest extends CanNest[BigQueryMap]
 
