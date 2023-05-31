@@ -97,6 +97,12 @@
       "type": "pubsub",
       "id": "pubsubsource2",
       "topic": "p2pout"
+    },
+    {
+      "type": "datastore",
+      "id": "datastoresource1",
+      "kind": "dataflowwrite",
+      "dedupCommits": true
     }
   ],
   "steps": [
@@ -112,7 +118,7 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "params": [["m => m.append('count, 1)"]],
+      "params": [["m => m.append('count, datastore.get[Message](\"blah\").map(_.score).getOrElse(1))"]],
       "paramsEncoded": false
     },
     {

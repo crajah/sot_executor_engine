@@ -88,7 +88,8 @@
     {
       "type": "datastore",
       "id": "datastoresource1",
-      "kind": "crm-stg-df-customer-nested"
+      "kind": "crm-stg-df-customer-nested",
+      "dedupCommits": true
     }
   ],
   "steps": [

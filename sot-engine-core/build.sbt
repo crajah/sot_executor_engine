@@ -10,9 +10,6 @@ libraryDependencies ++= Seq(
   pureConfig,
   grizzledLogging,
   circe,
-  catsCore,
-  catsEffect,
-  monixEval,
   sprayJson,
   trueAccordCompiler,
   trueAccordRuntime,
@@ -39,5 +36,8 @@ libraryDependencies ++= Seq(
   scalacheckShapeless % Test,
   spotifyTest % Test,
   spotifyCore % Test,
-  testContainers % IntegrationTest
+  testContainers % IntegrationTest,
+  avro4sCore % IntegrationTest,
+  avro4sJson % IntegrationTest,
+  avro4sMacros % IntegrationTest
 )

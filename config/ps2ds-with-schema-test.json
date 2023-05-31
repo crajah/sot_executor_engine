@@ -52,10 +52,6 @@
         "name": "OutSchema",
         "fields": [
           {
-            "name": "id",
-            "type": "Int"
-          },
-          {
             "name": "user",
             "type": "String"
           },
@@ -80,7 +76,8 @@
     {
       "type": "datastore",
       "id": "datastoresource1",
-      "kind": "dataflowwrite"
+      "kind": "dataflowwritededupe",
+      "dedupCommits": true
     }
   ],
   "steps": [
@@ -96,15 +93,7 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "params": [["m => {val updated = m.append('id, Helper.random.nextInt());updated.project(projector(Col('id), Col('user), Col('score) ** Col('score1), Col('score) ** Col('score2)))}"]],
-      "paramsEncoded": false
-    },
-    {
-      "type": "transformation",
-      "id": "filter",
-      "name": "filter",
-      "op": "filter",
-      "params": [["m => m.get('score1) > 1"]],
+      "params": [["m => {m.project(projector(Col('user), Col('score) ** Col('score1), Col('score) ** Col('score2)))}"]],
       "paramsEncoded": false
     },
     {
@@ -122,10 +111,6 @@
     },
     {
       "from": "mapper1",
-      "to": "filter"
-    },
-    {
-      "from": "filter",
       "to": "out"
     }
   ]

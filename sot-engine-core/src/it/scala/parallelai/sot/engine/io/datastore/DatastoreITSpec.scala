@@ -1,11 +1,10 @@
 package parallelai.sot.engine.io.datastore
 
 import shapeless._
-import shapeless.labelled.FieldType
 import org.scalatest.{MustMatchers, WordSpec}
 import com.google.cloud.datastore.Entity
-import parallelai.sot.containers.ForAllContainersSpec
-import parallelai.sot.containers.io.datastore.DatastoreContainer
+import parallelai.sot.containers.{Container, ForAllContainersFixture}
+import parallelai.sot.engine.ProjectFixture
 
 /**
   * Requires a local instance of Google Datastore e.g.
@@ -36,30 +35,34 @@ import parallelai.sot.containers.io.datastore.DatastoreContainer
   * By using [[https://github.com/testcontainers/testcontainers-scala]] we can mix in a Docker Container rule which requires a "container" (or containers) to configured for a test,
   * i.e. we can configure and start up containers programmatically as use in this specification.
   */
-class DatastoreITSpec extends WordSpec with MustMatchers with ForAllContainersSpec with DatastoreContainerSpec {
+class DatastoreITSpec extends WordSpec with MustMatchers with ForAllContainersFixture with ProjectFixture with DatastoreContainerFixture {
   case class Foo(one: String, two: String)
 
-  implicit val fooGen = LabelledGeneric[Foo]
+  case class Foo1(one: Boolean, two: Int)
 
-  override val container: DatastoreContainer = datastoreContainer
+  implicit val fooGen: LabelledGeneric[Foo] = LabelledGeneric[Foo]
+
+  implicit val foo1Gen: LabelledGeneric[Foo1] = LabelledGeneric[Foo1]
+
+  override val container: Container = datastoreContainer
 
   "Datastore" should {
     "persist data by ID of type Long" in {
       val foo = Foo("oneValue", "twoValue")
       datastore.put(42, foo)
 
-      datastore.get(42) mustBe Some(foo)
+      datastore.get[Foo](42) mustBe Some(foo)
     }
 
     "persist data by ID of type String" in {
       val foo = Foo("oneValue", "twoValue")
       datastore.put("myFoo", foo)
 
-      datastore.get("myFoo") mustBe Some(foo)
+      datastore.get[Foo]("myFoo") mustBe Some(foo)
     }
 
     "not find a value given a non existing key" in {
-      datastore.get("blah") mustBe None
+      datastore.get[Foo]("blah") mustBe None
     }
 
     // TODO - This seems dodgy
@@ -75,7 +78,7 @@ class DatastoreITSpec extends WordSpec with MustMatchers with ForAllContainersSp
 
       datastore.put(entity)
 
-      datastore.get(42) mustBe Some(Foo("oneAgain", "twoAgain"))
+      datastore.get[Foo](42) mustBe Some(Foo("oneAgain", "twoAgain"))
     }
 
     "find but not generate domain data when there is not enough data" in {
@@ -88,7 +91,7 @@ class DatastoreITSpec extends WordSpec with MustMatchers with ForAllContainersSp
 
       datastore.put(entity)
 
-      datastore.get(42) mustBe None
+      datastore.get[Foo](42) mustBe None
     }
 
     // TODO - dodgy
@@ -103,7 +106,7 @@ class DatastoreITSpec extends WordSpec with MustMatchers with ForAllContainersSp
 
       datastore.put(entity)
 
-      datastore.get(42) mustBe Some(Foo("", "The '1' for field 'one' is the problem"))
+      datastore.get[Foo](42) mustBe Some(Foo("", "The '1' for field 'one' is the problem"))
     }
 
     // TODO - dodgy
@@ -118,18 +121,14 @@ class DatastoreITSpec extends WordSpec with MustMatchers with ForAllContainersSp
 
       datastore.put(entity)
 
-      datastore.get(42) mustBe Some(Foo("", ""))
+      datastore.get[Foo](42) mustBe Some(Foo("", ""))
     }
 
     // TODO - dodgy
     "blah" in {
-      case class Foo1(one: Boolean, two: Int)
-
-      implicit val foo1Gen = LabelledGeneric[Foo1]
-
       datastore.put(42, Foo1(one = false, 6))
 
-      val result: Option[Foo] = datastore.get[Foo, FieldType[Witness.`'one`.T, String] :: FieldType[Witness.`'two`.T, String] :: HNil](42)
+      val result: Option[Foo] = datastore.get[Foo](42)
 
       result mustBe Some(Foo("", ""))
     }

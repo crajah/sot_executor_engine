@@ -9,7 +9,7 @@ import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, DatastoreTapDefinition, PubSubTapDefinition, TapDefinition}
-import parallelai.sot.engine.runner.scio.PaiScioContext._
+import com.spotify.scio.sot.PaiScioContext._
 import shapeless.{HList, LabelledGeneric, Poly2}
 import parallelai.sot.engine.io.utils.annotations._
 import com.google.datastore.v1.client.DatastoreHelper.makeKey
@@ -31,9 +31,7 @@ object Writer {
   Writer[PubSubTapDefinition, SOTUtils, HasAvroAnnotation, T0, OutR] =
     new Writer[PubSubTapDefinition, SOTUtils, HasAvroAnnotation, T0, OutR] {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils): Unit = {
-        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
-        utils.setupPubsubTopic()
-        sCollection.map(x => gen.from(x.hList)).saveAsTypedPubSubAvro(utils.getProject, tap.topic)
+        sCollection.map(x => gen.from(x.hList)).saveAsTypedPubSubAvro(tap, utils)
       }
     }
 
@@ -43,9 +41,7 @@ object Writer {
   Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0, OutR] =
     new Writer[PubSubTapDefinition, SOTUtils, GeneratedMessage, T0, OutR] {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: PubSubTapDefinition, utils: SOTUtils): Unit = {
-        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
-        utils.setupPubsubTopic()
-        sCollection.map(x => gen.from(x.hList)).saveAsTypedPubSubProto(utils.getProject, tap.topic)
+        sCollection.map(x => gen.from(x.hList)).saveAsTypedPubSubProto(tap, utils)
       }
     }
 
@@ -77,7 +73,7 @@ object Writer {
   Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] =
     new Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
-        sCollection.map(x => (h.head(x.hList), gen.from(x.hList))).saveAsTypedDatastore(utils.getProject, tap.kind)
+        sCollection.map(x => (h.head(x.hList), gen.from(x.hList))).saveAsDatastoreWithSchema(utils.getProject, tap.kind, tap.dedupCommits)
       }
     }
 

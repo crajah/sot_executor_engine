@@ -1,4 +1,4 @@
-package parallelai.so.macros
+package parallelai.sot.macros
 
 import org.scalatest.compatible.Assertion
 import org.scalatest.{FlatSpec, Matchers}

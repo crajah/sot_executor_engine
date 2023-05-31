@@ -26,7 +26,6 @@ class SOTBuilder extends scala.annotation.StaticAnnotation {
 
 object SOTMainMacroImpl {
   def expand(name: Term.Name, confStatements: Seq[Stat], statements: Seq[Stat], config: Config): Defn.Object = {
-
     val dag = config.parseDAG()
 
     val parsedSchemas = config.schemas.flatMap {
@@ -66,12 +65,12 @@ object SOTMainMacroImpl {
 
     val definitionsSchemasTypes = schemaTypeValDecl(config, dag)
 
-    val transformations = transformationsCodeGenerator(config, dag)
+    val job = jobCodeGenerator(config, dag)
 
     val allConfStatements = confStatements ++ definitionsSchemasTypes
     val configObject = Seq(q"object conf { ..$allConfStatements }")
 
-    val syn = parsedSchemas ++ configObject ++ transformations ++ statements
+    val syn = parsedSchemas ++ configObject ++ job ++ statements
 
     val code =
       q"""object $name {
@@ -85,60 +84,78 @@ object SOTMainMacroImpl {
   /**
     * Generates the code for the all the operations
     */
-  def transformationsCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Class] = {
-    val transformations = getMonadTransformations(config, dag, q"init[HNil]")
+  def jobCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Class] = {
+    // TODO - WIP
+    /*val dependencies: Term =
+      """
+        import parallelai.sot.engine.io.datastore.Datastore
+        import parallelai.sot.engine.io.datastore.Kind
+        import parallelai.sot.engine.Project
+
+        val datastore = Datastore(Project("bi-crm-poc"), Kind("kind-test"))
+      """.parse[Term].get*/
+
+    val transformations: Term = getMonadTransformations(config, dag, q"init[HNil]")
 
     Seq(
       q"""
-       class Builder extends Serializable() {
-         def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
-           val job = ${transformations}
+        class Job extends Serializable {
+          import parallelai.sot.engine.io.datastore.Datastore
+          import parallelai.sot.engine.io.datastore.Kind
+          import parallelai.sot.engine.Project
 
-           job.run(HNil)._1
-           val result = sc.close()
-           if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
-         }
-       }
+          val datastore = Datastore(Project("bi-crm-poc"), Kind("kind-test"))
+
+          def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
+            val job = $transformations
+
+            job.run(HNil)._1
+            val result = sc.close()
+            if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
+          }
+        }
       """)
   }
 
   private def getMonadTransformations(config: Config, dag: Topology[String, DAGMapping], q: Term): Term = {
-
     val tsorted = dag.topologicalSort()._2
     val sinks = getSinks(config)
     val idsStack = mutable.Map[String, Int]()
-    val srcSteps = getSources(config).zipWithIndex.map({
-      case (srcOp,i) => {
+
+    val srcSteps = getSources(config).zipWithIndex.map {
+      case (srcOp,i) =>
         setNextStackId(idsStack, srcOp._1)
         (Term.Name("read"), List(List(Term.Name("sc"), buildTap(Term.Name("conf.sourceTaps"), srcOp._2, srcOp._3, i), Term.Name("sotUtils"))))
-      }
-    })
+    }
 
-    val ops = tsorted.map({
-      case (e1, e2) => {
+    val ops = tsorted.map {
+      case (e1, e2) =>
         val op = getOp(e2, config.steps)
+
+        // TODO - Not exhaustive!
         val stepParsed =  op match {
-          case _: TransformationOp => {
+          case _: TransformationOp =>
             setNextStackId(idsStack, e2)
             val opParsed = parseOperation(op, dag, config).get
             (opParsed._2, opParsed._3)
-          }
-          case _: TFPredictOp => {
+
+          case _: TFPredictOp =>
             setNextStackId(idsStack, e2)
             val opParsed = parseOperation(op, dag, config).get
             (opParsed._2, opParsed._3)
-          }
-          case sinkOp: SinkOp => {
+
+          case sinkOp: SinkOp =>
             val sinkDef = sinks.find(_._1 == sinkOp.id).get
             val writeMethod = if (sinkDef._2.isDefined) "write" else "writeSchemaless"
             (Term.Name(writeMethod), List(List(buildTap(Term.Name("conf.sinkTaps"), sinkDef._2, sinkDef._3, sinks.indexOf(sinkDef)), Term.Name("sotUtils"))))
-          }
         }
-        val inEdgeIndex = idsStack.get(e1).get
+
+        val inEdgeIndex = idsStack(e1)
         val idTerm = Term.Apply(Term.Name("Nat" + inEdgeIndex), List())
-        (stepParsed._1, List(List(q"sColls.at(${idTerm})")) ::: stepParsed._2)
-      }
-    }).toList
+
+        (stepParsed._1, List(List(q"sColls.at($idTerm)")) ::: stepParsed._2)
+
+    }.toList
 
     parseStateMonadExpression(srcSteps ++ ops, q)
   }
@@ -178,23 +195,19 @@ object SOTMainMacroImpl {
     Seq(block)
   }
 
-  def SOTFieldParser(fieldName: String, fieldType: String, fieldMode: String): Term.Param = {
-    fieldMode match {
-      case "nullable" => s"$fieldName: Option[$fieldType]".parse[Term.Param].get
-      case "repeated" => s"$fieldName: List[$fieldType]".parse[Term.Param].get
-      case "required" => s"$fieldName: $fieldType".parse[Term.Param].get
-    }
+  def SOTFieldParser(fieldName: String, fieldType: String, fieldMode: String): Term.Param = fieldMode match {
+    case "nullable" => s"$fieldName: Option[$fieldType]".parse[Term.Param].get
+    case "repeated" => s"$fieldName: List[$fieldType]".parse[Term.Param].get
+    case "required" => s"$fieldName: $fieldType".parse[Term.Param].get
   }
 
-  def SOTCaseClassParser(fields: List[JSONDefinitionField], name: String): List[(String, Term.Param)] = {
-    fields.flatMap {
-      f =>
-        f.`type` match {
-          case "record" =>
-            val newName = NameProvider.getUniqueName(name)
-            (name, SOTFieldParser(f.name, newName, f.mode)) :: SOTCaseClassParser(f.fields.get, newName)
-          case _ => List((name, SOTFieldParser(f.name, f.`type`, f.mode)))
-        }
+  def SOTCaseClassParser(fields: List[JSONDefinitionField], name: String): List[(String, Term.Param)] = fields.flatMap { f =>
+    f.`type` match {
+      case "record" =>
+        val newName = NameProvider.getUniqueName(name)
+        (name, SOTFieldParser(f.name, newName, f.mode)) :: SOTCaseClassParser(f.fields.get, newName)
+
+      case _ => List((name, SOTFieldParser(f.name, f.`type`, f.mode)))
     }
   }
 
@@ -205,11 +218,11 @@ object SOTMainMacroImpl {
       case (key, value) =>
         val name = Type.Name(key)
         val listSchema = value.map(_._2)
+
         q"""
-        case class $name ( ..$listSchema) extends parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
+          case class $name ( ..$listSchema) extends parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
         """
     }.toList
-
   }
 
   def avroSchemaCodeGenerator(definition: AvroDefinition): Seq[Stat] = {
@@ -235,6 +248,7 @@ object SOTMainMacroImpl {
         Seq(
           q"""object gen { ..$statements}""",
           q"import SOTBuilder.gen._")
+
       case _ =>
         abort("@main must annotate an object.")
     }
@@ -250,12 +264,14 @@ object SOTMainMacroImpl {
   }
 
   private def buildTaps(taps: List[(String, Option[Schema], TapDefinition)], term: Term.Name) = {
-    val sinksDefs = taps.view.zipWithIndex.map({
+    val sinksDefs = taps.view.zipWithIndex.map {
       case ((_, sinkSchema, sinkTap), i) =>
         buildTap(term, sinkSchema, sinkTap, i)
-    })
-    val sinks = sinksDefs.tail.
-      foldLeft(Term.ApplyInfix(sinksDefs.head, Term.Name("::"), List(), List(Term.Name("HNil"))))((cumul: Term.ApplyInfix, t: Term.Apply) => Term.ApplyInfix(t, Term.Name("::"), List(), List(cumul)))
+    }
+
+    val sinks = sinksDefs.tail.foldLeft(Term.ApplyInfix(sinksDefs.head, Term.Name("::"), List(), List(Term.Name("HNil"))))
+                                       { (cumul: Term.ApplyInfix, t: Term.Apply) => Term.ApplyInfix(t, Term.Name("::"), List(), List(cumul)) }
+
     sinks
   }
 
@@ -265,23 +281,22 @@ object SOTMainMacroImpl {
     } else {
       schemalessTap(sinkSchema, sinkTap)
     }
+
     Term.Apply(sinkConfigApply, Seq(q"$term(${Lit.Int(i)})._3"))
   }
 
-  private def schemalessTap(sinkSchema: Option[Schema], sinkTap: TapDefinition) = {
+  private def schemalessTap(sinkSchema: Option[Schema], sinkTap: TapDefinition) =
     Term.ApplyType(Term.Name("SchemalessTapDef"),
       List(Type.Name(getTapType(sinkTap)),
         Type.Name("parallelai.sot.engine.config.gcp.SOTUtils"),
         Type.Name(getSchemaAnnotation(sinkSchema))))
-  }
 
-  private def typedTap(maybeSchema: Option[Schema], tap: TapDefinition) = {
+  private def typedTap(maybeSchema: Option[Schema], tap: TapDefinition) =
     Term.ApplyType(Term.Name("TapDef"),
       List(Type.Name(getTapType(tap)),
         Type.Name("parallelai.sot.engine.config.gcp.SOTUtils"),
         Type.Name(getSchemaAnnotation(maybeSchema)),
         Type.Name(maybeSchema.get.definition.name)))
-  }
 
   def buildSchemaType(definitionName: String, annotation: String): Term.ApplyInfix =
     q"${Lit.String(definitionName)} -> ${Term.ApplyType(Term.Name("SchemaType"), List(Type.Name(annotation), Type.Name(definitionName)))}"

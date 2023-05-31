@@ -10,7 +10,6 @@ import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.{Args, ScioContext}
 import parallelai.sot.engine.config.SchemaResourcePath
 import parallelai.sot.engine.config.gcp.{SOTOptions, SOTUtils}
-import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.io.TapDef
 import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.runner.SCollectionStateMonad._
@@ -25,19 +24,17 @@ import parallelai.sot.macros.SOTMacroHelper._
   * </pre>
   */
 object DatastoreSOTBuilder extends Logging {
-  val datastore = Datastore(Project(), Kind())
-
   @AvroType.toSchema
   case class Message(user: String, teamName: String, score: Int, eventTime: Long, eventTimeStr: String)
 
   @AvroType.toSchema
   case class MessageExtended(user: String, teamName: String, score: Int, eventTime: Long, eventTimeStr: String, count: Int)
 
-  implicit val messageGen = LabelledGeneric[Message]
+  implicit val messageGen: LabelledGeneric[Message] = LabelledGeneric[Message]
 
-  implicit val messageExtendedGen = LabelledGeneric[MessageExtended]
+  implicit val messageExtendedGen: LabelledGeneric[MessageExtended] = LabelledGeneric[MessageExtended]
 
-  object Config {
+  object conf {
     val jobConfig: SOTMacroConfig.Config =
       SOTMacroJsonConfig(SchemaResourcePath().value)
 
@@ -57,27 +54,17 @@ object DatastoreSOTBuilder extends Logging {
       SchemalessTapDef[BigQueryTapDefinition, SOTUtils, com.google.api.client.json.GenericJson](sinkTaps.head._2) :: HNil*/
   }
 
-  object Builder extends Serializable {
-    import Config._
+  class Job extends Serializable {
+    import conf._
+
+    val datastore = Datastore(Project(projectId), Kind("kind-test"))
 
     def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
       val job = init[HNil] flatMap { _ =>
         read(sc, source, sotUtils)
       } flatMap { sColls =>
         map(sColls.at(Nat._0)) { m =>
-          // TODO - For testing only
-          val incomingMessage = Row.to[Message].from(m.hList)
-          datastore.put("blah", incomingMessage)
-
-          datastore.get[Message, m.L]("blah").map { persistedM =>
-            info(s"Persisted Message = $persistedM")
-            val updatedM = m.append('count, persistedM.score)
-
-            val messageExtended = Row.to[MessageExtended].from(updatedM.hList)
-            info(s"Message Extended = $messageExtended")
-
-            updatedM
-          } get
+          m.append('count, datastore.get[Message]("blah").map(_.score).getOrElse(1))
         }
       } flatMap { sColls =>
         write(sColls.at(Nat._1))(sinks.head, sotUtils)
@@ -91,10 +78,13 @@ object DatastoreSOTBuilder extends Logging {
   }
 
   def main(cmdArg: Array[String]): Unit = {
-    val (sotOptions, sotArgs) = ScioContext.parseArguments[SOTOptions](cmdArg)
-    execute(sotOptions, sotArgs)
+    val (sotOptions, sotArgs) = executionContext(cmdArg)
+    execute(new Job, sotOptions, sotArgs)
   }
 
-  def execute[P <: PipelineOptions](pipelineOptions: P, args: Args): Unit =
-    Builder.execute(new SOTUtils(pipelineOptions), ScioContext(pipelineOptions), args)
+  def executionContext(cmdArg: Array[String]): (SOTOptions, Args) =
+    ScioContext.parseArguments[SOTOptions](cmdArg)
+
+  def execute[P <: PipelineOptions](job: Job, pipelineOptions: P, args: Args): Unit =
+    job.execute(new SOTUtils(pipelineOptions), ScioContext(pipelineOptions), args)
 }

@@ -5,7 +5,6 @@ libraryDependencies ++= Seq(
   pureConfig,
   grizzledLogging,
   shapeless,
-  refined,
   gcloudDatastore
 )
 

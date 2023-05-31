@@ -94,13 +94,17 @@
     {
       "type": "pubsub",
       "id": "pubsubsource1",
-      "topic": "p2pin"
+      "topic": "p2pds",
+      "managedSubscription": true,
+      "timestampAttribute": "timestamp_ms"
     },
     {
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "streaming_word_extract29"
+      "table": "streaming_word_extract1",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
     }
   ],
   "steps": [
