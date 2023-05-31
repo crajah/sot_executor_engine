@@ -3,13 +3,13 @@ package parallelai.sot.macros
 import scala.collection.immutable.Seq
 import scala.collection.mutable
 import scala.meta._
+import spray.json._
 import parallelai.sot.engine.config.SchemaResourcePath
 import parallelai.sot.engine.serialization.protobuf.ProtoPBCCodeGen
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
 import parallelai.sot.executor.model.SOTMacroJsonConfig._
 import parallelai.sot.executor.model._
 import parallelai.sot.macros.SOTMacroHelper._
-import spray.json._
 
 class SOTBuilder extends scala.annotation.StaticAnnotation {
   inline def apply(defn: Any): Any = meta {
@@ -84,28 +84,12 @@ object SOTMainMacroImpl {
   /**
     * Generates the code for the all the operations
     */
-  def jobCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Defn.Class] = {
-    // TODO - WIP
-    /*val dependencies: Term =
-      """
-        import parallelai.sot.engine.io.datastore.Datastore
-        import parallelai.sot.engine.io.datastore.Kind
-        import parallelai.sot.engine.Project
-
-        val datastore = Datastore(Project("bi-crm-poc"), Kind("kind-test"))
-      """.parse[Term].get*/
-
+  def jobCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Stat] = {
     val transformations: Term = getMonadTransformations(config, dag, q"init[HNil]")
 
-    Seq(
+    datastores(config) ++ Seq(
       q"""
         class Job extends Serializable {
-          import parallelai.sot.engine.io.datastore.Datastore
-          import parallelai.sot.engine.io.datastore.Kind
-          import parallelai.sot.engine.Project
-
-          val datastore = Datastore(Project("bi-crm-poc"), Kind("kind-test"))
-
           def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
             val job = $transformations
 
@@ -114,7 +98,20 @@ object SOTMainMacroImpl {
             if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
           }
         }
-      """)
+      """
+    )
+  }
+
+  private def datastores(config: Config): Seq[Stat] = config.taps.collect {
+    case DatastoreTapDefinition(_, id, kind, _) =>
+      s"""val $id = Datastore(Project("bi-crm-poc"), Kind("$kind"))""".parse[Stat].get
+  } match {
+    case ds if ds.isEmpty => ds
+    case ds => Seq(
+      "import parallelai.sot.engine.Project".parse[Stat].get,
+      "import parallelai.sot.engine.io.datastore.Datastore".parse[Stat].get,
+      "import parallelai.sot.engine.io.datastore.Kind".parse[Stat].get
+    ) ++ ds
   }
 
   private def getMonadTransformations(config: Config, dag: Topology[String, DAGMapping], q: Term): Term = {

@@ -100,7 +100,7 @@
     },
     {
       "type": "datastore",
-      "id": "datastoresource1",
+      "id": "datastore1",
       "kind": "dataflowwrite",
       "dedupCommits": true
     }
@@ -118,7 +118,7 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "params": [["m => m.append('count, datastore.get[Message](\"blah\").map(_.score).getOrElse(1))"]],
+      "params": [["m => m.append('count, datastore1.get[Message](\"blah\").map(_.score).getOrElse(1))"]],
       "paramsEncoded": false
     },
     {
