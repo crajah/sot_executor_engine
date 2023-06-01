@@ -52,7 +52,9 @@ lazy val `sot-executor` = (project in file("./sot-executor"))
     Common.macroSettings,
     Defaults.itSettings,
     assembySettings,
-    unmanagedResourceDirectories in Compile += configResources
+    unmanagedResourceDirectories in Compile += configResources,
+    test in assembly := {},
+    assemblyJarName in assembly := "sot_executor_rule.jar"
   )
 
 lazy val `sot` = (project in file("."))
