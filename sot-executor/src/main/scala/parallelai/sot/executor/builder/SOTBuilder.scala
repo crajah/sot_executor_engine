@@ -50,7 +50,7 @@ import parallelai.sot.engine.runner.Writer
 import parallelai.sot.engine.runner.SCollectionStateMonad._
 import scalaz.Scalaz.init
 
-//// Windowing imports
+//// Windowing
 import org.joda.time.Duration
 import com.spotify.scio.values.WindowOptions
 import org.apache.beam.sdk.values.WindowingStrategy.AccumulationMode
@@ -61,7 +61,7 @@ import org.apache.beam.sdk.transforms.windowing._
 import parallelai.sot.engine.io.bigquery._
 import parallelai.sot.engine.io.datastore._
 
-// SOT Nats
+//// SOT Nats
 import parallelai.sot.executor.SOTNats._
 
 /**

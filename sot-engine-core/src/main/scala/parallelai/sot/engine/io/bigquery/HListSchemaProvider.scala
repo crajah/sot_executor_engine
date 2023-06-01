@@ -4,6 +4,8 @@ import com.google.api.services.bigquery.model.TableFieldSchema
 import com.google.protobuf.ByteString
 import com.trueaccord.scalapb.GeneratedEnum
 import org.joda.time.{Instant, LocalDate, LocalDateTime, LocalTime}
+import parallelai.sot.engine.io.utils.FieldNaming
+import parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition
 import shapeless.labelled.FieldType
 import shapeless.{::, HList, HNil, Witness}
 
@@ -50,10 +52,11 @@ trait LowPrioritySchemaProvider {
   implicit def optionProductParser[K <: Symbol, V <: HList, T <: HList](implicit
                                                                   hNestedProvider: HListSchemaProvider[V],
                                                                   witness: Witness.Aux[K],
-                                                                  tSchemaProvider: HListSchemaProvider[T]) =
+                                                                  tSchemaProvider: HListSchemaProvider[T],
+                                                                  fieldNaming: FieldNaming[BigQueryTapDefinition]) =
     new HListSchemaProvider[FieldType[K, Option[V]] :: T] {
       def getSchema: Iterable[TableFieldSchema] = {
-        val name = witness.value.name
+        val name = fieldNaming(witness.value.name)
         val nestedFields = hNestedProvider.getSchema
         val nestedSchema = new TableFieldSchema()
           .setMode("NULLABLE")
@@ -67,10 +70,11 @@ trait LowPrioritySchemaProvider {
   implicit def listProductParser[K <: Symbol, V <: HList, T <: HList](implicit
                                                                         hNestedProvider: HListSchemaProvider[V],
                                                                         witness: Witness.Aux[K],
-                                                                        tSchemaProvider: HListSchemaProvider[T]) =
+                                                                        tSchemaProvider: HListSchemaProvider[T],
+                                                                      fieldNaming: FieldNaming[BigQueryTapDefinition]) =
     new HListSchemaProvider[FieldType[K, List[V]] :: T] {
       def getSchema: Iterable[TableFieldSchema] = {
-        val name = witness.value.name
+        val name = fieldNaming(witness.value.name)
         val nestedFields = hNestedProvider.getSchema
         val nestedSchema = new TableFieldSchema()
           .setMode("REPEATED")
@@ -84,10 +88,11 @@ trait LowPrioritySchemaProvider {
   implicit def productParser[K <: Symbol, V <: HList, T <: HList](implicit
                                                                   hNestedProvider: HListSchemaProvider[V],
                                                                   witness: Witness.Aux[K],
-                                                                  tSchemaProvider: HListSchemaProvider[T]) =
+                                                                  tSchemaProvider: HListSchemaProvider[T],
+                                                                  fieldNaming: FieldNaming[BigQueryTapDefinition]) =
     new HListSchemaProvider[FieldType[K, V] :: T] {
       def getSchema: Iterable[TableFieldSchema] = {
-        val name = witness.value.name
+        val name = fieldNaming(witness.value.name)
         val nestedFields = hNestedProvider.getSchema
         val nestedSchema = new TableFieldSchema()
           .setMode("REQUIRED")
@@ -109,10 +114,11 @@ object HListSchemaProvider extends LowPrioritySchemaProvider {
   implicit def requiredFieldParser[K <: Symbol, V, T <: HList](implicit
                                                        hExtractor: HListSchemaExtractor[V],
                                                        witness: Witness.Aux[K],
-                                                       tSchemaProvider: HListSchemaProvider[T]) =
+                                                       tSchemaProvider: HListSchemaProvider[T],
+                                                       fieldNaming: FieldNaming[BigQueryTapDefinition]) =
     new HListSchemaProvider[FieldType[K, V] :: T] {
       def getSchema: Iterable[TableFieldSchema] = {
-        val name = witness.value.name
+        val name = fieldNaming(witness.value.name)
         val tpeParam = hExtractor.apply
         Iterable(new TableFieldSchema().setMode("REQUIRED").setName(name).setType(tpeParam)) ++ tSchemaProvider.getSchema
       }
@@ -121,10 +127,11 @@ object HListSchemaProvider extends LowPrioritySchemaProvider {
   implicit def listFieldParser[K <: Symbol, V, T <: HList](implicit
                                                                hExtractor: HListSchemaExtractor[V],
                                                                witness: Witness.Aux[K],
-                                                               tSchemaProvider: HListSchemaProvider[T]) =
+                                                               tSchemaProvider: HListSchemaProvider[T],
+                                                               fieldNaming: FieldNaming[BigQueryTapDefinition]) =
     new HListSchemaProvider[FieldType[K, List[V]] :: T] {
       def getSchema: Iterable[TableFieldSchema] = {
-        val name = witness.value.name
+        val name = fieldNaming(witness.value.name)
         val tpeParam = hExtractor.apply
         Iterable(new TableFieldSchema().setMode("REPEATED").setName(name).setType(tpeParam)) ++ tSchemaProvider.getSchema
       }
@@ -133,10 +140,11 @@ object HListSchemaProvider extends LowPrioritySchemaProvider {
   implicit def optionalFieldParser[K <: Symbol, V, T <: HList](implicit
                                                            hExtractor: HListSchemaExtractor[V],
                                                            witness: Witness.Aux[K],
-                                                           tSchemaProvider: HListSchemaProvider[T]) =
+                                                           tSchemaProvider: HListSchemaProvider[T],
+                                                           fieldNaming: FieldNaming[BigQueryTapDefinition]) =
     new HListSchemaProvider[FieldType[K, Option[V]] :: T] {
       def getSchema: Iterable[TableFieldSchema] = {
-        val name = witness.value.name
+        val name = fieldNaming(witness.value.name)
         val tpeParam = hExtractor.apply
         Iterable(new TableFieldSchema().setMode("NULLABLE").setName(name).setType(tpeParam)) ++ tSchemaProvider.getSchema
       }
