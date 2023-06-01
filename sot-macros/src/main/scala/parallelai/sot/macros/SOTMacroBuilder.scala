@@ -5,6 +5,7 @@ import scala.collection.mutable
 import scala.meta._
 import spray.json._
 import parallelai.sot.engine.config.SchemaResourcePath
+import parallelai.sot.engine.projectId
 import parallelai.sot.engine.serialization.protobuf.ProtoPBCCodeGen
 import parallelai.sot.executor.model.SOTMacroConfig.{Config, DAGMapping, _}
 import parallelai.sot.executor.model.SOTMacroJsonConfig._
@@ -104,13 +105,11 @@ object SOTMainMacroImpl {
 
   private def datastores(config: Config): Seq[Stat] = config.taps.collect {
     case DatastoreTapDefinition(_, id, kind, _) =>
-      s"""val $id = Datastore(Project("bi-crm-poc"), Kind("$kind"))""".parse[Stat].get
+      s"""val $id = Datastore(Project("$projectId"), Kind("$kind"))""".parse[Stat].get
   } match {
     case ds if ds.isEmpty => ds
     case ds => Seq(
-      "import parallelai.sot.engine.Project".parse[Stat].get,
-      "import parallelai.sot.engine.io.datastore.Datastore".parse[Stat].get,
-      "import parallelai.sot.engine.io.datastore.Kind".parse[Stat].get
+      "import parallelai.sot.engine.Project, parallelai.sot.engine.io.datastore.{Datastore, Kind}".parse[Stat].get
     ) ++ ds
   }
 
