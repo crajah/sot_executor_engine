@@ -8,6 +8,9 @@ import com.google.cloud.{NoCredentials, ServiceOptions}
 import parallelai.sot.containers.{Container, ContainersFixture}
 import parallelai.sot.engine.ProjectFixture
 
+/**
+  * docker run -p 8081:8081 --name my-datastore google/cloud-sdk gcloud beta emulators datastore start --project=test --host-port=0.0.0.0:8081
+  */
 trait DatastoreContainerFixture {
   this: Suite with ContainersFixture with ProjectFixture =>
 
