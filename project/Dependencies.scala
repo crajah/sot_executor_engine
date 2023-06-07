@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-  val scala211 = "2.11.12"
+  val scala211 = "2.11.11"
   val scala212 = "2.12.2"
   val metaVersion = "1.8.0"
   val paradiseVersion = "3.0.0-M9"
