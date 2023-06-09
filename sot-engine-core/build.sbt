@@ -27,7 +27,8 @@ libraryDependencies ++= Seq(
   gcloudDatastore,
   gcloudStorage,
   logbackClassic,
-  scalacheck
+  scalacheck,
+  javaKafkaBeam
 )
 
 libraryDependencies ++= Seq(

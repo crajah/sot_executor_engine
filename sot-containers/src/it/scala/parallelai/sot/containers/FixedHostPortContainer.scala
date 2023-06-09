@@ -2,14 +2,14 @@ package parallelai.sot.containers
 
 import com.dimafeng.testcontainers.SingleContainer
 import org.testcontainers.containers.wait.WaitStrategy
-import org.testcontainers.containers.{FixedHostPortGenericContainer, GenericContainer}
+import org.testcontainers.containers.{FixedHostPortGenericContainer}
 
 import scala.language.implicitConversions
 
 /**
-  * Instantiate a Container - This instantiation is equivalent to for example:
+  * Instantiate a Container - This instantiation is equivalent to for example (subject to parameter values):
   * <pre>
-  *   docker run -p 8081 google/cloud-sdk:latest gcloud beta emulators datastore start --project=bi-crm-poc --host-port=0.0.0.0:8081
+  *   docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=0.0.0.0 --env ADVERTISED_PORT=9092 all4it/local-kafka:v2
   * </pre>
   *
   * @param imageName String Required name of image - if a tag is not provided then "latest" is assumed
@@ -18,19 +18,22 @@ import scala.language.implicitConversions
   * @param waitStrategy Option[WaitStrategy] State how to wait for the container to be up and running (NOTE the nasty default of null allowing for an easier client call)
   * @param commands Seq[String] The commands to run against the instantiated container
   *
-  * Note - Regarding port bindings, any exposed ports are bound to (externally) by calling the (wrapped) container's "getMappedPort" with the exposed port of the desired service.
+  * Note - in contrast to Container this will map exposedPorts to the same ports in the Docker host
   */
-class Container(val imageName: String,
+
+class FixedHostPortContainer(val imageName: String,
                 override val exposedPorts: Seq[Int] = Seq.empty,
                 val environment: Map[String, String] = Map.empty,
-                // classpathResourceMapping: Seq[(String, String, BindMode)] = Seq() TODO - Maybe
                 val waitStrategy: Option[WaitStrategy] = None,
-                val commands: Seq[String] = Seq.empty) extends SingleContainer[GenericContainer[_]] {
+                val commands: Seq[String] = Seq.empty) extends SingleContainer[FixedHostPortGenericContainer[_]] {
 
-  implicit val container: GenericContainer[_] = {
-    val container = new GenericContainer(if (imageName contains ":") imageName else s"$imageName:latest")
+  implicit val container: FixedHostPortGenericContainer[_] = {
 
-    container.addExposedPorts(exposedPorts: _*)
+    // Must fully qualify the type of container here, otherwise it failes with runtime error possibly because
+    // container.withFixedExposedPort overwrites itself with Nothing
+    val container: FixedHostPortGenericContainer[_] = new FixedHostPortGenericContainer(if (imageName contains ":") imageName else s"$imageName:latest")
+
+    exposedPorts foreach { case p => container.withFixedExposedPort(p, p) }
 
     environment foreach { case (k, v) => container.addEnv(k, v) }
 
