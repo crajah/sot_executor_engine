@@ -52,7 +52,7 @@
       "id": "mapper2",
       "name": "mapper2",
       "op": "map",
-      "params": [["m => {val message = \"Congratulations. You won \" + m.get('winnings) + \" \" + m.get('currency) + \". On a bet placed on \" + m.get('eventName) + \" for \" + m.get('outComeName) + \" to \" + m.get('marketName) + \".\";m.append('message, message).append('ts, Helper.fmt.print(Instant.now()))}"]],
+      "params": [["m => {val message = \"Congratulations. You won \" + m.get('winnings) + \" \" + m.get('currency) + \". On a bet placed on \" + m.get('eventName) + \" for \" + m.get('outComeName) + \" to \" + m.get('marketName) + \".\";m.append('message, message).append('ts, Helper.fmt.print(Helper.Instant.now()))}"]],
       "paramsEncoded": false
     },
     {
