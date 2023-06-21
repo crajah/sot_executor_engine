@@ -80,7 +80,7 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
 //  }
 //
 //  "SOTMacroBuilder service" should "build from json" in {
-//    val config =  SOTMacroJsonConfig("ps2bq-test-join.json")
+//    val config =  SOTMacroJsonConfig("ps2bq-test-left-join.json")
 //
 //    val expectedBlock =
 //      q"""

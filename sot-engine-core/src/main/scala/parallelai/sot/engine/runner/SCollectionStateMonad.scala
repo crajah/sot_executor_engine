@@ -1,18 +1,17 @@
 package parallelai.sot.engine.runner
 
 import com.spotify.scio.ScioContext
+import com.spotify.scio.sot.tensorflow._
 import com.spotify.scio.values.{SCollection, WindowOptions}
 import org.joda.time.Duration
 import org.tensorflow.Tensor
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.executor.model.SOTMacroConfig.TapDefinition
+import shapeless.labelled.FieldType
+import shapeless.ops.hlist.{At, Length, Prepend}
+import shapeless.ops.record.Values
 import shapeless.{::, HList, HNil, LabelledGeneric, Nat, Witness}
-import shapeless.labelled.{FieldType, field}
-import shapeless.ops.hlist.{At, LeftFolder, Length, ModifierAt, Prepend}
-import shapeless.ops.record.{LacksKey, Remover, Updater, Values}
-import shapeless.syntax.singleton._
-import com.spotify.scio.sot.tensorflow._
 
 import scala.reflect.ClassTag
 import scalaz.IndexedState
@@ -95,6 +94,19 @@ object SCollectionStateMonad {
     })
 
 
+  def combine[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
+                                                                         (createCombiner: Row.Aux[L] => Row.Aux[Out])
+                                                                         (mergeValue: (Row.Aux[Out], Row.Aux[L]) => Row.Aux[Out],
+                                                                          mergeCombiners: (Row.Aux[Out], Row.Aux[Out]) => Row.Aux[Out])
+                                                                         (implicit
+                                                                          prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
+                                                                         ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, sCollection.combine(createCombiner)(mergeValue)(mergeCombiners) :: HNil)
+      (res, res)
+    })
+
+
   def groupBy[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, K: Manifest](sCollection: SCollection[Row.Aux[L]])
                                                                                       (f: Row.Aux[L] => K)
                                                                                       (implicit
@@ -106,6 +118,7 @@ object SCollectionStateMonad {
       }) :: HNil)
       (res, res)
     })
+
 
   def join[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
   (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
@@ -120,6 +133,21 @@ object SCollectionStateMonad {
     }
     )
 
+
+  def hashJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+  (implicit
+   pair1: IsPair.Aux[J1, K, L1],
+   pair2: IsPair.Aux[J2, K, L2],
+   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, L1, L2] :: HNil, SCOLOUT]
+  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, pair1(sColl1).hashJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+      (res, res)
+    }
+    )
+
+
   def leftOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
   (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
   (implicit
@@ -133,16 +161,46 @@ object SCollectionStateMonad {
     }
     )
 
-    def write[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO, In <: ANNO : Manifest](sCollection: SCollection[Row.Aux[L]])
-                                                                                                                    (tap: TapDef[TAP, UTIL, ANNO, In], utils: UTIL)
-                                                                                                                    (implicit
-                                                                                                                     gen: LabelledGeneric.Aux[In, L],
-                                                                                                                     writer: Writer[TAP, UTIL, ANNO, In, L]
-                                                                                                                    ): IndexedState[SCOLS, SCOLS, SCOLS] =
-      IndexedState(sColls => {
-        writer.write(sCollection, tap.tapDefinition, utils)
-        (sColls, sColls)
-      })
+
+  def hashLeftJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+  (implicit
+   pair1: IsPair.Aux[J1, K, L1],
+   pair2: IsPair.Aux[J2, K, L2],
+   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, L1, Option[L2]] :: HNil, SCOLOUT]
+  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, pair1(sColl1).hashLeftJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+      (res, res)
+    }
+    )
+
+
+  def rightOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+  (implicit
+   pair1: IsPair.Aux[J1, K, L1],
+   pair2: IsPair.Aux[J2, K, L2],
+   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, Option[L1], L2] :: HNil, SCOLOUT]
+  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, pair1(sColl1).rightOuterJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+      (res, res)
+    }
+    )
+
+
+  def write[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO, In <: ANNO : Manifest](sCollection: SCollection[Row.Aux[L]])
+                                                                                                                  (tap: TapDef[TAP, UTIL, ANNO, In], utils: UTIL)
+                                                                                                                  (implicit
+                                                                                                                   gen: LabelledGeneric.Aux[In, L],
+                                                                                                                   writer: Writer[TAP, UTIL, ANNO, In, L]
+                                                                                                                  ): IndexedState[SCOLS, SCOLS, SCOLS] =
+    IndexedState(sColls => {
+      writer.write(sCollection, tap.tapDefinition, utils)
+      (sColls, sColls)
+    })
+
 
   def writeSchemaless[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO](sCollection: SCollection[Row.Aux[L]])
                                                                                                      (tap: SchemalessTapDef[TAP, UTIL, ANNO], utils: UTIL)
