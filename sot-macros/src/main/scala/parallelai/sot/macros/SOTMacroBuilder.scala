@@ -114,46 +114,45 @@ object SOTMainMacroImpl {
   }
 
   private def getMonadTransformations(config: Config, dag: Topology[String, DAGMapping], q: Term): Term = {
-    val tsorted = dag.topologicalSort()._2
+    val (tsortedVertices, tsortedEdges) = dag.topologicalSort()
+    val sources = getSources(config).zipWithIndex
     val sinks = getSinks(config)
+    val opInputs: Map[String, scala.Seq[String]] = tsortedEdges.groupBy(_._2).map(x =>(x._1, x._2.map(_._1)))
     val idsStack = mutable.Map[String, Int]()
+    val ops = tsortedVertices.map {opId =>
+      val op = getOp(opId, config.steps)
+      setNextStackId(idsStack, opId)
+      val stepParsed =  op match {
+        case _: TransformationOp =>
+          val opParsed = parseOperation(op, dag, config).get
+          (opParsed._2, opParsed._3)
 
-    val srcSteps = getSources(config).zipWithIndex.map {
-      case (srcOp,i) =>
-        setNextStackId(idsStack, srcOp._1)
-        (Term.Name("read"), List(List(Term.Name("sc"), buildTap(Term.Name("conf.sourceTaps"), srcOp._2, srcOp._3, i), Term.Name("sotUtils"))))
-    }
+        case _: TFPredictOp =>
+          val opParsed = parseOperation(op, dag, config).get
+          (opParsed._2, opParsed._3)
 
-    val ops = tsorted.map {
-      case (e1, e2) =>
-        val op = getOp(e2, config.steps)
+        case sinkOp: SinkOp =>
+          val sinkDef = sinks.find(_._1 == sinkOp.id).get
+          val writeMethod = if (sinkDef._2.isDefined) "write" else "writeSchemaless"
+          (Term.Name(writeMethod), List(List(buildTap(Term.Name("conf.sinkTaps"), sinkDef._2, sinkDef._3, sinks.indexOf(sinkDef)), Term.Name("sotUtils"))))
 
-        // TODO - Not exhaustive!
-        val stepParsed =  op match {
-          case _: TransformationOp =>
-            setNextStackId(idsStack, e2)
-            val opParsed = parseOperation(op, dag, config).get
-            (opParsed._2, opParsed._3)
+        case sourceOp: SourceOp =>
+          val sourceDef = sources.find(_._1._1 == sourceOp.id).get
+          (Term.Name("read"), List(List(Term.Name("sc"), buildTap(Term.Name("conf.sourceTaps"), sourceDef._1._2, sourceDef._1._3, sourceDef._2), Term.Name("sotUtils"))))
+      }
 
-          case _: TFPredictOp =>
-            setNextStackId(idsStack, e2)
-            val opParsed = parseOperation(op, dag, config).get
-            (opParsed._2, opParsed._3)
+      val inputScolls = opInputs.getOrElse(opId, Nil).map {e1 =>
+          val inEdgeIndex = idsStack(e1)
+          val idTerm = Term.Apply(Term.Name("Nat" + inEdgeIndex), List())
+          q"sColls.at($idTerm)"
+      }.toList
 
-          case sinkOp: SinkOp =>
-            val sinkDef = sinks.find(_._1 == sinkOp.id).get
-            val writeMethod = if (sinkDef._2.isDefined) "write" else "writeSchemaless"
-            (Term.Name(writeMethod), List(List(buildTap(Term.Name("conf.sinkTaps"), sinkDef._2, sinkDef._3, sinks.indexOf(sinkDef)), Term.Name("sotUtils"))))
-        }
-
-        val inEdgeIndex = idsStack(e1)
-        val idTerm = Term.Apply(Term.Name("Nat" + inEdgeIndex), List())
-
-        (stepParsed._1, List(List(q"sColls.at($idTerm)")) ::: stepParsed._2)
+      val params = if (inputScolls.isEmpty) stepParsed._2 else List(inputScolls) ::: stepParsed._2
+      (stepParsed._1, params)
 
     }.toList
 
-    parseStateMonadExpression(srcSteps ++ ops, q)
+    parseStateMonadExpression(ops, q)
   }
 
   private def setNextStackId(idsStack: mutable.Map[String, Int], id: String) = {
@@ -271,14 +270,14 @@ object SOTMainMacroImpl {
     sinks
   }
 
-  private def buildTap(term: Term.Name, sinkSchema: Option[Schema], sinkTap: TapDefinition, i: Int) = {
+  private def buildTap(term: Term.Name, sinkSchema: Option[Schema], sinkTap: TapDefinition, tapIndex: Int) = {
     val sinkConfigApply = if (sinkSchema.isDefined) {
       typedTap(sinkSchema, sinkTap)
     } else {
       schemalessTap(sinkSchema, sinkTap)
     }
 
-    Term.Apply(sinkConfigApply, Seq(q"$term(${Lit.Int(i)})._3"))
+    Term.Apply(sinkConfigApply, Seq(q"$term(${Lit.Int(tapIndex)})._3"))
   }
 
   private def schemalessTap(sinkSchema: Option[Schema], sinkTap: TapDefinition) =
