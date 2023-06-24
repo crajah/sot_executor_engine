@@ -4,82 +4,13 @@ import scala.meta.{Term, _}
 import spray.json.{JsArray, JsObject, JsString}
 import org.scalatest.compatible.Assertion
 import org.scalatest.{FlatSpec, Matchers}
+import parallelai.sot.engine.config.SchemaResourcePath
 import parallelai.sot.executor.model.SOTMacroConfig._
+import parallelai.sot.executor.model.SOTMacroJsonConfig
 
 class SOTMacroBuilderSpec extends FlatSpec with Matchers {
 
-  "SOTMacroBuilder service" should "build pubsub to bigquery macro" in {
-    val avroFields =
-      JsArray(JsObject(Map(
-        "name" -> JsString("user"),
-        "type" -> JsString("string")
-      )),
-        JsObject(Map(
-          "name" -> JsString("score"),
-          "type" -> JsString("in")
-        )))
-
-    val avroDef = AvroDefinition(`type` = "record", name = "MessageExtended", namespace = "parallelai.sot.avro", fields = avroFields)
-    val in = AvroSchema(`type` = "avro", id = "inschema1", name = "inschema1", version = "", definition = avroDef)
-
-    val bqFields = JsArray(JsObject(Map(
-      "mode" -> JsString("REQUIRED"),
-      "name" -> JsString("user"),
-      "type" -> JsString("STRING")
-    )),
-      JsObject(Map(
-        "mode" -> JsString("REQUIRED"),
-        "name" -> JsString("total_score"),
-        "type" -> JsString("INTEGER")
-      )))
-
-    val bqDefinition = BigQueryDefinition(`type` = "bigquerydefinition", name = "BigQueryRow", fields = bqFields)
-    val out = BigQuerySchema(`type` = "bigquery", id = "outschema1", name = "outschema1", version = "", definition = bqDefinition)
-
-    val schemas = List(in, out)
-
-    val taps = List(
-      // TODO: fix next line if it's needed; commented out - was not compiling
-//      PubSubTapDefinition(`type` = "pubsub", id = "insource", topic = "p2pin"),
-      BigQueryTapDefinition(`type` = "bigquery", id = "outsource", dataset = "dataset1", table = "table1", None, None)
-
-    )
-
-    val dag = List(
-      DAGMapping(from = "in", to = "mapper1"),
-      DAGMapping(from = "mapper1", to = "mapper2"),
-      DAGMapping(from = "mapper2", to = "out")
-    )
-
-    val steps = List(
-      SourceOp(`type` = "source", id = "in", name = "in", schema = "inschema1", tap = "insource"),
-      TransformationOp(`type` = "transformation", id = "mapper1", name = "mapper1", op = "map", params = List(List("m => BigQueryRow(m, (m.name, m.count))")), paramsEncoded = false),
-      TransformationOp(`type` = "transformation", id = "mapper2", name = "mapper2", op = "map", params = List(List("((Row(('events ->> List()) :: HNil)), ({(aggr, m) => Row(('events ->> aggr.get('events) :+ m.get('eventName)) :: HNil)}, {(aggr1, aggr2) => Row(('events ->> aggr1.get('events) ++ aggr2.get('events)) :: HNil)}))")), paramsEncoded = false),
-      SinkOp(`type` = "sink", id = "out", name = "out", schema = Some("outschema1"), tap = "outsource")
-    )
-
-    val config = Config(id = "", name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
-
-    val expectedBlock =
-      q"""
-            `@AvroType`.fromSchema("{\"type\":\"record\",\"name\":\"MessageExtended\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"user\",\"type\":\"string\"},{\"name\":\"score\",\"type\":\"in\"}]}")
-            class MessageExtended
-            `@BigQueryType`.fromSchema("{\"type\":\"bigquerydefinition\",\"name\":\"BigQueryRow\",\"fields\":[{\"mode\":\"REQUIRED\",\"name\":\"user\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"total_score\",\"type\":\"INTEGER\"}]}")
-            class BigQueryRow
-            def transform(in: SCollection[MessageExtended]) = {
-              in.map(m => BigQueryRow(m, (m.name, m.count)))
-            }
-            val inArgs = PubSubArgs(topic = "p2pin")
-            val outArgs = BigQueryArgs(dataset = "dataset1", table = "table1")
-            val getBuilder = new ScioBuilderPubSubToBigQuery(transform, inArgs, outArgs)
-            val x = 1
-       """
-    assertEqualStructure(config, expectedBlock)
-
-  }
-
-//
-//  "SOTMacroBuilder service" should "build pubsub to bigtable macro" in {
+//  "SOTMacroBuilder service" should "build pubsub to bigquery macro" in {
 //    val avroFields =
 //      JsArray(JsObject(Map(
 //        "name" -> JsString("user"),
@@ -91,26 +22,65 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
 //        )))
 //
 //    val avroDef = AvroDefinition(`type` = "record", name = "MessageExtended", namespace = "parallelai.sot.avro", fields = avroFields)
-//    val in = AvroSchema(`type` = "avro", id =  "inschema1", version = "", definition = avroDef)
+//    val in = AvroSchema(`type` = "avro", id = "inschema1", name = "inschema1", version = "", definition = avroDef)
 //
-//    val schemas = List(in)
+//    val bqFields = JsArray(JsObject(Map(
+//      "mode" -> JsString("REQUIRED"),
+//      "name" -> JsString("user"),
+//      "type" -> JsString("STRING")
+//    )),
+//      JsObject(Map(
+//        "mode" -> JsString("REQUIRED"),
+//        "name" -> JsString("total_score"),
+//        "type" -> JsString("INTEGER")
+//      )))
+//
+//    val bqDefinition = BigQueryDefinition(`type` = "bigquerydefinition", name = "BigQueryRow", fields = bqFields)
+//    val out = BigQuerySchema(`type` = "bigquery", id = "outschema1", name = "outschema1", version = "", definition = bqDefinition)
+//
+//    val schemas = List(in, out)
 //
 //    val taps = List(
-//      PubSubTapDefinition(`type` = "pubsub", id = "insource", topic = "p2pin"),
-//      BigTableTapDefinition(`type` = "bigtable", id =  "outsource", instanceId = "biBigTablegtable-test", tableId = "bigquerytest", familyName = List("cf"), numNodes = 3)
+//      PubSubTapDefinition(`type` = "pubsub", id = "insource", topic = "p2pin", None, None, None),
+//      BigQueryTapDefinition(`type` = "bigquery", id = "outsource", dataset = "dataset1", table = "table1", None, None)
+//
 //    )
 //
 //    val dag = List(
 //      DAGMapping(from = "in", to = "mapper1"),
-//      DAGMapping(from = "mapper1", to = "out")
-//    )
-//    val steps = List(
-//      SourceOp(`type` = "source", name = "in", schema = "inschema1", tap = "insource"),
-//      TransformationOp(`type` = "transformation", name = "mapper1", op = "map", func = "m => BigTableRecord(m, (\"cf\", \"name\", m.name))"),
-//      SinkOp(`type` = "sink", name = "out", schema = Some("outschema1"), tap = "outsource")
+//      DAGMapping(from = "mapper1", to = "mapper2"),
+//      DAGMapping(from = "mapper2", to = "out")
 //    )
 //
-//    val config = Config(name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
+//    val steps = List(
+//      SourceOp(`type` = "source", id = "in", name = "in", schema = "inschema1", tap = "insource"),
+//      TransformationOp(`type` = "transformation", id = "mapper1", name = "mapper1", op = "map", params = List(List("m => BigQueryRow(m, (m.name, m.count))")), paramsEncoded = false),
+//      TransformationOp(`type` = "transformation", id = "mapper2", name = "mapper2", op = "map", params = List(List("((Row(('events ->> List()) :: HNil)), ({(aggr, m) => Row(('events ->> aggr.get('events) :+ m.get('eventName)) :: HNil)}, {(aggr1, aggr2) => Row(('events ->> aggr1.get('events) ++ aggr2.get('events)) :: HNil)}))")), paramsEncoded = false),
+//      SinkOp(`type` = "sink", id = "out", name = "out", schema = Some("outschema1"), tap = "outsource")
+//    )
+//
+//    val config = Config(id = "", name = "", version = "", schemas = schemas, taps = taps, dag = dag, steps = steps)
+//
+//    val expectedBlock =
+//      q"""
+//            `@AvroType`.fromSchema("{\"type\":\"record\",\"name\":\"MessageExtended\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"user\",\"type\":\"string\"},{\"name\":\"score\",\"type\":\"in\"}]}")
+//            class MessageExtended
+//            `@BigQueryType`.fromSchema("{\"type\":\"bigquerydefinition\",\"name\":\"BigQueryRow\",\"fields\":[{\"mode\":\"REQUIRED\",\"name\":\"user\",\"type\":\"STRING\"},{\"mode\":\"REQUIRED\",\"name\":\"total_score\",\"type\":\"INTEGER\"}]}")
+//            class BigQueryRow
+//            def transform(in: SCollection[MessageExtended]) = {
+//              in.map(m => BigQueryRow(m, (m.name, m.count)))
+//            }
+//            val inArgs = PubSubArgs(topic = "p2pin")
+//            val outArgs = BigQueryArgs(dataset = "dataset1", table = "table1")
+//            val getBuilder = new ScioBuilderPubSubToBigQuery(transform, inArgs, outArgs)
+//            val x = 1
+//       """
+//    assertEqualStructure(config, expectedBlock)
+//
+//  }
+//
+//  "SOTMacroBuilder service" should "build from json" in {
+//    val config =  SOTMacroJsonConfig("ps2bq-test-left-join.json")
 //
 //    val expectedBlock =
 //      q"""
@@ -126,6 +96,7 @@ class SOTMacroBuilderSpec extends FlatSpec with Matchers {
 //          """
 //    assertEqualStructure(config, expectedBlock)
 //  }
+
 //
 //  "SOTMacroBuilder service" should "build pubsub to datastore macro" in {
 //    val avroFields =
