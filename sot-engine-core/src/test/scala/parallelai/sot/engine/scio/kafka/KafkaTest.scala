@@ -12,23 +12,20 @@ import org.joda.time.Duration
 
 object KafkaJobSpec {
   val options = KafkaOptions("DUMMY-BOOTSTRAP", "SOME-TOPIC", "SOME-GROUP")
-  val charset = Charset.forName("UTF8")
-  val input = Seq("a", "b", "c").map(_.getBytes(charset))
+  val charset: Charset = Charset.forName("UTF8")
+  val input: Seq[Array[Byte]] = Seq("a", "b", "c").map(_.getBytes(charset))
 }
 
 object KafkaJob {
 
-  val bootstrapKey = "bootstrap"
-
-  val topicKey = "topic"
   def main(cmdlineArgs: Array[String]): Unit = {
 
     import KafkaJobSpec._
     val (sc, _) = ContextAndArgs(cmdlineArgs)
     sc
-      .fromKafka(options)
+      .readFromKafka(options)
       .map(v => new String(v, charset).toUpperCase().getBytes(charset))
-      .toKafka(options)
+      .writeToKafka(options)
     sc.close()
   }
 }

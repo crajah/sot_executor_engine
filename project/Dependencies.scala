@@ -82,4 +82,6 @@ object Dependencies {
   val avro4sMacros = "com.sksamuel.avro4s" %% "avro4s-macros" % avro4sVersion
 
   val javaKafkaBeam = "org.apache.beam" % "beam-sdks-java-io-kafka" % "2.1.0"
+  val slfLoggingApi = "org.slf4j" % "slf4j-api" % "1.7.5"
+  val slfLoggingSimple =  "org.slf4j" % "slf4j-simple" % "1.7.5"
 }

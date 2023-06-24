@@ -15,6 +15,8 @@ import parallelai.sot.containers.{Container, ForAllContainersFixture}
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import org.slf4j.LoggerFactory
+
 /**
   * Requires a local instance of Kafka available on 0.0.0.0:9092
   *
@@ -49,6 +51,10 @@ object KafkaIT {
 
 class KafkaIT extends PipelineSpec with ForAllContainersFixture with KafkaContainerFixture {
 
+  System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG")
+  val logger = LoggerFactory.getLogger(classOf[KafkaIT])
+  logger.info("Starting KafkaIT integration test")
+
   import KafkaIT._
 
   def createContext(appName: String = "MyApp"): ScioContext = {
@@ -58,24 +64,25 @@ class KafkaIT extends PipelineSpec with ForAllContainersFixture with KafkaContai
   }
 
   def write(): Unit = {
-    println("--> write")
+    logger.debug("--> write")
     val sc = createContext()
-    sc.parallelize(testDynamicData.map(_.getBytes(charset)).toArray).toKafka(kafkaOptionsLatest)
+    sc.parallelize(testDynamicData.map(_.getBytes(charset)).toArray).writeToKafka(kafkaOptionsLatest)
     sc.close()
-    println("<-- write")
+    logger.debug("<-- write")
   }
 
   @Test
   def read(fromStart: Boolean = false, count: Int = 3) = {
-    println("--> read")
+    logger.debug("--> read")
     val sc = createContext()
     val data = count match {
       case c if c > 0 => testDynamicData
       case _ => Seq.empty[String]
     }
-    sc.fromKafkaBounded(if (fromStart) kafkaOptionsEarliest else kafkaOptionsLatest, Some(count)).map(v => new String(v, charset)) should containInAnyOrder(data)
+    // TODO: make this work with .take instead of forcing bounded reads
+    sc.readFromKafkaBounded(if (fromStart) kafkaOptionsEarliest else kafkaOptionsLatest, Some(count)).map(v => new String(v, charset)) should containInAnyOrder(data)
     sc.close()
-    println("<-- read")
+    logger.debug("<-- read")
   }
 
   "KafkaIO" should "write" in {

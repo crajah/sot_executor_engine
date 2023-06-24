@@ -40,5 +40,7 @@ libraryDependencies ++= Seq(
   testContainers % IntegrationTest,
   avro4sCore % IntegrationTest,
   avro4sJson % IntegrationTest,
-  avro4sMacros % IntegrationTest
+  avro4sMacros % IntegrationTest,
+  slfLoggingApi % IntegrationTest,
+  slfLoggingSimple % IntegrationTest
 )
