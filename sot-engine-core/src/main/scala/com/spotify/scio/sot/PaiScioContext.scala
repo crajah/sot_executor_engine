@@ -1,6 +1,5 @@
 package com.spotify.scio.sot
 
-import com.google.datastore.v1.Entity
 import com.google.datastore.v1.client.DatastoreHelper.makeKey
 import com.spotify.scio.ScioContext
 import com.spotify.scio.avro.types.AvroType
@@ -8,10 +7,8 @@ import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
 import com.spotify.scio.values.SCollection
 import com.trueaccord.scalapb.GeneratedMessage
 import io.circe.parser._
-import org.slf4j.LoggerFactory
 import parallelai.sot.engine.io.datastore.{DatastoreType, ToEntity}
 import org.apache.beam.sdk.io.gcp.datastore.DatastoreIOSOT
-import parallelai.sot.engine.config.gcp.SOTPubsubTopicOptions.PubsubTopicFactory
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.io.utils.annotations.{HasDatastoreAnnotation, HasJSONAnnotation}
@@ -20,7 +17,6 @@ import parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition
 import shapeless.{HList, LabelledGeneric}
 
 object PaiScioContext extends Serializable {
-
   def getSubscription(tap: PubSubTapDefinition, utils: SOTUtils) =
     s"projects/${utils.getProject}/subscriptions/${utils.getJobName}-${tap.topic}-${tap.id}-managed"
 
@@ -45,7 +41,6 @@ object PaiScioContext extends Serializable {
     }
 
     def typedPubSubProto[In <: GeneratedMessage with com.trueaccord.scalapb.Message[In] : Manifest](tap: PubSubTapDefinition, utils: SOTUtils)(implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[In]): SCollection[In] = {
-
       if (tap.managedSubscription.isDefined && tap.managedSubscription.get) {
         utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
         val subscriptionName = getSubscription(tap, utils)
@@ -60,7 +55,6 @@ object PaiScioContext extends Serializable {
     }
 
     def typedPubSubJSON[In <: HasJSONAnnotation : Manifest](tap: PubSubTapDefinition, utils: SOTUtils)(implicit ev: io.circe.Decoder[In]): SCollection[In] = {
-
       if (tap.managedSubscription.isDefined && tap.managedSubscription.get) {
         utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
         val subscriptionName = getSubscription(tap, utils)
@@ -103,7 +97,6 @@ object PaiScioContext extends Serializable {
 
   implicit class PaiScioSCollectionProto[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0]](c: SCollection[T0]) {
     def saveAsTypedPubSubProto(tap: PubSubTapDefinition, utils: SOTUtils)(implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]): Unit = {
-
       //setup topic if it does not exist
       utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
       utils.setupPubsubTopic()
@@ -114,11 +107,10 @@ object PaiScioContext extends Serializable {
   }
 
   implicit class KVHListPaiScioSCollection[Out <: HList, Key](c: SCollection[(Key, Out)]) {
-
-    def saveAsDatastoreSchemaless(project: String, kind: String, dedupCommits: Boolean)(implicit
-                                                                                        toL: ToEntity[Out]): Unit = {
+    def saveAsDatastoreSchemaless(project: String, kind: String, dedupCommits: Boolean)(implicit toL: ToEntity[Out]): Unit = {
       c.map { case (key, rec) =>
         val entity = rec.toEntityBuilder
+
         val keyEntity = key match {
           case name: String => makeKey(kind, name.asInstanceOf[AnyRef])
           case id: Int => makeKey(kind, id.asInstanceOf[AnyRef])
@@ -131,7 +123,6 @@ object PaiScioContext extends Serializable {
   }
 
   implicit class KVPaiScioSCollection[Out <: HasDatastoreAnnotation : Manifest, Key](c: SCollection[(Key, Out)]) {
-
     def saveAsDatastoreWithSchema[L <: HList](project: String, kind: String, dedupCommits: Boolean)(implicit gen: LabelledGeneric.Aux[Out, L],
                                                                                                     toL: ToEntity[L]): Unit = {
       val dataStoreT: DatastoreType[Out] = DatastoreType[Out]
@@ -147,5 +138,4 @@ object PaiScioContext extends Serializable {
       }.applyInternal(DatastoreIOSOT.v1.write.withProjectId(project).removeDuplicatesWithinCommits(dedupCommits))
     }
   }
-
 }

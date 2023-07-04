@@ -7,7 +7,7 @@ import com.trueaccord.scalapb.GeneratedMessage
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
-import parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition
+import parallelai.sot.executor.model.SOTMacroConfig.{PubSubTapDefinition, SeqTapDefinition}
 import com.spotify.scio.sot.PaiScioContext._
 import shapeless.{HList, LabelledGeneric}
 import io.circe.generic.auto._
@@ -20,8 +20,7 @@ trait Reader[TAP, UTIL, ANNO, TIN <: ANNO] extends Serializable {
 }
 
 object Reader {
-
-  type Aux[TAP, UTIL, ANNO, I <: ANNO, In0 <: HList] = Reader[TAP, UTIL, ANNO, I] {type In = In0}
+  type Aux[TAP, UTIL, ANNO, I <: ANNO, In0 <: HList] = Reader[TAP, UTIL, ANNO, I] { type In = In0 }
 
   def apply[TAP, UTIL, ANNO, TIN <: ANNO](implicit reader: Reader[TAP, UTIL, ANNO, TIN]) = reader
 
@@ -60,4 +59,11 @@ object Reader {
       }
     }
 
+  implicit def seqReader[T0 <: Product, Repr <: HList](implicit gen: LabelledGeneric.Aux[T0, Repr], rdr: DeepRec[Repr]): Reader.Aux[SeqTapDefinition[T0], SOTUtils, Product, T0, rdr.Out] =
+    new Reader[SeqTapDefinition[T0], SOTUtils, Product, T0] {
+      type In = rdr.Out
+
+      def read(sc: ScioContext, tap: SeqTapDefinition[T0], utils: SOTUtils)(implicit m: Manifest[T0]): SCollection[Row.Aux[rdr.Out]] =
+        sc parallelize tap.content.map(t => Row[rdr.Out](rdr(gen.to(t))))
+    }
 }

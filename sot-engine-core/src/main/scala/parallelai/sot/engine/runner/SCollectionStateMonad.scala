@@ -12,28 +12,28 @@ import shapeless.labelled.FieldType
 import shapeless.ops.hlist.{At, Length, Prepend}
 import shapeless.ops.record.Values
 import shapeless.{::, HList, HNil, LabelledGeneric, Nat, Witness}
-
 import scala.reflect.ClassTag
 import scalaz.IndexedState
+import parallelai.sot.engine.generic.row.Row.Aux
 
 object SCollectionStateMonad {
 
   type GroupedSCollection[K, L] = SCollection[Row.Aux[FieldType[Witness.`'_1`.T, K] :: FieldType[Witness.`'_2`.T, List[L]] :: HNil]]
   type JoinedSCollection[K, L1, L2] = SCollection[Row.Aux[FieldType[Witness.`'_1`.T, K] :: FieldType[Witness.`'_2`.T, (FieldType[Witness.`'_1`.T, L1] :: FieldType[Witness.`'_2`.T, L2] :: HNil)] :: HNil]]
 
-  def read[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO, In <: ANNO : Manifest]
-  (sc: ScioContext, tap: TapDef[TAP, UTIL, ANNO, In], utils: UTIL)
-  (implicit
-   reader: Reader.Aux[TAP, UTIL, ANNO, In, L],
-   prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[L]] :: HNil, SCOLOUT]
-
-  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
+  def read[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO, In <: ANNO : Manifest](sc: ScioContext, tap: TapDef[TAP, UTIL, ANNO, In], utils: UTIL)
+                                                                                                                 (implicit reader: Reader.Aux[TAP, UTIL, ANNO, In, L], prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[L]] :: HNil, SCOLOUT]): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState { sColls =>
       val sColl = reader.read(sc, tap.tapDefinition, utils)
       val res = prepend(sColls, sColl :: HNil)
       (res, res)
-    })
+    }
 
+  def append[L <: HList, SCOLS <: HList, SCOLOUT <: HList](sColl: SCollection[Row.Aux[L]])(implicit prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[L]] :: HNil, SCOLOUT]): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, sColl :: HNil)
+      (res, res)
+    })
 
   def filter[SCOLS <: HList, SCOLOUT <: HList, L <: HList](sCollection: SCollection[Row.Aux[L]])
                                                           (f: Row.Aux[L] => Boolean)
