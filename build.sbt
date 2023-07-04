@@ -1,5 +1,7 @@
 import scala.language.postfixOps
 
+lazy val IT = config("it") extend Test
+
 lazy val configResources = file("config")
 
 lazy val assembySettings = assemblyMergeStrategy in assembly := {
@@ -29,10 +31,12 @@ lazy val `sot-containers` = (project in file("./sot-containers"))
 lazy val `sot-engine-core` = (project in file("./sot-engine-core"))
   .dependsOn(`sot-containers` % "it->it;test->test;compile->compile")
   .configs(IntegrationTest)
+  .configs(IT)
+  .settings(Defaults.itSettings: _*)
+  .settings(inConfig(IT)(Defaults.testSettings): _*)
   .settings(
     Common.settings,
     Common.macroSettings,
-    Defaults.itSettings,
     unmanagedResourceDirectories in Compile += configResources
   )
 
@@ -47,10 +51,12 @@ lazy val `sot-macros` = (project in file("./sot-macros"))
 lazy val `sot-executor` = (project in file("./sot-executor"))
   .dependsOn(`sot-containers` % "it->it;test->test;compile->compile", `sot-engine-core` % "it->it;test->test;compile->compile", `sot-macros`)
   .configs(IntegrationTest)
+  .configs(IT)
+  .settings(Defaults.itSettings: _*)
+  .settings(inConfig(IT)(Defaults.testSettings): _*)
   .settings(
     Common.settings,
     Common.macroSettings,
-    Defaults.itSettings,
     assembySettings,
     unmanagedResourceDirectories in Compile += configResources,
     test in assembly := {},

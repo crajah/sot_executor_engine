@@ -29,11 +29,6 @@
         <appender-ref ref="ACCESS" />
     </logger>
 
-    <logger name="parallelai.sot.engine.kafka" additivity="false">
-        <level value="DEBUG" />
-        <appender-ref ref="ACCESS" />
-    </logger>
-
     <logger name="parallelai.sot.executor.bolts.AvroDecoderBolt" additivity="false">
         <level value="OFF" />
         <appender-ref ref="ACCESS" />
