@@ -34,6 +34,15 @@ class Datastore private(project: Project,
   def put(entity: Entity): Entity =
     datastore.put(entity)
 
+  def update[A, L <: HList](id: Long, a: A)(implicit gen: LabelledGeneric.Aux[A, L], toL: ToEntity[L]): Unit =
+    datastore.update(toEntity(id, a))
+
+  def update[A, L <: HList](id: String, a: A)(implicit gen: LabelledGeneric.Aux[A, L], toL: ToEntity[L]): Unit =
+    datastore.update(toEntity(id, a))
+
+  def update(entity: Entity): Unit =
+    datastore.update(entity)
+
   def run[T](query: Query[T], options: Seq[ReadOption] = Seq(ReadOption.eventualConsistency())): QueryResults[T] =
     datastore.run(query, options: _*)
 
