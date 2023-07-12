@@ -119,7 +119,8 @@ object SOTMacroHelper {
     sourceIdsSorted.map { id =>
       val sourceOp = SOTMacroHelper.getOp(id, config.steps) match {
         case s: SourceOp => s
-        case _ => throw new Exception("Unsupported source operation")
+        case s => throw new Exception(s"${s.getClass.getCanonicalName} is not a source operation for $id id. " +
+          s"This likely to happen when an operation is a leaf node in the DAG but it is not a supported source.")
       }
 
       (sourceOp.id, Some(SOTMacroHelper.getSchema(sourceOp.schema, config.schemas)), SOTMacroHelper.getTap(sourceOp.tap, config.taps))
@@ -134,9 +135,9 @@ object SOTMacroHelper {
     sinkIdsSorted.map { sinkOpId =>
       val sinkOp = SOTMacroHelper.getOp(sinkOpId, config.steps) match {
         case s: SinkOp => s
-        case _ => throw new Exception("Unsupported sink operation")
+        case s => throw new Exception(s"${s.getClass.getCanonicalName} is not a sink operation for $sinkOpId id. " +
+          s"This likely to happen when an operation is a leaf node in the DAG but it is not a supported sink.")
       }
-
       val sinkSchema = sinkOp.schema match {
         case Some(schemaId) => Some(SOTMacroHelper.getSchema(schemaId, config.schemas))
         case None => None
