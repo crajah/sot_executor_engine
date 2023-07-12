@@ -1,6 +1,7 @@
 package parallelai.sot.engine.io.datastore
 
 import java.net.URI
+
 import scalaz.Scalaz._
 import scalaz._
 import shapeless.{HList, LabelledGeneric}
@@ -10,6 +11,7 @@ import com.google.cloud.datastore.EntityOps._
 import com.google.cloud.datastore.{Query, ReadOption, _}
 import parallelai.sot.engine.Project
 import com.google.cloud.datastore.Key
+import parallelai.sot.engine.generic.row.Row
 
 class Datastore private(project: Project,
                         kind: Kind,
@@ -30,6 +32,12 @@ class Datastore private(project: Project,
 
   def put[A, L <: HList](id: String, a: A)(implicit gen: LabelledGeneric.Aux[A, L], toL: ToEntity[L]): Entity =
     datastore.put(toEntity(id, a))
+
+  def put[L <: HList](id: Long, a: Row.Aux[L])(implicit toL: ToEntity[L]): Entity =
+    datastore.put(toEntityHList(id, a.hList))
+
+  def put[L <: HList](id: String, a: Row.Aux[L])(implicit toL: ToEntity[L]): Entity =
+    datastore.put(toEntityHList(id, a.hList))
 
   def put(entity: Entity): Entity =
     datastore.put(entity)

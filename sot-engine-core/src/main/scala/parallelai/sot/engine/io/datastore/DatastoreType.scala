@@ -46,4 +46,16 @@ object DatastoreType {
       override def to(value: V): Value = toFn(value)
     }
 
+  def toEntityBuilder[L <: HList](a: L)
+                                      (implicit
+                                       toL: ToEntity[L]): Entity.Builder =
+    toL(a)
+
+
+  def toEntity[L <: HList](a: L)
+                               (implicit toL: ToEntity[L]): Entity =
+    toL(a).build()
+
+
+
 }
