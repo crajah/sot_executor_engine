@@ -1,10 +1,13 @@
 package com.spotify.scio.sot
 
+import java.nio.charset.Charset
+
 import com.google.datastore.v1.Entity
 import com.google.datastore.v1.client.DatastoreHelper.makeKey
 import com.spotify.scio.ScioContext
 import com.spotify.scio.avro.types.AvroType
 import com.spotify.scio.avro.types.AvroType.HasAvroAnnotation
+import com.spotify.scio.kafka._
 import com.spotify.scio.values.SCollection
 import com.trueaccord.scalapb.GeneratedMessage
 import io.circe.parser._
@@ -16,7 +19,7 @@ import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.io.utils.annotations.{HasDatastoreAnnotation, HasJSONAnnotation}
 import parallelai.sot.engine.serialization.avro.AvroUtils
-import parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition
+import parallelai.sot.executor.model.SOTMacroConfig.{KafkaTapDefinition, PubSubTapDefinition}
 import shapeless.{HList, LabelledGeneric}
 
 object PaiScioContext extends Serializable {
@@ -81,6 +84,39 @@ object PaiScioContext extends Serializable {
               case Left(p) => throw p.fillInStackTrace()
             }
           }
+      }
+    }
+
+    def typedKafkaProto[In <: GeneratedMessage with com.trueaccord.scalapb.Message[In] : Manifest](tap: KafkaTapDefinition, utils: SOTUtils)(implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[In]): SCollection[In] = {
+
+      // TODO: do full implementation based on Utils
+      val opt = KafkaOptions(tap.bootstrap, tap.topic, tap.group, tap.defaultOffset)
+      sc.readFromKafka(opt).map(f => messageCompanion.parseFrom(f))
+
+      //      if (tap.managedSubscription.isDefined && tap.managedSubscription.get) {
+      //        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
+      //        val subscriptionName = getSubscription(tap, utils)
+      //        utils.setPubsubSubscription(subscriptionName)
+      //        utils.setupPubsubSubscription()
+      //        sc.pubsubSubscription[Array[Byte]](utils.getPubsubSubscription, timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
+      //          .map(f => messageCompanion.parseFrom(f))
+      //      } else {
+      //        sc.pubsubTopic[Array[Byte]](s"projects/${utils.getProject}/topics/${tap.topic}", timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
+      //          .map(f => messageCompanion.parseFrom(f))
+      //      }
+    }
+
+    def typedKafkaJSON[In <: HasJSONAnnotation : Manifest](tap: KafkaTapDefinition, utils: SOTUtils)(implicit ev: io.circe.Decoder[In]): SCollection[In] = {
+
+      val opt = KafkaOptions(tap.bootstrap, tap.topic, tap.group, tap.defaultOffset)
+
+      sc.readFromKafka(opt).map { f =>
+        val charset = Charset.forName("UTF-8")
+        val f1 = new String(f, charset)
+        decode[In](f1) match {
+          case Right(in) => in
+          case Left(p) => throw p.fillInStackTrace()
+        }
       }
     }
   }

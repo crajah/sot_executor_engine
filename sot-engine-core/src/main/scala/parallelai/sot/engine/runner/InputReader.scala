@@ -7,7 +7,7 @@ import com.trueaccord.scalapb.GeneratedMessage
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
-import parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition
+import parallelai.sot.executor.model.SOTMacroConfig.{KafkaTapDefinition, PubSubTapDefinition}
 import com.spotify.scio.sot.PaiScioContext._
 import shapeless.{HList, LabelledGeneric}
 import io.circe.generic.auto._
@@ -60,4 +60,27 @@ object Reader {
       }
     }
 
+  implicit def kafkaProtobuf[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0], Repr <: HList]( implicit
+                                                                                                             messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0],
+                                                                                                             gen: LabelledGeneric.Aux[T0, Repr],
+                                                                                                             rdr: DeepRec[Repr]): Reader.Aux[KafkaTapDefinition, SOTUtils, GeneratedMessage, T0, rdr.Out] =
+    new Reader[KafkaTapDefinition, SOTUtils, GeneratedMessage, T0] {
+      type In = rdr.Out
+
+      def read(sc: ScioContext, tap: KafkaTapDefinition, utils: SOTUtils)(implicit m: Manifest[T0]): SCollection[Row.Aux[rdr.Out]] = {
+        sc.typedKafkaProto[T0](tap, utils).map(a => Row[rdr.Out](rdr(gen.to(a))))
+      }
+    }
+
+  implicit def kafkaJSON[T0 <: HasJSONAnnotation, Repr <: HList](implicit
+                                                                  ev: io.circe.Decoder[T0],
+                                                                  gen: LabelledGeneric.Aux[T0, Repr],
+                                                                  rdr: DeepRec[Repr]): Reader.Aux[KafkaTapDefinition, SOTUtils, HasJSONAnnotation, T0, rdr.Out] =
+    new Reader[KafkaTapDefinition, SOTUtils, HasJSONAnnotation, T0] {
+      type In = rdr.Out
+
+      def read(sc: ScioContext, tap: KafkaTapDefinition, utils: SOTUtils)(implicit m: Manifest[T0]): SCollection[Row.Aux[rdr.Out]] = {
+        sc.typedKafkaJSON[T0](tap, utils).map(a => Row[rdr.Out](rdr(gen.to(a))))
+      }
+    }
 }

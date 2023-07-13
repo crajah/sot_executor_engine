@@ -9,6 +9,9 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 
 package object kafka {
 
+  /**
+    * @param offset possible values are "latest" or "earliest"
+    */
   case class KafkaOptions(bootstrap: String, topic: String, group: String, offset: String = "latest")
 
   case class KafkaTestIO[T](opt: KafkaOptions) extends TestIO[T](s"${opt.bootstrap}:${opt.topic}")

@@ -1,0 +1,137 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "schema-saf",
+      "name": "SAFSchema",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "saf",
+        "fields": [
+          {
+            "mode": "nullable",
+            "name": "selection",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "selectionKey",
+                "type": "Long"
+              }
+            ]
+          },
+          {
+            "mode": "nullable",
+            "name": "market",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "marketKey",
+                "type": "Long"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "taps": [
+    {
+      "type": "kafka",
+      "id": "kafkatap-sportsbook",
+      "bootstrap": "lc-df-nonprod-kafka-lb-1656149905.eu-west-2.elb.amazonaws.com:9092",
+      "topic": "coral.prod.digital.sportsbook.1",
+      "group": "pai-saf-group-2",
+      "defaultOffset" : "earliest"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-selection",
+      "dataset": "bi_crm_poc",
+      "table": "saf_selection",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-market",
+      "dataset": "bi_crm_poc",
+      "table": "saf_market",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "schema-saf",
+      "source": "kafkatap-sportsbook"
+    },
+    {
+      "type": "transformation",
+      "id": "mapper",
+      "name": "mapper",
+      "op": "map",
+      "params": [["m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "filter-selection",
+      "name": "filterSelection",
+      "op": "filter",
+      "params": [["m => m.get('selection) != None"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "filter-market",
+      "name": "filterMarket",
+      "op": "filter",
+      "params": [["m => m.get('market) != None"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out-selection",
+      "name": "outSelection",
+      "source": "bigquerytap-selection"
+    },
+    {
+      "type": "sink",
+      "id": "out-market",
+      "name": "outMarket",
+      "source": "bigquerytap-market"
+    }
+
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "mapper"
+    },
+    {
+      "from": "mapper",
+      "to": "filter-selection"
+    },
+    {
+      "from": "mapper",
+      "to": "filter-market"
+    },
+    {
+      "from": "filter-selection",
+      "to": "out-selection"
+    },
+    {
+      "from": "filter-market",
+      "to": "out-market"
+    }
+  ]
+}

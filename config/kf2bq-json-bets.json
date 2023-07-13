@@ -1,0 +1,107 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "jsonschema1",
+      "name": "jsonschema1Name",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "Bet",
+        "fields": [
+          {
+            "mode": "required",
+            "name": "id",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "creationDate",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "customerRef",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "source",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "nullable",
+                "name": "channelRef",
+                "type": "String"
+              }
+            ]
+          },
+          {
+            "mode": "nullable",
+            "name": "betTypeRef",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "isSettled",
+            "type": "Boolean"
+          }
+        ]
+      }
+    }
+  ],
+  "taps": [
+    {
+      "type": "kafka",
+      "id": "kafkasource1",
+      "bootstrap": "35.197.234.116:9092",
+      "topic": "my-topic",
+      "group": "pai-bets-group",
+      "defaultOffset" : "latest"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bi_crm_poc",
+      "table": "stg_test_bets",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "jsonschema1",
+      "source": "kafkasource1"
+    },
+    {
+      "type": "transformation",
+      "id": "mapper",
+      "name": "mapper",
+      "op": "map",
+      "params": [["m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "source": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "mapper"
+    },
+    {
+      "from": "mapper",
+      "to": "out"
+    }
+  ]
+}
