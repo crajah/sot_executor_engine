@@ -1,0 +1,115 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "id": "avroschema1",
+      "name": "avroschema1",
+      "version": "version2",
+      "definition": {
+        "name": "Features",
+        "doc": "A basic schema for storing user records",
+        "fields": [
+          {
+            "name": "userId",
+            "type": "string"
+          },
+          {
+            "name": "depositAmount",
+            "type": "float"
+          },
+          {
+            "name": "depositTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "depositTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "type": "record",
+        "namespace": "parallelai.sot.avro"
+      }
+    },
+    {
+      "type": "avro",
+      "id": "avroschema1",
+      "name": "avroschema1",
+      "version": "version2",
+      "definition": {
+        "name": "Deposits",
+        "doc": "A basic schema for storing user records",
+        "fields": [
+          {
+            "name": "userId",
+            "type": "string"
+          },
+          {
+            "name": "nDeposits",
+            "type": "int"
+          }
+        ],
+        "type": "record",
+        "namespace": "parallelai.sot.avro"
+      }
+    }
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource1",
+      "topic": "depositpoc"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "deposits9",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    },
+    {
+      "type": "datastore",
+      "id": "datastore1",
+      "kind": "dataflowwrite9",
+      "dedupCommits": true
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "avroschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "transformation",
+      "id": "mapper1",
+      "name": "mapper1",
+      "op": "map",
+      "params": [["m => {datastore1.incrementField(m.get('userId), \"nDeposits\", 1L);m}"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "source": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "mapper1"
+    },
+    {
+      "from": "mapper1",
+      "to": "out"
+    }
+  ]
+}
