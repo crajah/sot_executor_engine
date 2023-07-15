@@ -37,6 +37,8 @@ object HListSchemaExtractor {
 
   implicit def emunExtractor[A <: GeneratedEnum] = new HListSchemaExtractor[A] {def apply = "STRING"}
 
+  //Java types
+  implicit val integerExtractor = new HListSchemaExtractor[Integer] {def apply = "INTEGER"}
 }
 
 trait HListSchemaProvider[A <: HList] extends Serializable {

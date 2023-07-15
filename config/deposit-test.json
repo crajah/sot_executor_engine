@@ -89,10 +89,24 @@
     },
     {
       "type": "transformation",
+      "id": "window1",
+      "name": "window1",
+      "op": "withFixedWindows",
+      "params": [
+        [
+          "Duration.millis(100)",
+          "Duration.millis(0)",
+          "WindowOptions(trigger =  Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardSeconds(30))), accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES, allowedLateness =  Duration.standardMinutes(args.int(\"allowedLateness\", 120)))"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
       "id": "mapper1",
       "name": "mapper1",
-      "op": "map",
-      "params": [["m => {datastore1.incrementField(m.get('userId), \"nDeposits\", 1L);m}"]],
+      "op": "increment",
+      "params": [["m => (m.get('userId), m)","m => 1","(key, row, counter) => Row('key ->> key :: 'counter ->> counter :: HNil)"]],
       "paramsEncoded": false
     },
     {

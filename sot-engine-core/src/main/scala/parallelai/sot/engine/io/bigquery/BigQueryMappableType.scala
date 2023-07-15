@@ -81,6 +81,9 @@ trait BigQueryMappableType {
     x => BaseEncoding.base64().decode(x.toString),
     x => BaseEncoding.base64().encode(x))
 
+  //Java types
+  implicit val integerBigQueryMappableType = BigQueryType.at[Integer](_.toString.toInt, id)
+
   //TODO: check if this is correct
   implicit val byteStringBigQueryMappableType = BigQueryType.at[ByteString](
     x => ByteString.copyFromUtf8(x.toString),

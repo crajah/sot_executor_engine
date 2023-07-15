@@ -2,6 +2,7 @@ package parallelai.sot.engine.runner
 
 import com.spotify.scio.ScioContext
 import com.spotify.scio.sot.tensorflow._
+import com.spotify.scio.sot.accumulator._
 import com.spotify.scio.values.{SCollection, WindowOptions}
 import org.joda.time.Duration
 import org.tensorflow.Tensor
@@ -14,7 +15,6 @@ import shapeless.ops.record.Values
 import shapeless.{::, HList, HNil, LabelledGeneric, Nat, Witness}
 import scala.reflect.ClassTag
 import scalaz.IndexedState
-import parallelai.sot.engine.generic.row.Row.Aux
 
 object SCollectionStateMonad {
 
@@ -64,6 +64,18 @@ object SCollectionStateMonad {
                                                                          ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val res = prepend(sColls, sCollection.predict(modelBucket, modelPath, fetchOps)(inFn)(outFn) :: HNil)
+      (res, res)
+    })
+
+  def increment[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])(
+                                                                              keyMapper: Row.Aux[L] => (K, Row.Aux[L]),
+                                                                              getValue: Row.Aux[L] => Integer,
+                                                                              toOut: (Row.Aux[L], Integer) => Row.Aux[Out])
+                                                                         (implicit
+                                                                          prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
+                                                                         ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, sCollection.incrementAccumulator(keyMapper, getValue, toOut) :: HNil)
       (res, res)
     })
 
