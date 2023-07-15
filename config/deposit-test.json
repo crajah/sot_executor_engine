@@ -68,15 +68,9 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "deposits9",
+      "table": "deposits12",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
-    },
-    {
-      "type": "datastore",
-      "id": "datastore1",
-      "kind": "dataflowwrite9",
-      "dedupCommits": true
     }
   ],
   "steps": [
@@ -106,7 +100,7 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "increment",
-      "params": [["m => (m.get('userId), m)","m => 1","(key, row, counter) => Row('key ->> key :: 'counter ->> counter :: HNil)"]],
+      "params": [["m => (m.get('userId), m)","m => 1","(row, counter) => Row('userId ->> row.get('userId) :: 'counter ->> counter :: 'originalTime ->> row.get('depositTimeStr) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)"]],
       "paramsEncoded": false
     },
     {

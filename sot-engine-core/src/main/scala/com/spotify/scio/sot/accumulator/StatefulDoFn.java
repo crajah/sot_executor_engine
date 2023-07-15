@@ -30,8 +30,9 @@ public class StatefulDoFn<K, V, Out> extends DoFn<KV<K, V>, Out> {
         Integer current = firstNonNull(index.read(), 0);
         K key = context.element().getKey();
         Integer value = getValue.apply(context.element().getValue());
-        context.output(toOut.apply(context.element().getValue(), current));
-        index.write(current + value);
+        Integer updated = current + value;
+        context.output(toOut.apply(context.element().getValue(), updated));
+        index.write(updated);
     }
 
 }
