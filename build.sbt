@@ -10,7 +10,7 @@ lazy val assembySettings = assemblyMergeStrategy in assembly := {
   case PathList(ps @ _*) if ps.last endsWith ".class" => MergeStrategy.first
   case PathList(ps @ _*) if ps.last endsWith ".properties" => MergeStrategy.first
   case PathList(ps @ _*) if ps.last endsWith ".proto" => MergeStrategy.first
-  case "application.conf" => MergeStrategy.concat
+  case "application.conf" => MergeStrategy.first
   case "unwanted.txt" => MergeStrategy.discard
   case "plugin.xml" => MergeStrategy.discard
   case "parquet.thrift" => MergeStrategy.discard
