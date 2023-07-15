@@ -69,8 +69,8 @@ object SCollectionStateMonad {
 
   def increment[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])(
                                                                               keyMapper: Row.Aux[L] => (K, Row.Aux[L]),
-                                                                              getValue: Row.Aux[L] => Integer,
-                                                                              toOut: (Row.Aux[L], Integer) => Row.Aux[Out])
+                                                                              getValue: Row.Aux[L] => Int,
+                                                                              toOut: (Row.Aux[L], Int) => Row.Aux[Out])
                                                                          (implicit
                                                                           prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
                                                                          ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
