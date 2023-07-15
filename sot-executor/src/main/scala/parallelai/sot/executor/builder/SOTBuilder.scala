@@ -76,38 +76,26 @@ import parallelai.sot.executor.SOTNats._
   * </pre>
   * NOTE That application configurations can also be set/overridden via system and environment properties.
   */
+@SOTBuilder
 object SOTBuilder {
-  @AvroType.fromSchema("{\"type\":\"record\",\"name\":\"Features\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"userId\",\"type\":\"string\"},{\"name\":\"depositAmount\",\"type\":\"float\"},{\"name\":\"depositTime\",\"type\":\"long\",\"doc\":\"time when event created\"},{\"name\":\"depositTimeStr\",\"type\":\"string\",\"doc\":\"event time string for debugging\"}]}")
-  class Features
-  @AvroType.fromSchema("{\"type\":\"record\",\"name\":\"Deposits\",\"namespace\":\"parallelai.sot.avro\",\"fields\":[{\"name\":\"userId\",\"type\":\"string\"},{\"name\":\"nDeposits\",\"type\":\"int\"}]}")
-  class Deposits
   object conf {
     val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
     val sourceTaps = getSources(jobConfig)
     val sinkTaps = getSinks(jobConfig)
-    val sources = TapDef[parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Features](conf.sourceTaps(0)._3) :: HNil
-    val sinks = SchemalessTapDef[parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, parallelai.sot.engine.io.utils.annotations.Schemaless](conf.sinkTaps(0)._3) :: HNil
   }
-  import parallelai.sot.engine.Project, parallelai.sot.engine.io.datastore.{ Datastore, Kind }
-  val datastore1 = Datastore(Project("bi-crm-poc"), Kind("dataflowwrite9"))
-  class Job extends Serializable {
-    def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
-      val job = init[HNil].flatMap(sColls => read(sc, TapDef[parallelai.sot.executor.model.SOTMacroConfig.PubSubTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, com.spotify.scio.avro.types.AvroType.HasAvroAnnotation, Features](conf.sourceTaps(0)._3), sotUtils)).
-        flatMap(sColls => increment(sColls.at(Nat0()))(m => (m.get('userId), m), m => 1, (row, counter) => Row(('key ->> row.get('userId)) :: ('counter ->> counter) :: HNil))).
-        flatMap(sColls => writeSchemaless(sColls.at(Nat1()))(SchemalessTapDef[parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, parallelai.sot.engine.io.utils.annotations.Schemaless](conf.sinkTaps(0)._3), sotUtils))
-      job.run(HNil)._1
-      val result = sc.close()
-      if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
-    }
-  }
+
   def main(cmdArg: Array[String]): Unit = {
     val (sotOptions, sotArgs) = executionContext(cmdArg)
-    execute(new Job(), sotOptions, sotArgs)
+    execute(new Job, sotOptions, sotArgs)
   }
-  def executionContext(cmdArg: Array[String]): (SOTOptions, Args) = ScioContext.parseArguments[SOTOptions](cmdArg)
+
+  def executionContext(cmdArg: Array[String]): (SOTOptions, Args) =
+    ScioContext.parseArguments[SOTOptions](cmdArg)
+
   def execute[P <: PipelineOptions](job: Job, pipelineOptions: P, args: Args): Unit = {
     val sotUtils = new SOTUtils(pipelineOptions)
     val sc = ScioContext(pipelineOptions)
+
     job.execute(sotUtils, sc, args)
   }
 }
