@@ -6,10 +6,6 @@ import org.apache.beam.sdk.state.{StateSpec, StateSpecs, ValueState}
 import org.apache.beam.sdk.transforms.{DoFn, ParDo}
 import org.apache.beam.sdk.transforms.DoFn.{ProcessElement, StateId}
 import org.apache.beam.sdk.values.KV
-import org.apache.commons.lang.ObjectUtils
-import parallelai.sot.engine.generic.row.Row
-import shapeless.HList
-import java.util.function.{BiFunction => JBiFunction, BiPredicate => JBiPredicate, Function => JFunction, Predicate => JPredicate}
 
 import com.spotify.scio.util.Functions
 
