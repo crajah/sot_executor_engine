@@ -11,22 +11,34 @@ import com.spotify.scio.util.Functions
 
 import scala.reflect.ClassTag
 
-
-class StatefulDoFn[K, V, Out](getValue: V => Int,
-                              toOut: (V, Int) => Out)
+/**
+  *
+  * @param getValue function to get the value to store from the data object
+  * @param aggr aggregate values
+  * @param toOut function that creates the output object
+  * @param coder value coder for value state
+  * @tparam K key
+  * @tparam V value
+  * @tparam Out output type
+  * @tparam Value value type
+  */
+class StatefulDoFn[K, V, Out, Value](getValue: V => Value,
+                                     aggr: (Option[Value], Value) => Value,
+                                     toOut: (V, Value) => Out,
+                                     coder: Coder[Value])
   extends DoFn[KV[K, V], Out] {
 
   @StateId("index")
-  private val indexSpec: StateSpec[ValueState[Integer]] = StateSpecs.value(VarIntCoder.of())
+  private val indexSpec: StateSpec[ValueState[Value]] = StateSpecs.value(coder)
 
   @ProcessElement
-  def processElement(context: ProcessContext, @StateId("index") index: ValueState[Integer]): Unit = {
+  def processElement(context: ProcessContext, @StateId("index") index: ValueState[Value]): Unit = {
 
-    val current: Integer = Option(index.read()).getOrElse(0)
-    val key = context.element().getKey
+    val current: Option[Value] = Option(index.read())
     val value = getValue(context.element().getValue)
-    context.output(toOut(context.element().getValue, current))
-    index.write(current + value)
+    val newValue = aggr(current, value)
+    context.output(toOut(context.element().getValue, newValue))
+    index.write(newValue)
   }
 
 }
@@ -37,13 +49,17 @@ class StatefulDoFn[K, V, Out](getValue: V => Int,
 class AccumulatorSCollectionFunctions[V: ClassTag](@transient val self: SCollection[V])
   extends Serializable {
 
-  def incrementAccumulator[K: ClassTag, Out: ClassTag](keyMapper: V => (K, V), getValue: V => Int, toOut: (V, Int) => Out): SCollection[Out] = {
+  def incrementAccumulator[K: ClassTag, Out: ClassTag, Value: ClassTag](keyMapper: V => (K, V),
+                                                                        getValue: V => Value,
+                                                                        aggr: (Option[Value], Value) => Value,
+                                                                        toOut: (V, Value) => Out): SCollection[Out] = {
     val toKvTransform = ParDo.of(Functions.mapFn[V, KV[K, V]](v => {
       val kv = keyMapper(v)
       KV.of(kv._1, kv._2)
     }))
+    val incrementCoder: Coder[Value] = self.getCoder[Value]
     val o = self.applyInternal(toKvTransform).setCoder(self.getKvCoder[K, V])
-    self.context.wrap(o).parDo(new StatefulDoFn(getValue, toOut))
+    self.context.wrap(o).parDo(new StatefulDoFn(getValue, aggr, toOut, incrementCoder))
   }
 
 }

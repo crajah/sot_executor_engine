@@ -68,7 +68,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "deposits12",
+      "table": "deposits14",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -100,7 +100,16 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "increment",
-      "params": [["m => (m.get('userId), m)","m => 1","(row, counter) => Row('userId ->> row.get('userId) :: 'counter ->> counter :: 'originalTime ->> row.get('depositTimeStr) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)"]],
+      "params": [
+        [
+          "m => (m.get('depositAmount))"
+        ],
+        [
+          "m => (m.get('userId), m)",
+          "(oldvalue, newvalue) => oldvalue.getOrElse(0) + newvalue",
+          "(row, counter) => Row('userId ->> row.get('userId) :: 'counter ->> counter :: 'originalTime ->> row.get('depositTimeStr) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
