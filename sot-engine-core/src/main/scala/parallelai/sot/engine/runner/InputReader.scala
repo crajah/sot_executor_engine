@@ -8,6 +8,7 @@ import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
 import parallelai.sot.executor.model.SOTMacroConfig.{KafkaTapDefinition, PubSubTapDefinition}
+import parallelai.sot.executor.model.SOTMacroConfig.{PubSubTapDefinition, SeqTapDefinition}
 import com.spotify.scio.sot.PaiScioContext._
 import shapeless.{HList, LabelledGeneric}
 import io.circe.generic.auto._
@@ -82,5 +83,12 @@ object Reader {
       def read(sc: ScioContext, tap: KafkaTapDefinition, utils: SOTUtils)(implicit m: Manifest[T0]): SCollection[Row.Aux[rdr.Out]] = {
         sc.typedKafkaJSON[T0](tap, utils).map(a => Row[rdr.Out](rdr(gen.to(a))))
       }
+    }
+  implicit def seqReader[T0 <: Product, Repr <: HList](implicit gen: LabelledGeneric.Aux[T0, Repr], rdr: DeepRec[Repr]): Reader.Aux[SeqTapDefinition[T0], SOTUtils, Product, T0, rdr.Out] =
+    new Reader[SeqTapDefinition[T0], SOTUtils, Product, T0] {
+      type In = rdr.Out
+
+      def read(sc: ScioContext, tap: SeqTapDefinition[T0], utils: SOTUtils)(implicit m: Manifest[T0]): SCollection[Row.Aux[rdr.Out]] =
+        sc parallelize tap.content.map(t => Row[rdr.Out](rdr(gen.to(t))))
     }
 }

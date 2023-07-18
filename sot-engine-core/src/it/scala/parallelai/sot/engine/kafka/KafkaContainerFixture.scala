@@ -1,4 +1,4 @@
-package parallelai.sot.engine.scio.kafka
+package parallelai.sot.engine.kafka
 
 import java.net.URI
 

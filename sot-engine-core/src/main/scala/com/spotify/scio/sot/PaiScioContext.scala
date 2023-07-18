@@ -11,10 +11,8 @@ import com.spotify.scio.kafka._
 import com.spotify.scio.values.SCollection
 import com.trueaccord.scalapb.GeneratedMessage
 import io.circe.parser._
-import org.slf4j.LoggerFactory
 import parallelai.sot.engine.io.datastore.{DatastoreType, ToEntity}
 import org.apache.beam.sdk.io.gcp.datastore.DatastoreIOSOT
-import parallelai.sot.engine.config.gcp.SOTPubsubTopicOptions.PubsubTopicFactory
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.io.utils.annotations.{HasDatastoreAnnotation, HasJSONAnnotation}
@@ -183,5 +181,4 @@ object PaiScioContext extends Serializable {
       }.applyInternal(DatastoreIOSOT.v1.write.withProjectId(project).removeDuplicatesWithinCommits(dedupCommits))
     }
   }
-
 }

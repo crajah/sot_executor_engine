@@ -1,21 +1,15 @@
-package parallelai.sot.engine.scio.kafka
+package parallelai.sot.engine.kafka
 
-import com.spotify.scio.kafka._
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.Calendar
-
-import com.spotify.scio._
-import com.spotify.scio.testing._
-import org.apache.beam.sdk.options.{PipelineOptions, PipelineOptionsFactory}
-import org.junit.Test
-import org.scalatest.PrivateMethodTester
-import parallelai.sot.containers.{Container, ForAllContainersFixture}
-
-import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-
-import org.slf4j.LoggerFactory
+import scala.concurrent._
+import grizzled.slf4j.Logging
+import com.spotify.scio._
+import com.spotify.scio.kafka._
+import com.spotify.scio.testing._
+import parallelai.sot.containers.ForAllContainersFixture
 
 /**
   * Requires a local instance of Kafka available on 0.0.0.0:9092
@@ -38,24 +32,16 @@ import org.slf4j.LoggerFactory
   * $ sbt "it:testOnly *KafkaIT"
   * </pre>
   */
-object KafkaIT {
+class KafkaITSpec extends PipelineSpec with ForAllContainersFixture with KafkaContainerFixture with Logging {
+  lazy val kafkaOptionsLatest = KafkaOptions(s"0.0.0.0:${container.container.getMappedPort(9092)}", "my-topic", "my-group", "latest")
+  lazy val kafkaOptionsEarliest = kafkaOptionsLatest.copy(offset = "earliest")
+  lazy val charset = Charset.forName("UTF-8")
+  lazy val timeFormat = new SimpleDateFormat("hh:mm:ss")
+  lazy val runID = timeFormat.format(Calendar.getInstance.getTime())
+  lazy val testStaticData = Seq("Some message from Kafka Integration Test", "Second message", "3rd test message")
+  lazy val testDynamicData = testStaticData.map(v => s"$runID: " + v)
 
-  val kafkaOptionsLatest = KafkaOptions("0.0.0.0:9092", "my-topic", "my-group", "latest")
-  val kafkaOptionsEarliest = kafkaOptionsLatest.copy(offset = "earliest")
-  val charset = Charset.forName("UTF-8")
-  val timeFormat = new SimpleDateFormat("hh:mm:ss")
-  val runID = timeFormat.format(Calendar.getInstance.getTime())
-  val testStaticData = Seq("Some message from Kafka Integration Test", "Second message", "3rd test message")
-  val testDynamicData = testStaticData.map(v => s"$runID: " + v)
-}
-
-class KafkaIT extends PipelineSpec with ForAllContainersFixture with KafkaContainerFixture {
-
-  System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, "DEBUG")
-  val logger = LoggerFactory.getLogger(classOf[KafkaIT])
-  logger.info("Starting KafkaIT integration test")
-
-  import KafkaIT._
+  info("Starting KafkaIT integration test")
 
   def createContext(appName: String = "MyApp"): ScioContext = {
 //    val opts = PipelineOptionsFactory.fromArgs(s"--appName=$appName").as(classOf[PipelineOptions])
@@ -64,16 +50,15 @@ class KafkaIT extends PipelineSpec with ForAllContainersFixture with KafkaContai
   }
 
   def write(): Unit = {
-    logger.debug("--> write")
+    debug("--> write")
     val sc = createContext()
     sc.parallelize(testDynamicData.map(_.getBytes(charset)).toArray).writeToKafka(kafkaOptionsLatest)
     sc.close()
-    logger.debug("<-- write")
+    debug("<-- write")
   }
 
-  @Test
-  def read(fromStart: Boolean = false, count: Int = 3) = {
-    logger.debug("--> read")
+  def read(fromStart: Boolean = false, count: Int = 3): Unit = {
+    debug("--> read")
     val sc = createContext()
     val data = count match {
       case c if c > 0 => testDynamicData
@@ -82,11 +67,11 @@ class KafkaIT extends PipelineSpec with ForAllContainersFixture with KafkaContai
     // TODO: make this work with .take instead of forcing bounded reads
     sc.readFromKafkaBounded(if (fromStart) kafkaOptionsEarliest else kafkaOptionsLatest, Some(count)).map(v => new String(v, charset)) should containInAnyOrder(data)
     sc.close()
-    logger.debug("<-- read")
+    debug("<-- read")
   }
 
   "KafkaIO" should "write" in {
-    write
+    write()
   }
 
   it should "read zero records from beginning" in {
@@ -99,7 +84,7 @@ class KafkaIT extends PipelineSpec with ForAllContainersFixture with KafkaContai
     val w = Future {
       // Pause for at least 20 sec, increase if test is getting blocked
       Thread.sleep(20000)
-      write
+      write()
     }
     read()
   }
