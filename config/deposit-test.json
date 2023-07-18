@@ -68,7 +68,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "deposits14",
+      "table": "deposits15",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -106,7 +106,7 @@
         ],
         [
           "m => (m.get('userId), m)",
-          "(oldvalue, newvalue) => oldvalue.getOrElse(0) + newvalue",
+          "(oldvalue, newvalue) => oldvalue.getOrElse(0.0f) + newvalue",
           "(row, counter) => Row('userId ->> row.get('userId) :: 'counter ->> counter :: 'originalTime ->> row.get('depositTimeStr) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)"
         ]
       ],
