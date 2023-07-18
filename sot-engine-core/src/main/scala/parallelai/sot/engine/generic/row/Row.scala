@@ -23,7 +23,7 @@ trait Row extends Serializable {
                                    (implicit replacer: ReplaceAt.Aux[L, n.N, V, (W, Out)]): Out =
     replacer(hList, value)._2
 
-  def appendList[V <: HList, Out <: HList](v: V)(implicit prep: Prepend.Aux[L, V, Out]) =
+  def appendList[V <: HList, Out <: HList](v: V)(implicit prep: Prepend.Aux[L, V, Out]): Row.Aux[Out] =
     Row[Out](prep(hList, v))
 
   def keys(implicit keys: Keys[L]): keys.Out =

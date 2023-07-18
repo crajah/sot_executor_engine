@@ -68,7 +68,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "deposits15",
+      "table": "deposits16",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -102,12 +102,12 @@
       "op": "increment",
       "params": [
         [
-          "m => (m.get('depositAmount))"
+          "m => m.get('depositAmount)"
         ],
         [
           "m => (m.get('userId), m)",
           "(oldvalue, newvalue) => oldvalue.getOrElse(0.0f) + newvalue",
-          "(row, counter) => Row('userId ->> row.get('userId) :: 'counter ->> counter :: 'originalTime ->> row.get('depositTimeStr) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)"
+          "(row, counter) => row.append('counter, counter).append('ts, Helper.fmt.print(Helper.Instant.now()))"
         ]
       ],
       "paramsEncoded": false
