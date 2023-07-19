@@ -34,28 +34,6 @@
         "type": "record",
         "namespace": "parallelai.sot.avro"
       }
-    },
-    {
-      "type": "avro",
-      "id": "avroschema1",
-      "name": "avroschema1",
-      "version": "version2",
-      "definition": {
-        "name": "Deposits",
-        "doc": "A basic schema for storing user records",
-        "fields": [
-          {
-            "name": "userId",
-            "type": "string"
-          },
-          {
-            "name": "nDeposits",
-            "type": "int"
-          }
-        ],
-        "type": "record",
-        "namespace": "parallelai.sot.avro"
-      }
     }
   ],
   "taps": [
@@ -68,7 +46,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "deposits16",
+      "table": "deposits17",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -107,7 +85,8 @@
         [
           "m => (m.get('userId), m)",
           "(oldvalue, newvalue) => oldvalue.getOrElse(0.0f) + newvalue",
-          "(row, counter) => row.append('counter, counter).append('ts, Helper.fmt.print(Helper.Instant.now()))"
+          "(row, counter) => row.append('counter, counter).append('ts, Helper.fmt.print(Helper.Instant.now()))",
+          "\"test3\""
         ]
       ],
       "paramsEncoded": false
