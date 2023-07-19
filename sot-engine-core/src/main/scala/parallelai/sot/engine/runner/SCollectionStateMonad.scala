@@ -67,7 +67,7 @@ object SCollectionStateMonad {
       (res, res)
     })
 
-  def increment[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I: ClassTag](sCollection: SCollection[Row.Aux[L]])
+  def accumulator[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I: ClassTag](sCollection: SCollection[Row.Aux[L]])
                                                                                                      (getValue: Row.Aux[L] => I)(
                                                                                                        keyMapper: Row.Aux[L] => (K, Row.Aux[L]),
                                                                                                        aggr: (Option[I], I) => I,
@@ -76,7 +76,7 @@ object SCollectionStateMonad {
                                                                                                       prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
                                                                                                      ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
-      val res = prepend(sColls, sCollection.incrementAccumulator(keyMapper, getValue, aggr, toOut) :: HNil)
+      val res = prepend(sColls, sCollection.accumulator(keyMapper, getValue, aggr, toOut) :: HNil)
       (res, res)
     })
 

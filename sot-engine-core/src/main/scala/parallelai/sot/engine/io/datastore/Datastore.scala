@@ -148,6 +148,7 @@ object Datastore {
     new Datastore(project, kind, host, credentials, retry)
 
   implicit class DatastoreOps[L <: HList](datastore: Datastore) {
+
     def get[A](id: String)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] =
       get(datastore.keyFactory.newKey(id))
 
