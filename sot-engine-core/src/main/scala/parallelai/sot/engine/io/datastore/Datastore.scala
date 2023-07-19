@@ -91,7 +91,7 @@ class Datastore private(project: Project,
     retry(5)(key, transaction(field, value, _: Key))
   }
 
-  def retry[T](n: Int)(key: Key, fn: Key => T): T = {
+  private def retry[T](n: Int)(key: Key, fn: Key => T): T = {
     try {
       fn(key)
     } catch {

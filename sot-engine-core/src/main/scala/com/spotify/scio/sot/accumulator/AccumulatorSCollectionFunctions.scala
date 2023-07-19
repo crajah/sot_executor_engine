@@ -37,7 +37,7 @@ class StatefulDoFn[K, V, Out, Value, L <: HList](getValue: V => Value,
                                      aggr: (Option[Value], Value) => Value,
                                      toOut: (V, Value) => Out,
                                      persistence: Option[Datastore],
-                                     coder: Coder[Value])(implicit gen: LabelledGeneric.Aux[S.State[Value], L], toL: ToEntity[L])
+                                     coder: Coder[Value])(implicit gen: LabelledGeneric.Aux[S.State[Value], L], toL: ToEntity[L], fromL: FromEntity[L])
   extends DoFn[KV[K, V], Out] {
 
   @StateId("value")
@@ -61,7 +61,7 @@ class StatefulDoFn[K, V, Out, Value, L <: HList](getValue: V => Value,
     persistence match {
       case Some(p) =>
         key match {
-          case k: Int => p.put[S.State[Value], FieldType[Witness.`'state`.T, Value] :: HNil](k, S.State[Value](value))
+          case k: Int => p.put(k, S.State[Value](value))
           case k: String => p.put(k, S.State[Value](value))
           case _ => throw new Exception("Only String and Int type keys supports persistence.")
         }
@@ -87,32 +87,19 @@ class StatefulDoFn[K, V, Out, Value, L <: HList](getValue: V => Value,
 
 }
 
-//object StatefulDoFnOps {
-//
-//  case class State[Value](state: Value)
-//
-//  implicit class StatefulDoFnPer[K, V, Out, Value, L <: HList](s: StatefulDoFn[K, V, Out, Value])
-//                                                              (implicit gen: LabelledGeneric.Aux[State[Value], L], toL: ToEntity[L])
-//    extends DoFn[KV[K, V], Out] {
-//
-//    def processElementX(context: ProcessContext, @StateId("value") state: ValueState[Value]): Unit = {
-//      s.processElement(context, state)
-//    }
-//  }
-//}
-
 /**
   * Enhanced version of [[com.spotify.scio.values.SCollection SCollection]] with Accumulator methods.
   */
 class AccumulatorSCollectionFunctions[V: ClassTag](@transient val self: SCollection[V])
   extends Serializable {
 
-  def accumulator[K: ClassTag, Out: ClassTag, Value: ClassTag](keyMapper: V => (K, V),
+  def accumulator[K: ClassTag, Out: ClassTag, Value: ClassTag, HS <: HList](keyMapper: V => (K, V),
                                                                getValue: V => Value,
                                                                aggr: (Option[Value], Value) => Value,
                                                                toOut: (V, Value) => Out,
                                                                datastoreSettings: Option[(Project, Kind)] = Some(Project("crm-bi-poc"), Kind("test1"))
-                                                              ): SCollection[Out] = {
+                                                              )(implicit gen: LabelledGeneric.Aux[S.State[Value], HS], toL: ToEntity[HS], fromL: FromEntity[HS]): SCollection[Out] = {
+
     val datastore = datastoreSettings.map{case (project, kind) => Datastore(project = project, kind = kind)}
     val toKvTransform = ParDo.of(Functions.mapFn[V, KV[K, V]](v => {
       val kv = keyMapper(v)

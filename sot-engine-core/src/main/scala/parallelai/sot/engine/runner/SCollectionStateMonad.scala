@@ -7,12 +7,14 @@ import com.spotify.scio.values.{SCollection, WindowOptions}
 import org.joda.time.Duration
 import org.tensorflow.Tensor
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
+import parallelai.sot.engine.io.datastore.{FromEntity, ToEntity}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.executor.model.SOTMacroConfig.TapDefinition
 import shapeless.labelled.FieldType
 import shapeless.ops.hlist.{At, Length, Prepend}
 import shapeless.ops.record.Values
 import shapeless.{::, HList, HNil, LabelledGeneric, Nat, Witness}
+
 import scala.reflect.ClassTag
 import scalaz.IndexedState
 
@@ -67,13 +69,16 @@ object SCollectionStateMonad {
       (res, res)
     })
 
-  def accumulator[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I: ClassTag](sCollection: SCollection[Row.Aux[L]])
+  def accumulator[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I: ClassTag, HS <: HList](sCollection: SCollection[Row.Aux[L]])
                                                                                                      (getValue: Row.Aux[L] => I)(
                                                                                                        keyMapper: Row.Aux[L] => (K, Row.Aux[L]),
                                                                                                        aggr: (Option[I], I) => I,
                                                                                                        toOut: (Row.Aux[L], I) => Row.Aux[Out])
                                                                                                      (implicit
-                                                                                                      prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
+                                                                                                      prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT] ,
+                                                                                                      gen: LabelledGeneric.Aux[S.State[I], HS],
+                                                                                                      toL: ToEntity[HS],
+                                                                                                      fromL: FromEntity[HS]
                                                                                                      ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val res = prepend(sColls, sCollection.accumulator(keyMapper, getValue, aggr, toOut) :: HNil)
