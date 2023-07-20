@@ -46,7 +46,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "deposits17",
+      "table": "deposits18",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -80,13 +80,13 @@
       "op": "accumulator",
       "params": [
         [
-          "m => Row('depositAmount ->> m.get('depositAmount) :: HNil)"
+          "m => m.project(projector(Col('depositAmount))).append('depositCount, 1)"
         ],
         [
-          "m => (m.get('userId), m)",
-          "(oldvalue, newvalue) => oldvalue.getOrElse(Row('depositAmount ->> 0.0f :: HNil)).get('depositAmount) + newvalue.get('depositAmount)",
-          "(row, state) => row.append('counter, state.get('depositAmount)).append('ts, Helper.fmt.print(Helper.Instant.now()))",
-          "\"test3\""
+          "m => m.get('userId)",
+          "(oldvalue, newvalue) => Row('depositAmount ->> (oldvalue.getOrElse(Row('depositAmount ->> 0.0f :: 'depositCount ->> 0 :: HNil)).get('depositAmount) + newvalue.get('depositAmount)) :: 'depositCount ->> (oldvalue.getOrElse(Row('depositAmount ->> 0.0f :: 'depositCount ->> 0 :: HNil)).get('depositCount) + newvalue.get('depositCount)) :: HNil)",
+          "(row, state) => row.append('counter, state.get('depositAmount)).append('counter2, state.get('depositCount)).append('ts, Helper.fmt.print(Helper.Instant.now()))",
+          "\"test4\""
         ]
       ],
       "paramsEncoded": false

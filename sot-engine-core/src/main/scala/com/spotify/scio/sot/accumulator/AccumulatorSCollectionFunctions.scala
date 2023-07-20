@@ -16,6 +16,7 @@ import scala.reflect.ClassTag
 
 /**
   * StatefulDoFn keeps track of a state of the marked variables and stores them to datastore if persistence is provided.
+  *
   * @param getValue function to get the value to keep track of from the data object
   * @param aggr     aggregate values
   * @param toOut    function that creates the output object
@@ -26,10 +27,10 @@ import scala.reflect.ClassTag
   * @tparam Value value type
   */
 class StatefulDoFn[K, V <: HList, Out <: HList, Value <: HList](getValue: Row.Aux[V] => Row.Aux[Value],
-                                     aggr: (Option[Row.Aux[Value]], Row.Aux[Value]) => Row.Aux[Value],
-                                     toOut: (Row.Aux[V], Row.Aux[Value]) => Row.Aux[Out],
-                                     persistence: Option[Datastore],
-                                     coder: Coder[Row.Aux[Value]])(implicit toL: ToEntity[Value], fromL: FromEntity[Value])
+                                                                aggr: (Option[Row.Aux[Value]], Row.Aux[Value]) => Row.Aux[Value],
+                                                                toOut: (Row.Aux[V], Row.Aux[Value]) => Row.Aux[Out],
+                                                                persistence: Option[Datastore],
+                                                                coder: Coder[Row.Aux[Value]])(implicit toL: ToEntity[Value], fromL: FromEntity[Value])
   extends DoFn[KV[K, Row.Aux[V]], Row.Aux[Out]] {
 
   @StateId("value")
@@ -49,7 +50,7 @@ class StatefulDoFn[K, V <: HList, Out <: HList, Value <: HList](getValue: Row.Au
     persistValue(key, newValue)
   }
 
-  private def persistValue(key:K, value: Row.Aux[Value]) = {
+  private def persistValue(key: K, value: Row.Aux[Value]) = {
     persistence match {
       case Some(p) =>
         key match {
@@ -85,17 +86,17 @@ class StatefulDoFn[K, V <: HList, Out <: HList, Value <: HList](getValue: Row.Au
 class AccumulatorSCollectionFunctions[V <: HList](@transient val self: SCollection[Row.Aux[V]])
   extends Serializable {
 
-  def accumulator[K: ClassTag, Out <: HList, Value <: HList](keyMapper: Row.Aux[V] => (K, Row.Aux[V]),
-                                                               getValue: Row.Aux[V] => Row.Aux[Value],
-                                                               aggr: (Option[Row.Aux[Value]], Row.Aux[Value]) => Row.Aux[Value],
-                                                               toOut: (Row.Aux[V], Row.Aux[Value]) => Row.Aux[Out],
-                                                               datastoreSettings: Option[(Project, Kind)]
-                                                              )(implicit toL: ToEntity[Value], fromL: FromEntity[Value]): SCollection[Row.Aux[Out]] = {
+  def accumulator[K: ClassTag, Out <: HList, Value <: HList](keyMapper: Row.Aux[V] => K,
+                                                             getValue: Row.Aux[V] => Row.Aux[Value],
+                                                             aggr: (Option[Row.Aux[Value]], Row.Aux[Value]) => Row.Aux[Value],
+                                                             toOut: (Row.Aux[V], Row.Aux[Value]) => Row.Aux[Out],
+                                                             datastoreSettings: Option[(Project, Kind)]
+                                                            )(implicit toL: ToEntity[Value], fromL: FromEntity[Value]): SCollection[Row.Aux[Out]] = {
 
-    val datastore = datastoreSettings.map{case (project, kind) => Datastore(project = project, kind = kind)}
+    val datastore = datastoreSettings.map { case (project, kind) => Datastore(project = project, kind = kind) }
     val toKvTransform = ParDo.of(Functions.mapFn[Row.Aux[V], KV[K, Row.Aux[V]]](v => {
-      val kv = keyMapper(v)
-      KV.of(kv._1, kv._2)
+      val key = keyMapper(v)
+      KV.of(key, v)
     }))
     val valueCoder: Coder[Row.Aux[Value]] = self.getCoder[Row.Aux[Value]]
     val o = self.applyInternal(toKvTransform).setCoder(self.getKvCoder[K, Row.Aux[V]])
