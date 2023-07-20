@@ -11,9 +11,14 @@ import com.spotify.scio.kafka._
 import com.spotify.scio.values.SCollection
 import com.trueaccord.scalapb.GeneratedMessage
 import io.circe.parser._
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.syntax._
+import io.circe.shapes._
 import parallelai.sot.engine.io.datastore.{DatastoreType, ToEntity}
 import org.apache.beam.sdk.io.gcp.datastore.DatastoreIOSOT
 import parallelai.sot.engine.config.gcp.SOTUtils
+import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.io.utils.annotations.{HasDatastoreAnnotation, HasJSONAnnotation}
 import parallelai.sot.engine.serialization.avro.AvroUtils
@@ -87,26 +92,13 @@ object PaiScioContext extends Serializable {
 
     def typedKafkaProto[In <: GeneratedMessage with com.trueaccord.scalapb.Message[In] : Manifest](tap: KafkaTapDefinition, utils: SOTUtils)(implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[In]): SCollection[In] = {
 
-      // TODO: do full implementation based on Utils
-      val opt = KafkaOptions(tap.bootstrap, tap.topic, tap.group, tap.defaultOffset)
+      val opt = KafkaOptions(tap.bootstrap, tap.topic, tap.group, tap.defaultOffset, tap.autoCommit)
       sc.readFromKafka(opt).map(f => messageCompanion.parseFrom(f))
-
-      //      if (tap.managedSubscription.isDefined && tap.managedSubscription.get) {
-      //        utils.setPubsubTopic(s"projects/${utils.getProject}/topics/${tap.topic}")
-      //        val subscriptionName = getSubscription(tap, utils)
-      //        utils.setPubsubSubscription(subscriptionName)
-      //        utils.setupPubsubSubscription()
-      //        sc.pubsubSubscription[Array[Byte]](utils.getPubsubSubscription, timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
-      //          .map(f => messageCompanion.parseFrom(f))
-      //      } else {
-      //        sc.pubsubTopic[Array[Byte]](s"projects/${utils.getProject}/topics/${tap.topic}", timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
-      //          .map(f => messageCompanion.parseFrom(f))
-      //      }
     }
 
     def typedKafkaJSON[In <: HasJSONAnnotation : Manifest](tap: KafkaTapDefinition, utils: SOTUtils)(implicit ev: io.circe.Decoder[In]): SCollection[In] = {
 
-      val opt = KafkaOptions(tap.bootstrap, tap.topic, tap.group, tap.defaultOffset)
+      val opt = KafkaOptions(tap.bootstrap, tap.topic, tap.group, tap.defaultOffset, tap.autoCommit)
 
       sc.readFromKafka(opt).map { f =>
         val charset = Charset.forName("UTF-8")
@@ -179,6 +171,13 @@ object PaiScioContext extends Serializable {
         entity.setKey(keyEntity)
         entity.build()
       }.applyInternal(DatastoreIOSOT.v1.write.withProjectId(project).removeDuplicatesWithinCommits(dedupCommits))
+    }
+  }
+
+  implicit class PaiScioSCollectionJSON[L <: HList](c: SCollection[Row.Aux[L]]) {
+    def saveAsKafka(tap: KafkaTapDefinition, utils: SOTUtils)(implicit en: io.circe.Encoder[L]): Unit = {
+      val opt = KafkaOptions(tap.bootstrap, tap.topic, tap.group, tap.defaultOffset, tap.autoCommit)
+      c.map(r => { val j = r.hList.asJson; j.toString().getBytes(Charset.forName("UTF-8"))}).writeToKafka(opt)
     }
   }
 }

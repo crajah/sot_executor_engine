@@ -37,6 +37,7 @@ object Dependencies {
 
   val sprayJson = "io.spray" %% "spray-json" % "1.3.3"
   val circe = "io.circe" %% "circe-core" % "0.8.0"
+  val circeShapes = "io.circe" %% "circe-shapes" % "0.8.0"
 
   val trueAccordCompiler = "com.trueaccord.scalapb" %% "compilerplugin" % trueAccordVersion
   val trueAccordRuntime = "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % trueAccordVersion
@@ -84,4 +85,5 @@ object Dependencies {
   val javaKafkaBeam = "org.apache.beam" % "beam-sdks-java-io-kafka" % "2.1.0"
   val slfLoggingApi = "org.slf4j" % "slf4j-api" % "1.7.5"
   val slfLoggingSimple =  "org.slf4j" % "slf4j-simple" % "1.7.5"
+//  val springExpression = "org.springframework" % "spring-expression" % "4.3.5.RELEASE"
 }

@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
   pureConfig,
   grizzledLogging,
   circe,
+  circeShapes,
   sprayJson,
   trueAccordCompiler,
   trueAccordRuntime,
@@ -29,6 +30,7 @@ libraryDependencies ++= Seq(
   logbackClassic,
   scalacheck,
   javaKafkaBeam
+  //, springExpression
 )
 
 libraryDependencies ++= Seq(

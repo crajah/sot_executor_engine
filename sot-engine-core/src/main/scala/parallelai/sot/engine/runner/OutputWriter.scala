@@ -8,14 +8,12 @@ import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO.Write.{CreateDisposition, 
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
-import parallelai.sot.executor.model.SOTMacroConfig.{BigQueryTapDefinition, DatastoreTapDefinition, PubSubTapDefinition, TapDefinition}
+import parallelai.sot.executor.model.SOTMacroConfig._
 import com.spotify.scio.sot.PaiScioContext._
 import shapeless.{HList, LabelledGeneric, Poly2}
 import parallelai.sot.engine.io.utils.annotations._
 import com.google.datastore.v1.client.DatastoreHelper.makeKey
-
 import shapeless.ops.hlist.IsHCons
-
 import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.io.bigquery._
 
@@ -76,7 +74,6 @@ object Writer {
         sCollection.map(x => (h.head(x.hList), gen.from(x.hList))).saveAsDatastoreWithSchema(utils.getProject, tap.kind, tap.dedupCommits)
       }
     }
-
 }
 
 trait SchemalessWriter[TAP, UTIL, ANNO, OutR <: HList] extends Serializable {
@@ -124,6 +121,14 @@ object SchemalessWriter {
           entity.setKey(keyEntity)
           entity.build()
         }.saveAsDatastore(project)
+      }
+    }
+
+  implicit def kafkaWriter[OutR <: HList](implicit ev: io.circe.Encoder[OutR]):
+  SchemalessWriter[KafkaTapDefinition, SOTUtils, Schemaless, OutR] =
+    new SchemalessWriter[KafkaTapDefinition, SOTUtils, Schemaless, OutR] {
+      def write(sCollection: SCollection[Row.Aux[OutR]], tap: KafkaTapDefinition, utils: SOTUtils): Unit = {
+        sCollection.saveAsKafka(tap, utils)
       }
     }
 

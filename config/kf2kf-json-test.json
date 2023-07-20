@@ -10,7 +10,7 @@
       "version": "version1",
       "definition": {
         "type": "jsondefinition",
-        "name": "Bet",
+        "name": "Test",
         "fields": [
           {
             "mode": "required",
@@ -19,35 +19,20 @@
           },
           {
             "mode": "nullable",
-            "name": "creationDate",
-            "type": "String"
-          },
-          {
-            "mode": "nullable",
-            "name": "customerRef",
-            "type": "String"
-          },
-          {
-            "mode": "nullable",
-            "name": "source",
+            "name": "refs",
             "type": "record",
             "fields": [
               {
+                "mode": "required",
+                "name": "refId",
+                "type": "String"
+              },
+              {
                 "mode": "nullable",
-                "name": "channelRef",
+                "name": "refName",
                 "type": "String"
               }
             ]
-          },
-          {
-            "mode": "nullable",
-            "name": "betTypeRef",
-            "type": "String"
-          },
-          {
-            "mode": "nullable",
-            "name": "isSettled",
-            "type": "Boolean"
           }
         ]
       }
@@ -57,19 +42,17 @@
     {
       "type": "kafka",
       "id": "kafkasource1",
-      "bootstrap": "35.197.234.116:9092",
+      "bootstrap": "0.0.0.0:9092",
       "topic": "my-topic",
       "group": "pai-test-bets-group",
       "defaultOffset": "latest",
       "autoCommit": true
     },
     {
-      "type": "bigquery",
-      "id": "bigquerysource1",
-      "dataset": "bi_crm_poc",
-      "table": "test_bets",
-      "createDisposition": "CREATE_IF_NEEDED",
-      "writeDisposition": "WRITE_APPEND"
+      "type": "kafka",
+      "id": "kafkasource2",
+      "bootstrap": "0.0.0.0:9092",
+      "topic": "my-topic-out"
     }
   ],
   "steps": [
@@ -92,7 +75,7 @@
       "type": "sink",
       "id": "out",
       "name": "out",
-      "source": "bigquerysource1"
+      "source": "kafkasource2"
     }
   ],
   "dag": [

@@ -21,7 +21,7 @@ import parallelai.sot.containers.ForAllContainersFixture
   * Other similar docker images or non-docker Kafka instances should work too as long as they are accessible via
   * 0.0.0.0:9092 and are compatible with the client built for v 0.10 of Kafka
   * <pre>
-  *   docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=0.0.0.0 --env ADVERTISED_PORT=9092 all4it/local-kafka:v2
+  * docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=0.0.0.0 --env ADVERTISED_PORT=9092 all4it/local-kafka:v2
   * </pre>
   *
   * An alternative to running the Docker container manually is to mix in a Container fixture which will configure and
@@ -33,8 +33,9 @@ import parallelai.sot.containers.ForAllContainersFixture
   * </pre>
   */
 class KafkaITSpec extends PipelineSpec with ForAllContainersFixture with KafkaContainerFixture with Logging {
-  lazy val kafkaOptionsLatest = KafkaOptions(s"0.0.0.0:${container.container.getMappedPort(9092)}", "my-topic", "my-group", "latest")
-  lazy val kafkaOptionsEarliest = kafkaOptionsLatest.copy(offset = "earliest")
+  lazy val kafkaOptionsLatest = KafkaOptions(bootstrap = s"0.0.0.0:${container.container.getMappedPort(9092)}",
+    topic = "my-topic", group = "my-group", defaultOffset = "latest", autoCommit = true)
+  lazy val kafkaOptionsEarliest = kafkaOptionsLatest.copy(defaultOffset = "earliest")
   lazy val charset = Charset.forName("UTF-8")
   lazy val timeFormat = new SimpleDateFormat("hh:mm:ss")
   lazy val runID = timeFormat.format(Calendar.getInstance.getTime())
@@ -44,8 +45,8 @@ class KafkaITSpec extends PipelineSpec with ForAllContainersFixture with KafkaCo
   info("Starting KafkaIT integration test")
 
   def createContext(appName: String = "MyApp"): ScioContext = {
-//    val opts = PipelineOptionsFactory.fromArgs(s"--appName=$appName").as(classOf[PipelineOptions])
-//    new ScioContext(opts, List[String]())
+    //    val opts = PipelineOptionsFactory.fromArgs(s"--appName=$appName").as(classOf[PipelineOptions])
+    //    new ScioContext(opts, List[String]())
     ScioContext()
   }
 

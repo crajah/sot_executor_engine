@@ -6,13 +6,20 @@ import org.apache.beam.sdk.io.kafka.KafkaIO
 import org.apache.kafka.common.serialization._
 import com.google.common.collect.ImmutableMap
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import java.util.UUID.randomUUID
 
 package object kafka {
 
   /**
-    * @param offset possible values are "latest" or "earliest"
+    * @param defaultOffset possible values are "latest" or "earliest"
     */
-  case class KafkaOptions(bootstrap: String, topic: String, group: String, offset: String = "latest")
+  case class KafkaOptions(bootstrap: String, topic: String, group: String, defaultOffset: String = "latest", autoCommit: Boolean = false)
+
+  object KafkaOptions {
+    def apply(bootstrap: String, topic: String, group: Option[String], defaultOffset: Option[String], autoCommit: Option[Boolean]): KafkaOptions = {
+      KafkaOptions(bootstrap, topic, group.getOrElse(s"no-group-${randomUUID()}"), defaultOffset.getOrElse("latest"), autoCommit.getOrElse(false))
+    }
+  }
 
   case class KafkaTestIO[T](opt: KafkaOptions) extends TestIO[T](s"${opt.bootstrap}:${opt.topic}")
 
@@ -35,8 +42,8 @@ package object kafka {
               //            .withReadCommitted() // Looks like this is not supported by currently used version of Beam
             .withKeyDeserializer(classOf[StringDeserializer])
             .withValueDeserializer(bdes.getClass)
-            .updateConsumerProperties(ImmutableMap.of(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, opt.offset))
-            .updateConsumerProperties(ImmutableMap.of(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, Boolean.box(true)))
+            .updateConsumerProperties(ImmutableMap.of(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, opt.defaultOffset))
+            .updateConsumerProperties(ImmutableMap.of(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, Boolean.box(opt.autoCommit)))
             .updateConsumerProperties(ImmutableMap.of(ConsumerConfig.GROUP_ID_CONFIG, opt.group))
 
           val finalRead = boundCount match {

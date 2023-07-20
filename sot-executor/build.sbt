@@ -7,6 +7,7 @@ libraryDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   circe,
+  circeShapes,
   typesafeConfig,
   pureConfig,
   grizzledLogging,

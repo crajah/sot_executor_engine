@@ -16,6 +16,10 @@ import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 //// JSON parser
 import io.circe.generic.auto._
 import io.circe.parser._
+import io.circe.shapes._
+import io.circe.syntax._
+
+
 
 //// SCIO
 import com.spotify.scio._

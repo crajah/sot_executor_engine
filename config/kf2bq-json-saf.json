@@ -47,7 +47,8 @@
       "bootstrap": "lc-df-nonprod-kafka-lb-1656149905.eu-west-2.elb.amazonaws.com:9092",
       "topic": "coral.prod.digital.sportsbook.1",
       "group": "pai-saf-group-2",
-      "defaultOffset" : "earliest"
+      "defaultOffset": "earliest",
+      "autoCommit": true
     },
     {
       "type": "bigquery",
