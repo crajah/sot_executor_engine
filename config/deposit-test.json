@@ -80,12 +80,12 @@
       "op": "accumulator",
       "params": [
         [
-          "m => m.get('depositAmount)"
+          "m => Row('depositAmount ->> m.get('depositAmount) :: HNil)"
         ],
         [
           "m => (m.get('userId), m)",
-          "(oldvalue, newvalue) => oldvalue.getOrElse(0.0f) + newvalue",
-          "(row, counter) => row.append('counter, counter).append('ts, Helper.fmt.print(Helper.Instant.now()))",
+          "(oldvalue, newvalue) => oldvalue.getOrElse(Row('depositAmount ->> 0.0f :: HNil)).get('depositAmount) + newvalue.get('depositAmount)",
+          "(row, state) => row.append('counter, state.get('depositAmount)).append('ts, Helper.fmt.print(Helper.Instant.now()))",
           "\"test3\""
         ]
       ],

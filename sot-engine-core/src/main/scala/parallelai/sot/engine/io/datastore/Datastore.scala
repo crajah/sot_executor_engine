@@ -91,6 +91,18 @@ class Datastore private(project: Project,
     retry(5)(key, transaction(field, value, _: Key))
   }
 
+  def getRow[L <: HList](id: String)(implicit fromL: FromEntity[L]): Option[Row.Aux[L]] =
+    getRow(keyFactory.newKey(id))
+
+  def getRow[L <: HList](id: Int)(implicit fromL: FromEntity[L]): Option[Row.Aux[L]] =
+    getRow(keyFactory.newKey(id))
+
+  def getRow[L <: HList](key: Key)(implicit fromL: FromEntity[L]): Option[Row.Aux[L]] = Option {
+    datastore.get(key, ReadOption.eventualConsistency())
+  } flatMap { entity =>
+    fromEntityHList(entity).map(e => Row(e))
+  }
+
   private def retry[T](n: Int)(key: Key, fn: Key => T): T = {
     try {
       fn(key)

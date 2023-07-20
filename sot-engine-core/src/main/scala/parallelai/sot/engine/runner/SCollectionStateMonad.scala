@@ -71,25 +71,24 @@ object SCollectionStateMonad {
       (res, res)
     })
 
-  def accumulator[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I: ClassTag, HS <: HList](sCollection: SCollection[Row.Aux[L]])
-                                                                                                     (getValue: Row.Aux[L] => I)(
-                                                                                                       keyMapper: Row.Aux[L] => (K, Row.Aux[L]),
-                                                                                                       aggr: (Option[I], I) => I,
-                                                                                                       toOut: (Row.Aux[L], I) => Row.Aux[Out],
-                                                                                                       kind: String = "")
-                                                                                                     (implicit
-                                                                                                      prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT] ,
-                                                                                                      gen: LabelledGeneric.Aux[StatefulDoFn.State[I], HS],
-                                                                                                      toL: ToEntity[HS],
-                                                                                                      fromL: FromEntity[HS]
-                                                                                                     ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+  def accumulator[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
+                                                                                                      (getValue: Row.Aux[L] => Row.Aux[I])(
+                                                                                                        keyMapper: Row.Aux[L] => (K, Row.Aux[L]),
+                                                                                                        aggr: (Option[Row.Aux[I]], Row.Aux[I]) => Row.Aux[I],
+                                                                                                        toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
+                                                                                                        kind: String = "")
+                                                                                                      (implicit
+                                                                                                       prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
+                                                                                                       toL: ToEntity[I],
+                                                                                                       fromL: FromEntity[I]
+                                                                                                      ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val opKind: Option[String] = kind match {
         case "" => None
         case s => Some(s)
       }
       val project = sCollection.context.optionsAs[GcpOptions].getProject
-      val datastoreSettings = opKind.map{k => (Project(project), Kind(k))}
+      val datastoreSettings = opKind.map { k => (Project(project), Kind(k)) }
       val res = prepend(sColls, sCollection.accumulator(keyMapper, getValue, aggr, toOut, datastoreSettings) :: HNil)
       (res, res)
     })

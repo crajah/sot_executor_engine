@@ -8,14 +8,15 @@ import org.apache.beam.sdk.transforms.DoFn.{ProcessElement, StateId}
 import org.apache.beam.sdk.values.KV
 import com.spotify.scio.util.Functions
 import parallelai.sot.engine.Project
+import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.io.datastore._
 import shapeless.{HList, LabelledGeneric}
 
 import scala.reflect.ClassTag
 
 /**
-  *
-  * @param getValue function to get the value to store from the data object
+  * StatefulDoFn keeps track of a state of the marked variables and stores them to datastore if persistence is provided.
+  * @param getValue function to get the value to keep track of from the data object
   * @param aggr     aggregate values
   * @param toOut    function that creates the output object
   * @param coder    value coder for value state
@@ -24,22 +25,22 @@ import scala.reflect.ClassTag
   * @tparam Out   output type
   * @tparam Value value type
   */
-class StatefulDoFn[K, V, Out, Value, L <: HList](getValue: V => Value,
-                                     aggr: (Option[Value], Value) => Value,
-                                     toOut: (V, Value) => Out,
+class StatefulDoFn[K, V <: HList, Out <: HList, Value <: HList](getValue: Row.Aux[V] => Row.Aux[Value],
+                                     aggr: (Option[Row.Aux[Value]], Row.Aux[Value]) => Row.Aux[Value],
+                                     toOut: (Row.Aux[V], Row.Aux[Value]) => Row.Aux[Out],
                                      persistence: Option[Datastore],
-                                     coder: Coder[Value])(implicit gen: LabelledGeneric.Aux[StatefulDoFn.State[Value], L], toL: ToEntity[L], fromL: FromEntity[L])
-  extends DoFn[KV[K, V], Out] {
+                                     coder: Coder[Row.Aux[Value]])(implicit toL: ToEntity[Value], fromL: FromEntity[Value])
+  extends DoFn[KV[K, Row.Aux[V]], Row.Aux[Out]] {
 
   @StateId("value")
-  private val stateSpec: StateSpec[ValueState[Value]] = StateSpecs.value(coder)
+  private val stateSpec: StateSpec[ValueState[Row.Aux[Value]]] = StateSpecs.value(coder)
 
   @ProcessElement
-  def processElement(context: ProcessContext, @StateId("value") state: ValueState[Value]): Unit = {
+  def processElement(context: ProcessContext, @StateId("value") state: ValueState[Row.Aux[Value]]): Unit = {
 
     val key = context.element().getKey
 
-    val current = getValue(key, Option(state.read()))
+    val current = readValue(key, Option(state.read()))
 
     val value = getValue(context.element().getValue)
     val newValue = aggr(current, value)
@@ -48,27 +49,27 @@ class StatefulDoFn[K, V, Out, Value, L <: HList](getValue: V => Value,
     persistValue(key, newValue)
   }
 
-  private def persistValue(key:K, value: Value) = {
+  private def persistValue(key:K, value: Row.Aux[Value]) = {
     persistence match {
       case Some(p) =>
         key match {
-          case k: Int => p.put(k, StatefulDoFn.State[Value](value))
-          case k: String => p.put(k, StatefulDoFn.State[Value](value))
+          case k: Int => p.put(k, value)
+          case k: String => p.put(k, value)
           case _ => throw new Exception("Only String and Int type keys supports persistence.")
         }
       case None =>
     }
   }
 
-  private def getValue(key: K, value: Option[Value]) = {
+  private def readValue(key: K, value: Option[Row.Aux[Value]]) = {
     value match {
       case Some(c) => Option(c)
       case None =>
         persistence match {
           case Some(p) =>
             key match {
-              case k: Int => p.get[StatefulDoFn.State[Value]](k).map(_.state)
-              case k: String => p.get[StatefulDoFn.State[Value]](k).map(_.state)
+              case k: Int => p.getRow(k)
+              case k: String => p.getRow(k)
               case _ => throw new Exception("Only String and Int type keys supports persistence.")
             }
           case None => None
@@ -78,32 +79,26 @@ class StatefulDoFn[K, V, Out, Value, L <: HList](getValue: V => Value,
 
 }
 
-object StatefulDoFn {
-
-  case class State[Value](state: Value)
-
-}
-
 /**
   * Enhanced version of [[com.spotify.scio.values.SCollection SCollection]] with Accumulator methods.
   */
-class AccumulatorSCollectionFunctions[V: ClassTag](@transient val self: SCollection[V])
+class AccumulatorSCollectionFunctions[V <: HList](@transient val self: SCollection[Row.Aux[V]])
   extends Serializable {
 
-  def accumulator[K: ClassTag, Out: ClassTag, Value: ClassTag, HS <: HList](keyMapper: V => (K, V),
-                                                               getValue: V => Value,
-                                                               aggr: (Option[Value], Value) => Value,
-                                                               toOut: (V, Value) => Out,
+  def accumulator[K: ClassTag, Out <: HList, Value <: HList](keyMapper: Row.Aux[V] => (K, Row.Aux[V]),
+                                                               getValue: Row.Aux[V] => Row.Aux[Value],
+                                                               aggr: (Option[Row.Aux[Value]], Row.Aux[Value]) => Row.Aux[Value],
+                                                               toOut: (Row.Aux[V], Row.Aux[Value]) => Row.Aux[Out],
                                                                datastoreSettings: Option[(Project, Kind)]
-                                                              )(implicit gen: LabelledGeneric.Aux[StatefulDoFn.State[Value], HS], toL: ToEntity[HS], fromL: FromEntity[HS]): SCollection[Out] = {
+                                                              )(implicit toL: ToEntity[Value], fromL: FromEntity[Value]): SCollection[Row.Aux[Out]] = {
 
     val datastore = datastoreSettings.map{case (project, kind) => Datastore(project = project, kind = kind)}
-    val toKvTransform = ParDo.of(Functions.mapFn[V, KV[K, V]](v => {
+    val toKvTransform = ParDo.of(Functions.mapFn[Row.Aux[V], KV[K, Row.Aux[V]]](v => {
       val kv = keyMapper(v)
       KV.of(kv._1, kv._2)
     }))
-    val valueCoder: Coder[Value] = self.getCoder[Value]
-    val o = self.applyInternal(toKvTransform).setCoder(self.getKvCoder[K, V])
+    val valueCoder: Coder[Row.Aux[Value]] = self.getCoder[Row.Aux[Value]]
+    val o = self.applyInternal(toKvTransform).setCoder(self.getKvCoder[K, Row.Aux[V]])
     self.context.wrap(o).parDo(new StatefulDoFn(getValue, aggr, toOut, datastore, valueCoder))
   }
 

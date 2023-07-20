@@ -33,7 +33,11 @@ object EntityOps extends Logging {
 
   def fromEntity[A, L <: HList](entity: Entity)(implicit gen: LabelledGeneric.Aux[A, L], fromL: FromEntity[L]): Option[A] = {
     val datastoreType: DatastoreType[A] = DatastoreType[A]
-
     datastoreType.fromEntity(entity.toPb)
+  }
+
+  def fromEntityHList[L <: HList](entity: Entity)(implicit fromL: FromEntity[L]): Option[L] = {
+    val datastoreType: DatastoreType[L] = DatastoreType[L]
+    fromL(entity.toPb.toBuilder)
   }
 }
