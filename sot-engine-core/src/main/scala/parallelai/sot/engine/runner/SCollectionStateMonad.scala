@@ -73,8 +73,9 @@ object SCollectionStateMonad {
 
   def accumulator[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
                                                                                                       (getValue: Row.Aux[L] => Row.Aux[I])(
+                                                                                                        defaultValue: Row.Aux[I],
                                                                                                         keyMapper: Row.Aux[L] => K,
-                                                                                                        aggr: (Option[Row.Aux[I]], Row.Aux[I]) => Row.Aux[I],
+                                                                                                        aggr: (Row.Aux[I], Row.Aux[I]) => Row.Aux[I],
                                                                                                         toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
                                                                                                         kind: String = "")
                                                                                                       (implicit
@@ -89,7 +90,7 @@ object SCollectionStateMonad {
       }
       val project = sCollection.context.optionsAs[GcpOptions].getProject
       val datastoreSettings = opKind.map { k => (Project(project), Kind(k)) }
-      val res = prepend(sColls, sCollection.accumulator(keyMapper, getValue, aggr, toOut, datastoreSettings) :: HNil)
+      val res = prepend(sColls, sCollection.accumulator(keyMapper, getValue, defaultValue, aggr, toOut, datastoreSettings) :: HNil)
       (res, res)
     })
 

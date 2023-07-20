@@ -61,20 +61,6 @@
     },
     {
       "type": "transformation",
-      "id": "window1",
-      "name": "window1",
-      "op": "withFixedWindows",
-      "params": [
-        [
-          "Duration.millis(100)",
-          "Duration.millis(0)",
-          "WindowOptions(trigger =  Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardSeconds(30))), accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES, allowedLateness =  Duration.standardMinutes(args.int(\"allowedLateness\", 120)))"
-        ]
-      ],
-      "paramsEncoded": false
-    },
-    {
-      "type": "transformation",
       "id": "mapper1",
       "name": "mapper1",
       "op": "accumulator",
@@ -83,8 +69,9 @@
           "m => m.project(projector(Col('depositAmount))).append('depositCount, 1)"
         ],
         [
+          "Row('depositAmount ->> 0.0f :: 'depositCount ->> 0 :: HNil)",
           "m => m.get('userId)",
-          "(oldvalue, newvalue) => Row('depositAmount ->> (oldvalue.getOrElse(Row('depositAmount ->> 0.0f :: 'depositCount ->> 0 :: HNil)).get('depositAmount) + newvalue.get('depositAmount)) :: 'depositCount ->> (oldvalue.getOrElse(Row('depositAmount ->> 0.0f :: 'depositCount ->> 0 :: HNil)).get('depositCount) + newvalue.get('depositCount)) :: HNil)",
+          "(oldvalue, newvalue) => oldvalue.updateWith('depositAmount)(_ + newvalue.get('depositAmount)).updateWith('depositCount)(_ + newvalue.get('depositCount))",
           "(row, state) => row.append('counter, state.get('depositAmount)).append('counter2, state.get('depositCount)).append('ts, Helper.fmt.print(Helper.Instant.now()))",
           "\"test4\""
         ]

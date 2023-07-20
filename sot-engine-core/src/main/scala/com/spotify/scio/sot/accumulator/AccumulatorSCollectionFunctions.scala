@@ -10,7 +10,8 @@ import com.spotify.scio.util.Functions
 import parallelai.sot.engine.Project
 import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.io.datastore._
-import shapeless.{HList, LabelledGeneric}
+import shapeless.labelled.FieldType
+import shapeless.{::, HList, HNil, LabelledGeneric, Witness}
 
 import scala.reflect.ClassTag
 
@@ -27,7 +28,8 @@ import scala.reflect.ClassTag
   * @tparam Value value type
   */
 class StatefulDoFn[K, V <: HList, Out <: HList, Value <: HList](getValue: Row.Aux[V] => Row.Aux[Value],
-                                                                aggr: (Option[Row.Aux[Value]], Row.Aux[Value]) => Row.Aux[Value],
+                                                                defaultValue: Row.Aux[Value],
+                                                                aggr: (Row.Aux[Value], Row.Aux[Value]) => Row.Aux[Value],
                                                                 toOut: (Row.Aux[V], Row.Aux[Value]) => Row.Aux[Out],
                                                                 persistence: Option[Datastore],
                                                                 coder: Coder[Row.Aux[Value]])(implicit toL: ToEntity[Value], fromL: FromEntity[Value])
@@ -44,7 +46,7 @@ class StatefulDoFn[K, V <: HList, Out <: HList, Value <: HList](getValue: Row.Au
     val current = readValue(key, Option(state.read()))
 
     val value = getValue(context.element().getValue)
-    val newValue = aggr(current, value)
+    val newValue = aggr(current.getOrElse(defaultValue), value)
     context.output(toOut(context.element().getValue, newValue))
     state.write(newValue)
     persistValue(key, newValue)
@@ -88,7 +90,8 @@ class AccumulatorSCollectionFunctions[V <: HList](@transient val self: SCollecti
 
   def accumulator[K: ClassTag, Out <: HList, Value <: HList](keyMapper: Row.Aux[V] => K,
                                                              getValue: Row.Aux[V] => Row.Aux[Value],
-                                                             aggr: (Option[Row.Aux[Value]], Row.Aux[Value]) => Row.Aux[Value],
+                                                             defaultValue: Row.Aux[Value],
+                                                             aggr: (Row.Aux[Value], Row.Aux[Value]) => Row.Aux[Value],
                                                              toOut: (Row.Aux[V], Row.Aux[Value]) => Row.Aux[Out],
                                                              datastoreSettings: Option[(Project, Kind)]
                                                             )(implicit toL: ToEntity[Value], fromL: FromEntity[Value]): SCollection[Row.Aux[Out]] = {
@@ -100,7 +103,7 @@ class AccumulatorSCollectionFunctions[V <: HList](@transient val self: SCollecti
     }))
     val valueCoder: Coder[Row.Aux[Value]] = self.getCoder[Row.Aux[Value]]
     val o = self.applyInternal(toKvTransform).setCoder(self.getKvCoder[K, Row.Aux[V]])
-    self.context.wrap(o).parDo(new StatefulDoFn(getValue, aggr, toOut, datastore, valueCoder))
+    self.context.wrap(o).parDo(new StatefulDoFn(getValue, defaultValue, aggr, toOut, datastore, valueCoder))
   }
 
 }
