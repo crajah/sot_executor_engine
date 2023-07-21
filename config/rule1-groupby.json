@@ -1,0 +1,182 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "id": "avroschema1",
+      "name": "avroschema1",
+      "version": "version2",
+      "definition": {
+        "type": "record",
+        "name": "Message",
+        "namespace": "parallelai.sot.avro",
+        "fields": [
+          {
+            "name": "user",
+            "type": "string",
+            "doc": "Name of the user"
+          },
+          {
+            "name": "teamName",
+            "type": "string",
+            "doc": "Name of the team"
+          },
+          {
+            "name": "score",
+            "type": "long",
+            "doc": "User score"
+          },
+          {
+            "name": "eventTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "eventTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "doc": "A basic schema for storing user records"
+      }
+    }
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource1",
+      "topic": "p2pds",
+      "managedSubscription": true,
+      "timestampAttribute": "timestamp_ms"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "score_aggregate2",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "avroschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "transformation",
+      "id": "filter",
+      "name": "filter",
+      "op": "filter",
+      "params": [
+        [
+          "m => m.get('score) > 2"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "mapper1",
+      "name": "mapper1",
+      "op": "map",
+      "params": [
+        [
+          "m => m.append('score2, m.get('score) * 0.23)"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "mapper2",
+      "name": "mapper2",
+      "op": "map",
+      "params": [
+        [
+          "m => m.append('processingTime, Helper.fmt.print(Helper.Instant.now()))"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "window1",
+      "name": "window1",
+      "op": "withFixedWindows",
+      "params": [
+        [
+          "Duration.millis(100)",
+          "Duration.millis(0)",
+          "WindowOptions(trigger =  Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardSeconds(30))), accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES, allowedLateness =  Duration.standardMinutes(args.int(\"allowedLateness\", 120)))"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "groupby1",
+      "name": "groupby1",
+      "op": "groupBy",
+      "params": [
+        [
+          "m => m.get('user)"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "mapper3",
+      "name": "mapper3",
+      "op": "map",
+      "params": [
+        [
+          "m => {val scoreSum = m.get('_2).map(r => r.get('score)).sum;val length = m.get('_2).length;Row('user ->> m.get('_1) :: 'scoreSum ->> scoreSum :: 'size ->> length :: HNil)}"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "source": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "filter"
+    },
+    {
+      "from": "filter",
+      "to": "mapper1"
+    },
+    {
+      "from": "mapper1",
+      "to": "mapper2"
+    },
+    {
+      "from": "mapper2",
+      "to": "window1"
+    },
+    {
+      "from": "window1",
+      "to": "groupby1"
+    },
+    {
+      "from": "groupby1",
+      "to": "mapper3"
+    },
+    {
+      "from": "mapper3",
+      "to": "out"
+    }
+  ]
+}

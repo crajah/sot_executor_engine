@@ -2,19 +2,23 @@ package parallelai.sot.engine.runner
 
 import com.spotify.scio.ScioContext
 import com.spotify.scio.sot.tensorflow._
+import com.spotify.scio.sot.accumulator._
 import com.spotify.scio.values.{SCollection, WindowOptions}
+import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import org.joda.time.Duration
 import org.tensorflow.Tensor
+import parallelai.sot.engine.Project
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
+import parallelai.sot.engine.io.datastore.{FromEntity, Kind, ToEntity}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.executor.model.SOTMacroConfig.TapDefinition
 import shapeless.labelled.FieldType
 import shapeless.ops.hlist.{At, Length, Prepend}
 import shapeless.ops.record.Values
 import shapeless.{::, HList, HNil, LabelledGeneric, Nat, Witness}
+
 import scala.reflect.ClassTag
 import scalaz.IndexedState
-import parallelai.sot.engine.generic.row.Row.Aux
 
 object SCollectionStateMonad {
 
@@ -64,6 +68,29 @@ object SCollectionStateMonad {
                                                                          ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val res = prepend(sColls, sCollection.predict(modelBucket, modelPath, fetchOps)(inFn)(outFn) :: HNil)
+      (res, res)
+    })
+
+  def accumulator[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
+                                                                                                      (getValue: Row.Aux[L] => Row.Aux[I])(
+                                                                                                        defaultValue: Row.Aux[I],
+                                                                                                        keyMapper: Row.Aux[L] => K,
+                                                                                                        aggr: (Row.Aux[I], Row.Aux[I]) => Row.Aux[I],
+                                                                                                        toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
+                                                                                                        kind: String = "")
+                                                                                                      (implicit
+                                                                                                       prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
+                                                                                                       toL: ToEntity[I],
+                                                                                                       fromL: FromEntity[I]
+                                                                                                      ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val opKind: Option[String] = kind match {
+        case "" => None
+        case s => Some(s)
+      }
+      val project = sCollection.context.optionsAs[GcpOptions].getProject
+      val datastoreSettings = opKind.map { k => (Project(project), Kind(k)) }
+      val res = prepend(sColls, sCollection.accumulator(keyMapper, getValue, defaultValue, aggr, toOut, datastoreSettings) :: HNil)
       (res, res)
     })
 

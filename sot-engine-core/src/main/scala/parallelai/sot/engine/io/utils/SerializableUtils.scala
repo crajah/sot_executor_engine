@@ -2,6 +2,8 @@ package parallelai.sot.engine.io.utils
 
 import java.{io => jio}
 
+import java.util.function.{Function => JFunction, Predicate => JPredicate, BiFunction => JBiFunction, BiPredicate => JBiPredicate}
+
 //TODO: Move to separate test project
 object SerializableUtils {
 
