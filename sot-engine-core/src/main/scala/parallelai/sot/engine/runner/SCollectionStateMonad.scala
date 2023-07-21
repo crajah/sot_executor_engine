@@ -71,7 +71,7 @@ object SCollectionStateMonad {
       (res, res)
     })
 
-  def accumulator[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
+  def accumulate[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
                                                                                                       (getValue: Row.Aux[L] => Row.Aux[I])(
                                                                                                         defaultValue: Row.Aux[I],
                                                                                                         keyMapper: Row.Aux[L] => K,

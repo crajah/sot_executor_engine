@@ -63,7 +63,7 @@
       "type": "transformation",
       "id": "mapper1",
       "name": "mapper1",
-      "op": "accumulator",
+      "op": "accumulate",
       "params": [
         [
           "m => m.project(projector(Col('depositAmount))).append('depositCount, 1)"
