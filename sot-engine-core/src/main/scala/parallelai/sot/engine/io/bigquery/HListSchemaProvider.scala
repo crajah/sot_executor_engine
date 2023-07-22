@@ -17,7 +17,6 @@ trait HListSchemaExtractor[A] {
 
 }
 
-
 object HListSchemaExtractor {
 
   implicit val booleanExtractor = new HListSchemaExtractor[Boolean] {def apply = "BOOLEAN"}

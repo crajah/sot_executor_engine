@@ -1,0 +1,98 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "id": "avroschema1",
+      "name": "avroschema1",
+      "version": "version2",
+      "definition": {
+        "name": "Features",
+        "doc": "A basic schema for storing user records",
+        "fields": [
+          {
+            "name": "userId",
+            "type": "string"
+          },
+          {
+            "name": "depositAmount",
+            "type": "float"
+          },
+          {
+            "name": "depositTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "depositTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "type": "record",
+        "namespace": "parallelai.sot.avro"
+      }
+    }
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource1",
+      "topic": "depositpoc"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "deposits18",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "avroschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "transformation",
+      "id": "mapper1",
+      "name": "mapper1",
+      "op": "accumulate",
+      "params": [
+        [
+          "m => m.project(projector(Col('depositAmount))).append('depositCount, 1)"
+        ],
+        [
+          "Row('depositAmount ->> 0.0f :: 'depositCount ->> 0 :: HNil)",
+          "m => m.get('userId)",
+          "(oldvalue, newvalue) => oldvalue.updateWith('depositAmount)(_ + newvalue.get('depositAmount)).updateWith('depositCount)(_ + newvalue.get('depositCount))",
+          "(row, state) => row.append('counter, state.get('depositAmount)).append('counter2, state.get('depositCount)).append('ts, Helper.fmt.print(Helper.Instant.now()))",
+          "\"test4\""
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "source": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "mapper1"
+    },
+    {
+      "from": "mapper1",
+      "to": "out"
+    }
+  ]
+}
