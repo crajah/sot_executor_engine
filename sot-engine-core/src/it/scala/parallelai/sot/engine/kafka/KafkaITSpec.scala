@@ -29,14 +29,13 @@ import parallelai.sot.containers.ForAllContainersFixture
   *
   * This will run only the current test
   * <pre>
-  * $ sbt "it:testOnly *KafkaIT"
+  * $ sbt "it:testOnly *KafkaITSpec"
   * </pre>
   */
 class KafkaITSpec extends PipelineSpec with ForAllContainersFixture with KafkaContainerFixture with Logging {
   lazy val kafkaOptionsLatest = KafkaOptions(bootstrap = s"0.0.0.0:${container.container.getMappedPort(9092)}",
     topic = "my-topic", group = "my-group", defaultOffset = "latest", autoCommit = true)
   lazy val kafkaOptionsEarliest = kafkaOptionsLatest.copy(defaultOffset = "earliest")
-  lazy val charset = Charset.forName("UTF-8")
   lazy val timeFormat = new SimpleDateFormat("hh:mm:ss")
   lazy val runID = timeFormat.format(Calendar.getInstance.getTime())
   lazy val testStaticData = Seq("Some message from Kafka Integration Test", "Second message", "3rd test message")
@@ -51,11 +50,9 @@ class KafkaITSpec extends PipelineSpec with ForAllContainersFixture with KafkaCo
   }
 
   def write(): Unit = {
-    debug("--> write")
     val sc = createContext()
-    sc.parallelize(testDynamicData.map(_.getBytes(charset)).toArray).writeToKafka(kafkaOptionsLatest)
+    sc.parallelize(testDynamicData.map(_.getBytes(Charset.forName("UTF-8"))).toArray).writeToKafka(kafkaOptionsLatest)
     sc.close()
-    debug("<-- write")
   }
 
   def read(fromStart: Boolean = false, count: Int = 3): Unit = {
@@ -66,7 +63,9 @@ class KafkaITSpec extends PipelineSpec with ForAllContainersFixture with KafkaCo
       case _ => Seq.empty[String]
     }
     // TODO: make this work with .take instead of forcing bounded reads
-    sc.readFromKafkaBounded(if (fromStart) kafkaOptionsEarliest else kafkaOptionsLatest, Some(count)).map(v => new String(v, charset)) should containInAnyOrder(data)
+    sc.readFromKafkaBounded(if (fromStart) kafkaOptionsEarliest else kafkaOptionsLatest, Some(count)).map {
+      v => new String(v, Charset.forName("UTF-8"))
+    } should containInAnyOrder(data)
     sc.close()
     debug("<-- read")
   }

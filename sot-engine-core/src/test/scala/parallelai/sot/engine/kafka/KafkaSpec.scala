@@ -9,11 +9,15 @@ import com.spotify.scio.{ContextAndArgs, ScioContext}
 import com.spotify.scio.testing.PipelineSpec
 import org.joda.time.Duration
 
-
+/**
+  * Can be run by
+  * <pre>
+  * $ sbt "testOnly *KafkaSpec"
+  * </pre>
+  */
 object KafkaJobSpec {
-  val options = KafkaOptions("DUMMY-BOOTSTRAP", "SOME-TOPIC", "SOME-GROUP")
-  val charset: Charset = Charset.forName("UTF8")
-  val input: Seq[Array[Byte]] = Seq("a", "b", "c").map(_.getBytes(charset))
+  val options = KafkaOptions("DUMMY-BOOTSTRAP", "SOME-TOPIC", None, None, None)
+  val input: Seq[Array[Byte]] = Seq("a", "b", "c").map(_.getBytes(Charset.forName("UTF8")))
 }
 
 object KafkaJob {
@@ -24,13 +28,13 @@ object KafkaJob {
     val (sc, _) = ContextAndArgs(cmdlineArgs)
     sc
       .readFromKafka(options)
-      .map(v => new String(v, charset).toUpperCase().getBytes(charset))
+      .map(v => new String(v, Charset.forName("UTF8")).toUpperCase().getBytes(Charset.forName("UTF8")))
       .writeToKafka(options)
     sc.close()
   }
 }
 
-class KafkaTest extends PipelineSpec {
+class KafkaSpec extends PipelineSpec {
 
   def testKafka(expected: String*): Unit = {
 
@@ -39,7 +43,7 @@ class KafkaTest extends PipelineSpec {
     JobTest[KafkaJob.type]
       .input(KafkaTestIO(options), input)
       .output(KafkaTestIO[Array[Byte]](options)) {
-        _ should containInAnyOrder(expected.map(_.getBytes(charset)))
+        _ should containInAnyOrder(expected.map(_.getBytes(Charset.forName("UTF8"))))
       }
       .run()
   }
