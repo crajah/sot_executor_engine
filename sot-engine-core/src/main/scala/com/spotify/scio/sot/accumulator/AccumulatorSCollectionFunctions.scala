@@ -1,5 +1,6 @@
 package com.spotify.scio.sot.accumulator
 
+import com.google.datastore.v1.client.DatastoreHelper.makeKey
 import com.spotify.scio.values.SCollection
 import org.apache.beam.sdk.coders.Coder
 import org.apache.beam.sdk.state.{StateSpec, StateSpecs, ValueState}
@@ -20,20 +21,17 @@ import scala.reflect.ClassTag
   *
   * @param getValue function to get the value to keep track of from the data object
   * @param aggr     aggregate values
-  * @param toOut    function that creates the output object
   * @param coder    value coder for value state
   * @tparam K     key
   * @tparam V     value
-  * @tparam Out   output type
   * @tparam Value value type
   */
-class StatefulDoFn[K, V <: HList, Out <: HList, Value <: HList](getValue: Row.Aux[V] => Row.Aux[Value],
+class StatefulDoFn[K, V <: HList, Value <: HList](getValue: Row.Aux[V] => Row.Aux[Value],
                                                                 defaultValue: Row.Aux[Value],
                                                                 aggr: (Row.Aux[Value], Row.Aux[Value]) => Row.Aux[Value],
-                                                                toOut: (Row.Aux[V], Row.Aux[Value]) => Row.Aux[Out],
                                                                 persistence: Option[Datastore],
                                                                 coder: Coder[Row.Aux[Value]])(implicit toL: ToEntity[Value], fromL: FromEntity[Value])
-  extends DoFn[KV[K, Row.Aux[V]], Row.Aux[Out]] {
+  extends DoFn[KV[K, Row.Aux[V]], (Row.Aux[V], Row.Aux[Value])] {
 
   @StateId("value")
   private val stateSpec: StateSpec[ValueState[Row.Aux[Value]]] = StateSpecs.value(coder)
@@ -47,9 +45,9 @@ class StatefulDoFn[K, V <: HList, Out <: HList, Value <: HList](getValue: Row.Au
 
     val value = getValue(context.element().getValue)
     val newValue = aggr(current.getOrElse(defaultValue), value)
-    context.output(toOut(context.element().getValue, newValue))
+    context.output((context.element().getValue, newValue))
     state.write(newValue)
-    persistValue(key, newValue)
+//    persistValue(key, newValue)
   }
 
   private def persistValue(key: K, value: Row.Aux[Value]) = {
@@ -97,13 +95,30 @@ class AccumulatorSCollectionFunctions[V <: HList](@transient val self: SCollecti
                                                             )(implicit toL: ToEntity[Value], fromL: FromEntity[Value]): SCollection[Row.Aux[Out]] = {
 
     val datastore = datastoreSettings.map { case (project, kind) => Datastore(project = project, kind = kind) }
+
     val toKvTransform = ParDo.of(Functions.mapFn[Row.Aux[V], KV[K, Row.Aux[V]]](v => {
       val key = keyMapper(v)
       KV.of(key, v)
     }))
     val valueCoder: Coder[Row.Aux[Value]] = self.getCoder[Row.Aux[Value]]
     val o = self.applyInternal(toKvTransform).setCoder(self.getKvCoder[K, Row.Aux[V]])
-    self.context.wrap(o).parDo(new StatefulDoFn(getValue, defaultValue, aggr, toOut, datastore, valueCoder))
-  }
+    val statefulStep = self.context.wrap(o).parDo(new StatefulDoFn(getValue, defaultValue, aggr, datastore, valueCoder))
 
+    datastoreSettings match {
+      case Some((projectName, kind)) =>
+        statefulStep.map { rec =>
+          val entity = rec.getValue.hList.toEntityBuilder
+          val key = rec.getKey
+          val keyEntity = key match {
+            case name: String => makeKey(kind, name.asInstanceOf[AnyRef])
+            case id: Int => makeKey(kind, id.asInstanceOf[AnyRef])
+          }
+          entity.setKey(keyEntity)
+          entity.build()
+        }.saveAsDatastore(projectName.id)
+    }
+
+    statefulStep.map(kv => to)
+
+  }
 }
