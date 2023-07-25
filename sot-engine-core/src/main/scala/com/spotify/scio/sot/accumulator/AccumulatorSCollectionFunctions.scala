@@ -50,19 +50,6 @@ class StatefulDoFn[K, V <: HList, Value <: HList](getValue: Row.Aux[V] => Row.Au
     val newValue = aggr(current.getOrElse(defaultValue), value)
     context.output((context.element().getValue, newValue, Instant.now()))
     state.write(newValue)
-    //    persistValue(key, newValue)
-  }
-
-  private def persistValue(key: K, value: Row.Aux[Value]) = {
-    persistence match {
-      case Some(p) =>
-        key match {
-          case k: Int => p.put(k, value)
-          case k: String => p.put(k, value)
-          case _ => throw new Exception("Only String and Int type keys supports persistence.")
-        }
-      case None =>
-    }
   }
 
   private def readValue(key: K, value: Option[Row.Aux[Value]]) = {
