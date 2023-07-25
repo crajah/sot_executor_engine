@@ -13,17 +13,18 @@ import org.joda.time.Instant
 import parallelai.sot.engine.Project
 import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.io.datastore._
-import shapeless.labelled.FieldType
-import shapeless.{::, HList, HNil, LabelledGeneric, Witness}
+import shapeless.HList
 
 import scala.reflect.ClassTag
 
 /**
   * StatefulDoFn keeps track of a state of the marked variables and stores them to datastore if persistence is provided.
   *
-  * @param getValue function to get the value to keep track of from the data object
-  * @param aggr     aggregate values
-  * @param coder    value coder for value state
+  * @param getValue     function to get the value to keep track of from the data object
+  * @param defaultValue value to initialise the state
+  * @param aggr         aggregate values
+  * @param persistence  storage option to persist states
+  * @param coder        value coder for value state
   * @tparam K     key
   * @tparam V     value
   * @tparam Value value type
@@ -117,7 +118,7 @@ class AccumulatorSCollectionFunctions[V <: HList](@transient val self: SCollecti
 
     datastoreSettings match {
       case Some((projectName, kind)) =>
-        statefulStep.parDo(new UpdateTimestampDoFn[V, Value]()).map{ rec =>
+        statefulStep.parDo(new UpdateTimestampDoFn[V, Value]()).map { rec =>
           val entity = rec._2.hList.toEntityBuilder
           val key = keyMapper(rec._1)
           val keyEntity = key match {
