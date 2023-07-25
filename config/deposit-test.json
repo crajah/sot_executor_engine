@@ -46,7 +46,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "deposits21",
+      "table": "deposits23",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -72,7 +72,8 @@
           "Row('depositAmount ->> 0.0f :: 'depositCount ->> 0 :: HNil)",
           "m => m.get('userId)",
           "(oldvalue, newvalue) => oldvalue.updateWith('depositAmount)(_ + newvalue.get('depositAmount)).updateWith('depositCount)(_ + newvalue.get('depositCount))",
-          "(row, state) => row.append('counter, state.get('depositAmount)).append('counter2, state.get('depositCount)).append('ts, Helper.fmt.print(Helper.Instant.now()))"
+          "(row, state) => row.append('counter, state.get('depositAmount)).append('counter2, state.get('depositCount)).append('ts, Helper.fmt.print(Helper.Instant.now()))",
+          "\"persistState3\""
         ]
       ],
       "paramsEncoded": false
@@ -82,7 +83,7 @@
       "id": "random",
       "name": "mapper1",
       "op": "map",
-      "params": [["m => if (scala.util.Random.nextDouble() > 0.5) throw new Exception(\"Unlucky\") else m"]],
+      "params": [["m => if (scala.util.Random.nextDouble() > 0.9) throw new Exception(\"Unlucky \" + m.get('userId)) else m"]],
       "paramsEncoded": false
     },
     {

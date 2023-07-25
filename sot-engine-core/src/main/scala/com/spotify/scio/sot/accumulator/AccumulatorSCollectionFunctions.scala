@@ -8,6 +8,8 @@ import org.apache.beam.sdk.transforms.{DoFn, ParDo}
 import org.apache.beam.sdk.transforms.DoFn.{ProcessElement, StateId}
 import org.apache.beam.sdk.values.KV
 import com.spotify.scio.util.Functions
+import org.apache.beam.sdk.io.gcp.datastore.DatastoreIOSOT
+import org.joda.time.Instant
 import parallelai.sot.engine.Project
 import parallelai.sot.engine.generic.row.Row
 import parallelai.sot.engine.io.datastore._
@@ -27,11 +29,11 @@ import scala.reflect.ClassTag
   * @tparam Value value type
   */
 class StatefulDoFn[K, V <: HList, Value <: HList](getValue: Row.Aux[V] => Row.Aux[Value],
-                                                                defaultValue: Row.Aux[Value],
-                                                                aggr: (Row.Aux[Value], Row.Aux[Value]) => Row.Aux[Value],
-                                                                persistence: Option[Datastore],
-                                                                coder: Coder[Row.Aux[Value]])(implicit toL: ToEntity[Value], fromL: FromEntity[Value])
-  extends DoFn[KV[K, Row.Aux[V]], (Row.Aux[V], Row.Aux[Value])] {
+                                                  defaultValue: Row.Aux[Value],
+                                                  aggr: (Row.Aux[Value], Row.Aux[Value]) => Row.Aux[Value],
+                                                  persistence: Option[Datastore],
+                                                  coder: Coder[Row.Aux[Value]])(implicit toL: ToEntity[Value], fromL: FromEntity[Value])
+  extends DoFn[KV[K, Row.Aux[V]], (Row.Aux[V], Row.Aux[Value], Instant)] {
 
   @StateId("value")
   private val stateSpec: StateSpec[ValueState[Row.Aux[Value]]] = StateSpecs.value(coder)
@@ -45,9 +47,9 @@ class StatefulDoFn[K, V <: HList, Value <: HList](getValue: Row.Aux[V] => Row.Au
 
     val value = getValue(context.element().getValue)
     val newValue = aggr(current.getOrElse(defaultValue), value)
-    context.output((context.element().getValue, newValue))
+    context.output((context.element().getValue, newValue, Instant.now()))
     state.write(newValue)
-//    persistValue(key, newValue)
+    //    persistValue(key, newValue)
   }
 
   private def persistValue(key: K, value: Row.Aux[Value]) = {
@@ -80,6 +82,15 @@ class StatefulDoFn[K, V <: HList, Value <: HList](getValue: Row.Aux[V] => Row.Au
 
 }
 
+class UpdateTimestampDoFn[V <: HList, Value <: HList] extends DoFn[(Row.Aux[V], Row.Aux[Value], Instant), (Row.Aux[V], Row.Aux[Value])] {
+
+  @ProcessElement
+  def processElement(context: ProcessContext): Unit = {
+    val value = context.element()
+    context.outputWithTimestamp((value._1, value._2), value._3)
+  }
+}
+
 /**
   * Enhanced version of [[com.spotify.scio.values.SCollection SCollection]] with Accumulator methods.
   */
@@ -106,19 +117,17 @@ class AccumulatorSCollectionFunctions[V <: HList](@transient val self: SCollecti
 
     datastoreSettings match {
       case Some((projectName, kind)) =>
-        statefulStep.map { rec =>
-          val entity = rec.getValue.hList.toEntityBuilder
-          val key = rec.getKey
+        statefulStep.parDo(new UpdateTimestampDoFn[V, Value]()).map{ rec =>
+          val entity = rec._2.hList.toEntityBuilder
+          val key = keyMapper(rec._1)
           val keyEntity = key match {
-            case name: String => makeKey(kind, name.asInstanceOf[AnyRef])
-            case id: Int => makeKey(kind, id.asInstanceOf[AnyRef])
+            case name: String => makeKey(kind.value, name.asInstanceOf[AnyRef])
+            case id: Int => makeKey(kind.value, id.asInstanceOf[AnyRef])
           }
           entity.setKey(keyEntity)
           entity.build()
-        }.saveAsDatastore(projectName.id)
+        }.applyInternal(DatastoreIOSOT.v1.write.withProjectId(projectName.id).removeDuplicatesWithinCommits(true))
     }
-
-    statefulStep.map(kv => to)
-
+    statefulStep.map { case (v, value, ts) => toOut(v, value) }
   }
 }
