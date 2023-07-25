@@ -128,7 +128,8 @@ class AccumulatorSCollectionFunctions[V <: HList](@transient val self: SCollecti
           entity.setKey(keyEntity)
           entity.build()
         }.applyInternal(DatastoreIOSOT.v1.write.withProjectId(projectName.id).removeDuplicatesWithinCommits(true))
+      case None =>
     }
-    statefulStep.map { case (v, value, ts) => toOut(v, value) }
+    statefulStep.map { case (v, value, _) => toOut(v, value) }
   }
 }
