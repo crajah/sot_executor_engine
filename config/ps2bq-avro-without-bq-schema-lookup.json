@@ -1,0 +1,117 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "id": "avroschema1",
+      "name": "avroschema1",
+      "version": "version2",
+      "definition": {
+        "type": "record",
+        "name": "Message",
+        "namespace": "parallelai.sot.avro",
+        "fields": [
+          {
+            "name": "user",
+            "type": "string",
+            "doc": "Name of the user"
+          },
+          {
+            "name": "teamName",
+            "type": "string",
+            "doc": "Name of the team"
+          },
+          {
+            "name": "score",
+            "type": "int",
+            "doc": "User score"
+          },
+          {
+            "name": "eventTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "eventTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "doc": "A basic schema for storing user records"
+      }
+    }
+  ],
+  "lookups": [
+    {
+      "schema": "avroschema1",
+      "id": "lookup1",
+      "tap": "datastore1"
+    }
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource1",
+      "topic": "p2pin"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "lookup_result"
+    },
+    {
+      "type": "datastore",
+      "id": "datastore1",
+      "kind": "dataflowwrite",
+      "dedupCommits": true
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "avroschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "transformation",
+      "id": "mapper1",
+      "name": "mapper1",
+      "op": "map",
+      "params": [["m => m.append('score2, m.get('score) * 0.23)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "mapper2",
+      "name": "mapper2",
+      "op": "map",
+      "params": [["m => m.append('lookedupField, lookup1.get(\"blah\").map(_.score).getOrElse(1))"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "source": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "mapper1"
+    },
+    {
+      "from": "mapper1",
+      "to": "mapper2"
+    },
+    {
+      "from": "mapper2",
+      "to": "out"
+    }
+  ]
+}
