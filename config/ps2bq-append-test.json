@@ -90,6 +90,7 @@
       }
     }
   ],
+  "lookups": [],
   "taps": [
     {
       "type": "pubsub",

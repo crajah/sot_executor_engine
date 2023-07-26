@@ -1,5 +1,7 @@
 package parallelai.sot.macros
 
+import cats.Applicative
+
 import scala.collection.immutable.Seq
 import scala.collection.mutable
 import scala.meta._
@@ -88,7 +90,7 @@ object SOTMainMacroImpl {
   def jobCodeGenerator(config: Config, dag: Topology[String, DAGMapping]): Seq[Stat] = {
     val transformations: Term = getMonadTransformations(config, dag, q"init[HNil]")
 
-    datastores(config) ++ Seq(
+    lookups(config) ++ Seq(
       q"""
         class Job extends Serializable {
           def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
@@ -106,6 +108,19 @@ object SOTMainMacroImpl {
   private def datastores(config: Config): Seq[Stat] = config.taps.collect {
     case DatastoreTapDefinition(_, id, kind, _) =>
       s"""val $id = Datastore(Project("$projectId"), Kind("$kind"))""".parse[Stat].get
+  }
+
+  private def lookups(config: Config): Seq[Stat] = config.lookups.flatMap {
+    case DatastoreLookupDefinition(id,schema,linkedTapId) => {
+      config.taps.collectFirst {
+        case DatastoreTapDefinition(_, tapId, kind, _) if tapId == linkedTapId =>
+          s"""Datastore(Project("$projectId"), Kind("$kind"))"""
+      }.flatMap { tap =>
+        config.schemas.find(_.id == schema).map(_.definition.name).map {
+          scalaType => s"""val $id = Lookup[$scalaType]($tap)""".parse[Stat].get
+        }
+      }
+    }
   } match {
     case ds if ds.isEmpty => ds
     case ds => Seq(
