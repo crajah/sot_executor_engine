@@ -87,6 +87,13 @@
       }
     }
   ],
+  "lookups": [
+    {
+      "schema": "avroschema1",
+      "id": "lookup1",
+      "tap": "datastore1"
+    }
+  ],
   "taps": [
     {
       "type": "pubsub",
@@ -118,7 +125,11 @@
       "id": "mapper1",
       "name": "mapper1",
       "op": "map",
-      "params": [["m => m.append('count, datastore1.get[Message](\"blah\").map(_.score).getOrElse(1))"]],
+      "params": [
+        [
+          "m => m.append('count, lookup1.get(\"blah\").map(_.score).getOrElse(1))"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
