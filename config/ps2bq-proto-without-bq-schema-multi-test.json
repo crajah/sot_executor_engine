@@ -16,6 +16,7 @@
       }
     }
   ],
+  "lookups": [],
   "taps": [
     {
       "type": "pubsub",

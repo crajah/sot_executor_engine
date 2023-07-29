@@ -25,7 +25,7 @@
           },
           {
             "name": "score",
-            "type": "long",
+            "type": "int",
             "doc": "User score"
           },
           {
@@ -41,56 +41,15 @@
         ],
         "doc": "A basic schema for storing user records"
       }
-    },
-    {
-      "type": "bigquery",
-      "id": "bigqueryschema1",
-      "name": "bigqueryschema1",
-      "version": "version3",
-      "definition": {
-        "type": "bigquerydefinition",
-        "name": "BigQueryRow",
-        "fields": [
-          {
-            "mode": "REQUIRED",
-            "name": "user",
-            "type": "STRING"
-          },
-          {
-            "mode": "REQUIRED",
-            "name": "teamName",
-            "type": "STRING"
-          },
-          {
-            "mode": "REQUIRED",
-            "name": "score",
-            "type": "INTEGER"
-          },
-          {
-            "mode": "REQUIRED",
-            "name": "eventTime",
-            "type": "INTEGER"
-          },
-          {
-            "mode": "REQUIRED",
-            "name": "eventTimeStr",
-            "type": "STRING"
-          },
-          {
-            "mode": "REQUIRED",
-            "name": "score2",
-            "type": "FLOAT"
-          },
-          {
-            "mode": "REQUIRED",
-            "name": "processingTime",
-            "type": "STRING"
-          }
-        ]
-      }
     }
   ],
-  "lookups": [],
+  "lookups": [
+    {
+      "schema": "avroschema1",
+      "id": "lookup1",
+      "tap": "datastore1"
+    }
+  ],
   "taps": [
     {
       "type": "pubsub",
@@ -101,9 +60,13 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "datastoretest",
-      "createDisposition": "CREATE_IF_NEEDED",
-      "writeDisposition": "WRITE_APPEND"
+      "table": "lookup_result"
+    },
+    {
+      "type": "datastore",
+      "id": "datastore1",
+      "kind": "dataflowwrite",
+      "dedupCommits": true
     }
   ],
   "steps": [
@@ -113,14 +76,6 @@
       "name": "in",
       "schema": "avroschema1",
       "source": "pubsubsource1"
-    },
-    {
-      "type": "transformation",
-      "id": "filter",
-      "name": "filter",
-      "op": "filter",
-      "params": [["m => m.get('score) > 2"]],
-      "paramsEncoded": false
     },
     {
       "type": "transformation",
@@ -135,29 +90,24 @@
       "id": "mapper2",
       "name": "mapper2",
       "op": "map",
-      "params": [["m => m.append('processingTime, Helper.fmt.print(Helper.Instant.now()))"]],
+      "params": [["m => m.append('lookedupField, lookup1.get(\"blah\").map(_.score).getOrElse(1))"]],
       "paramsEncoded": false
     },
     {
       "type": "sink",
       "id": "out",
       "name": "out",
-      "schema": "bigqueryschema1",
       "source": "bigquerysource1"
     }
   ],
   "dag": [
     {
       "from": "in",
-      "to": "filter"
+      "to": "mapper1"
     },
     {
       "from": "mapper1",
       "to": "mapper2"
-    },
-    {
-      "from": "filter",
-      "to": "mapper1"
     },
     {
       "from": "mapper2",
