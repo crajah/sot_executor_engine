@@ -38,7 +38,7 @@ object Common {
       Resolver.sbtPluginRepo("releases"),
       s3resolver.value("Parallel AI S3 Releases resolver", s3("release.repo.parallelai.com")) withMavenPatterns,
       s3resolver.value("Parallel AI S3 Snapshots resolver", s3("snapshot.repo.parallelai.com")) withMavenPatterns
-      //,Resolver.mavenLocal
+//      ,Resolver.mavenLocal
     ),
     resolvers += sbtResolver.value,
     publishTo := {

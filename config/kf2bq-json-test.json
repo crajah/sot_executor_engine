@@ -10,7 +10,7 @@
       "version": "version1",
       "definition": {
         "type": "jsondefinition",
-        "name": "Bet",
+        "name": "Test",
         "fields": [
           {
             "mode": "required",
@@ -59,15 +59,15 @@
       "id": "kafkasource1",
       "bootstrap": "35.197.234.116:9092",
       "topic": "my-topic",
-      "group": "pai-test-bets-group",
+      "group": "pai-test-group",
       "defaultOffset": "latest",
-      "autoCommit": true
+      "autoCommit": false
     },
     {
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bi_crm_poc",
-      "table": "test_bets",
+      "table": "kafka_test",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -85,7 +85,7 @@
       "id": "mapper",
       "name": "mapper",
       "op": "map",
-      "params": [["m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"]],
+      "params": [["m => { val t = Helper.fmt.print(Helper.Instant.now()); if (t(15) != 'a') m.append('ts, t) else throw new Exception }"]],
       "paramsEncoded": false
     },
     {

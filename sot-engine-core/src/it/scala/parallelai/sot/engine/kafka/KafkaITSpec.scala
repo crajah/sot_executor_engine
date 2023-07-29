@@ -24,7 +24,7 @@ import parallelai.sot.containers.ForAllContainersFixture
   * docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=0.0.0.0 --env ADVERTISED_PORT=9092 all4it/local-kafka:v2
   * </pre>
   *
-  * An alternative to running the Docker container manually is to mix in a Container fixture which will configure and
+  * An alternative to running the Docker§§ container manually is to mix in a Container fixture which will configure and
   * start up the container programmatically and that's what we use here.
   *
   * This will run only the current test
