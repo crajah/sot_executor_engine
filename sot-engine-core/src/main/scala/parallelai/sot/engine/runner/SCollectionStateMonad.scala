@@ -216,6 +216,19 @@ object SCollectionStateMonad {
     }
     )
 
+  def fullOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+  (implicit
+   pair1: IsPair.Aux[J1, K, L1],
+   pair2: IsPair.Aux[J2, K, L2],
+   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, Option[L1], Option[L2]] :: HNil, SCOLOUT]
+  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, pair1(sColl1).fullOuterJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+      (res, res)
+    }
+    )
+
 
   def write[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO, In <: ANNO : Manifest](sCollection: SCollection[Row.Aux[L]])
                                                                                                                   (tap: TapDef[TAP, UTIL, ANNO, In], utils: UTIL)
