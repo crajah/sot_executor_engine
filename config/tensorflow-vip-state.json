@@ -1,0 +1,255 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "id": "avroschema_deposit",
+      "name": "avroschema_deposit",
+      "version": "version2",
+      "definition": {
+        "name": "Deposit",
+        "doc": "A basic schema for storing user records",
+        "fields": [
+          {
+            "name": "userId",
+            "type": "string"
+          },
+          {
+            "name": "depositAmount",
+            "type": "float"
+          },
+          {
+            "name": "depositTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "depositTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "type": "record",
+        "namespace": "parallelai.sot.avro"
+      }
+    },
+    {
+      "type": "avro",
+      "id": "avroschema_bet",
+      "name": "avroschema_bet",
+      "version": "version2",
+      "definition": {
+        "name": "Bet",
+        "doc": "A basic schema for storing user records",
+        "fields": [
+          {
+            "name": "userId",
+            "type": "string"
+          },
+          {
+            "name": "eventId",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "stakeAmount",
+            "type": "float"
+          },
+          {
+            "name": "stakeFreeBet",
+            "type": "float"
+          },
+          {
+            "name": "payoutWinnings",
+            "type": "float"
+          },
+          {
+            "name": "isSettled",
+            "type": "boolean"
+          },
+          {
+            "name": "betTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "betTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "type": "record",
+        "namespace": "parallelai.sot.avro"
+      }
+    }
+
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource_bet",
+      "topic": "pubsubsource_bet"
+    },
+    {
+      "type": "pubsub",
+      "id": "pubsubsource_deposit",
+      "topic": "pubsubsource_deposit"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "vip_join2",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "bets_in",
+      "name": "bests_in",
+      "schema": "avroschema_bet",
+      "source": "pubsubsource_bet"
+    },
+    {
+      "type": "source",
+      "id": "deposits_in",
+      "name": "deposits_in",
+      "schema": "avroschema_deposit",
+      "source": "pubsubsource_deposit"
+    },
+    {
+      "type": "transformation",
+      "id": "window_bet",
+      "name": "window_bet",
+      "op": "withFixedWindows",
+      "params": [["Duration.millis(100)",
+        "Duration.millis(0)",
+        "WindowOptions(trigger =  Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardMinutes(2))), accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES, allowedLateness =  Duration.standardMinutes(args.int(\"allowedLateness\", 120)))"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "window_deposit",
+      "name": "window_deposit",
+      "op": "withFixedWindows",
+      "params": [["Duration.millis(100)",
+        "Duration.millis(0)",
+        "WindowOptions(trigger =  Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardMinutes(2))), accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES, allowedLateness =  Duration.standardMinutes(args.int(\"allowedLateness\", 120)))"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "mapper_bet",
+      "name": "mapper_bet",
+      "op": "map",
+      "params": [["m => Row(m.get('userId), (m.get('eventId), m.get('status), m.get('stakeAmount), m.get('stakeFreeBet), m.get('payoutWinnings), m.get('isSettled), m.get('betTime), m.get('betTimeStr)))"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "mapper_deposit",
+      "name": "mapper_deposit",
+      "op": "map",
+      "params": [["m => Row(m.get('userId), (m.get('depositAmount), m.get('depositTime), m.get('depositTimeStr)))"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "groupby_deposit",
+      "name": "groupby_deposit",
+      "op": "groupBy",
+      "params": [["m => m.get('_1)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "groupby_bet",
+      "name": "groupby_bet",
+      "op": "groupBy",
+      "params": [["m => m.get('_1)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "join_bet_deposit",
+      "name": "join_bet_deposit",
+      "op": "fullOuterJoin",
+      "params": [],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "vip_states",
+      "name": "vip_states",
+      "op": "accumulate",
+      "params": [
+        [
+          "m => Row(('depositAmount ->> m.get('_2).get('_2).getOrElse(List()).map(l => l.get('_2).get('_1)).sum) :: HNil)"
+        ],
+        [
+          "Row('depositAmount ->> 0.0f :: HNil)",
+          "m => m.get('_1)",
+          "(oldvalue, newvalue) => oldvalue.updateWith('depositAmount)(_ + newvalue.get('depositAmount))",
+          "(row, state) => Row('userId ->> row.get('_1) :: 'depositAmount ->> state.get('depositAmount) :: 'rw2 ->> row.get('_2).get('_2).getOrElse(List()) :: 'rw1 ->> row.get('_2).get('_1).getOrElse(List()) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)",
+          "\"vipPersist2\""
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "bq_out",
+      "name": "bq_out",
+      "source": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "bets_in",
+      "to": "window_bet"
+    },
+    {
+      "from": "window_bet",
+      "to": "mapper_bet"
+    },
+    {
+      "from": "mapper_bet",
+      "to": "groupby_bet"
+    },
+    {
+      "from": "groupby_bet",
+      "to": "join_bet_deposit"
+    },
+    {
+      "from": "deposits_in",
+      "to": "window_deposit"
+    },
+    {
+      "from": "window_deposit",
+      "to": "mapper_deposit"
+    },
+    {
+      "from": "mapper_deposit",
+      "to": "groupby_deposit"
+    },
+    {
+      "from": "groupby_deposit",
+      "to": "join_bet_deposit"
+    },
+    {
+      "from": "join_bet_deposit",
+      "to": "vip_states"
+    },
+    {
+      "from": "vip_states",
+      "to": "bq_out"
+    }
+  ]
+}

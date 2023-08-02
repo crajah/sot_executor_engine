@@ -1,0 +1,169 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "avro",
+      "id": "avroschema_deposit",
+      "name": "avroschema_deposit",
+      "version": "version2",
+      "definition": {
+        "name": "Deposit",
+        "doc": "A basic schema for storing user records",
+        "fields": [
+          {
+            "name": "userId",
+            "type": "string"
+          },
+          {
+            "name": "depositAmount",
+            "type": "float"
+          },
+          {
+            "name": "depositTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "depositTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "type": "record",
+        "namespace": "parallelai.sot.avro"
+      }
+    },
+    {
+      "type": "avro",
+      "id": "avroschema_bet",
+      "name": "avroschema_bet",
+      "version": "version2",
+      "definition": {
+        "name": "Bet",
+        "doc": "A basic schema for storing user records",
+        "fields": [
+          {
+            "name": "userId",
+            "type": "string"
+          },
+          {
+            "name": "eventId",
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "type": "string"
+          },
+          {
+            "name": "stakeAmount",
+            "type": "float"
+          },
+          {
+            "name": "stakeFreeBet",
+            "type": "float"
+          },
+          {
+            "name": "payoutWinnings",
+            "type": "float"
+          },
+          {
+            "name": "isSettled",
+            "type": "float"
+          },
+          {
+            "name": "betTime",
+            "type": "long",
+            "doc": "time when event created"
+          },
+          {
+            "name": "betTimeStr",
+            "type": "string",
+            "doc": "event time string for debugging"
+          }
+        ],
+        "type": "record",
+        "namespace": "parallelai.sot.avro"
+      }
+    }
+
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource1",
+      "topic": "depositpoc"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "bigquerytest",
+      "table": "vip_prediction",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "bets_in",
+      "name": "bests_in",
+      "schema": "avroschema_bets",
+      "source": "pubsubsource_bets"
+    },
+    {
+      "type": "source",
+      "id": "deposits_in",
+      "name": "deposits_in",
+      "schema": "avroschema_deposits",
+      "source": "pubsubsource_deposits"
+    },
+    {
+      "type": "transformation",
+      "id": "join_bet_deposit",
+      "name": "join_bet_deposit",
+      "op": "fullOuterJoin",
+      "params": [],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "random_data",
+      "name": "random_data",
+      "op": "map",
+      "params": [["m => Row('userId ->> m.get('userId) :: 'noOfDep ->> 1.0f :: 'totDepAmnt ->> 1.0f :: 'firstDepAmnt ->> 1.0f :: 'GGR ->> 1.0f :: 'turnover ->> 1.0f :: 'playerDays ->> 1.0f :: 'winAmnt ->> 1.0f :: 'noOfBets ->> 1.0f :: 'bonusStakeAmnt ->> 1.0f :: HNil)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "tfpredict",
+      "id": "predict1",
+      "name": "predict1",
+      "modelBucket": "sot-ml",
+      "modelPath": "vip_model_dw_v6/export/recommender-final-exporter/1518443994/",
+      "fetchOps": ["head/predictions/classes"],
+      "inFn": "ee =>  Map(\"Placeholder_4\" -> Tensor.create(ee.get('noOfDep)),\"Placeholder\" -> Tensor.create(ee.get('totDepAmnt)),\"Placeholder_9\" -> Tensor.create(ee.get('firstDepAmnt)),\"Placeholder_2\" -> Tensor.create(ee.get('GGR)),\"Placeholder_6\" -> Tensor.create(ee.get('turnover)),\"Placeholder_7\" -> Tensor.create(ee.get('playerDays)),\"Placeholder_1\" -> Tensor.create(ee.get('winAmnt)),\"Placeholder_3\" -> Tensor.create(ee.get('noOfBets)),\"Placeholder_5\" -> Tensor.create(ee.get('bonusStakeAmnt)))",
+      "outFn": "(r, o) => {val pred = o.map {case (_, t) => val v = Array.ofDim[Long](1, 1);t.copyTo(v);v.apply(0).apply(0)}.head; Row('userId ->> r.get('userId) :: 'prediction ->> pred :: HNil)}"
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "source": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "random_data"
+    },
+    {
+      "from": "random_data",
+      "to": "predict1"
+    },
+    {
+      "from": "predict1",
+      "to": "out"
+    }
+  ]
+}
