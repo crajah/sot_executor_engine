@@ -104,7 +104,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "vip_join5",
+      "table": "vip_join6",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -129,7 +129,7 @@
       "id": "window_bet",
       "name": "window_bet",
       "op": "withFixedWindows",
-      "params": [["Duration.standardMinutes(2)",
+      "params": [["Duration.standardMinutes(1)",
         "Duration.millis(0)",
         "WindowOptions(trigger =  Repeatedly.forever(AfterWatermark.pastEndOfWindow()), accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES, allowedLateness = Duration.standardMinutes(60))"]],
       "paramsEncoded": false
@@ -139,25 +139,9 @@
       "id": "window_deposit",
       "name": "window_deposit",
       "op": "withFixedWindows",
-      "params": [["Duration.standardMinutes(2)",
+      "params": [["Duration.standardMinutes(1)",
         "Duration.millis(0)",
         "WindowOptions(trigger =  Repeatedly.forever(AfterWatermark.pastEndOfWindow()), accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES, allowedLateness = Duration.standardMinutes(60))"]],
-      "paramsEncoded": false
-    },
-    {
-      "type": "transformation",
-      "id": "mapper_bet",
-      "name": "mapper_bet",
-      "op": "map",
-      "params": [["m => Row(m.get('userId), (m.get('eventId), m.get('status), m.get('stakeAmount), m.get('stakeFreeBet), m.get('payoutWinnings), m.get('isSettled), m.get('betTime), m.get('betTimeStr)))"]],
-      "paramsEncoded": false
-    },
-    {
-      "type": "transformation",
-      "id": "mapper_deposit",
-      "name": "mapper_deposit",
-      "op": "map",
-      "params": [["m => Row(m.get('userId), (m.get('depositAmount), m.get('depositTime), m.get('depositTimeStr)))"]],
       "paramsEncoded": false
     },
     {
@@ -165,7 +149,7 @@
       "id": "groupby_deposit",
       "name": "groupby_deposit",
       "op": "groupBy",
-      "params": [["m => m.get('_1)"]],
+      "params": [["m => m.get('userId)"]],
       "paramsEncoded": false
     },
     {
@@ -173,7 +157,7 @@
       "id": "groupby_bet",
       "name": "groupby_bet",
       "op": "groupBy",
-      "params": [["m => m.get('_1)"]],
+      "params": [["m => m.get('userId)"]],
       "paramsEncoded": false
     },
     {
@@ -191,14 +175,14 @@
       "op": "accumulate",
       "params": [
         [
-          "m => Row(('depositAmount ->> m.get('_2).get('_2).getOrElse(List()).map(l => l.get('_2).get('_1)).sum) :: HNil)"
+          "m => Row(('depositAmount ->> m.get('_2).get('_2).getOrElse(List()).map(l => l.get('depositAmount)).sum) :: 'numDeposit ->> m.get('_2).get('_2).getOrElse(List()).length :: ('turnover ->> m.get('_2).get('_1).getOrElse(List()).filter(l => l.get('status) == \"CREATE\").map(l => l.get('stakeAmount)).sum) :: ('winAmnt ->> m.get('_2).get('_1).getOrElse(List()).filter(l => l.get('isSettled) == true).map(_.get('payoutWinnings)).sum) :: ('numBets ->> m.get('_2).get('_1).getOrElse(List()).filter(l => l.get('status) == \"CREATE\").length) :: ('bonusStakeAmnt ->> m.get('_2).get('_1).getOrElse(List()).filter(l => l.get('status) == \"CREATE\").map(l => l.get('stakeFreeBet)).sum) :: HNil)"
         ],
         [
-          "Row('depositAmount ->> 0.0f :: HNil)",
+          "Row('depositAmount ->> 0.0f :: 'numDeposit ->> 0 :: 'turnover ->> 0.0f :: 'winAmnt ->> 0.0f :: 'numBets ->> 0 :: 'bonusStakeAmnt ->> 0.0f :: HNil)",
           "m => m.get('_1)",
-          "(oldvalue, newvalue) => oldvalue.updateWith('depositAmount)(_ + newvalue.get('depositAmount))",
-          "(row, state) => Row('userId ->> row.get('_1) :: 'depositAmount ->> state.get('depositAmount) :: 'rw2 ->> row.get('_2).get('_2).getOrElse(List()) :: 'rw1 ->> row.get('_2).get('_1).getOrElse(List()) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)",
-          "\"vipPersist5\""
+          "(oldvalue, newvalue) => oldvalue.updateWith('depositAmount)(_ + newvalue.get('depositAmount)).updateWith('numDeposit)(_ + newvalue.get('numDeposit)).updateWith('turnover)(_ + newvalue.get('turnover)).updateWith('winAmnt)(_ + newvalue.get('winAmnt)).updateWith('numBets)(_ + newvalue.get('numBets)).updateWith('bonusStakeAmnt)(_ + newvalue.get('bonusStakeAmnt))",
+          "(row, state) => Row('userId ->> row.get('_1) :: 'depositAmount ->> state.get('depositAmount) :: 'numDeposit ->> state.get('numDeposit) :: 'firstDepAmnt ->> 0.0 :: 'ggr ->> 0.0 :: 'turnover ->> state.get('turnover) :: 'winAmnt ->> state.get('winAmnt) :: 'numBets ->> state.get('numBets) :: 'bonusStakeAmnt ->> state.get('bonusStakeAmnt) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)",
+          "\"vipPersist6\""
         ]
       ],
       "paramsEncoded": false
@@ -217,10 +201,6 @@
     },
     {
       "from": "window_bet",
-      "to": "mapper_bet"
-    },
-    {
-      "from": "mapper_bet",
       "to": "groupby_bet"
     },
     {
@@ -233,10 +213,6 @@
     },
     {
       "from": "window_deposit",
-      "to": "mapper_deposit"
-    },
-    {
-      "from": "mapper_deposit",
       "to": "groupby_deposit"
     },
     {
