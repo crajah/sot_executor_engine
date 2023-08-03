@@ -104,7 +104,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "vip_join2",
+      "table": "vip_join5",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -129,9 +129,9 @@
       "id": "window_bet",
       "name": "window_bet",
       "op": "withFixedWindows",
-      "params": [["Duration.millis(100)",
+      "params": [["Duration.standardMinutes(2)",
         "Duration.millis(0)",
-        "WindowOptions(trigger =  Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardMinutes(2))), accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES, allowedLateness =  Duration.standardMinutes(args.int(\"allowedLateness\", 120)))"]],
+        "WindowOptions(trigger =  Repeatedly.forever(AfterWatermark.pastEndOfWindow()), accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES, allowedLateness = Duration.standardMinutes(60))"]],
       "paramsEncoded": false
     },
     {
@@ -139,9 +139,9 @@
       "id": "window_deposit",
       "name": "window_deposit",
       "op": "withFixedWindows",
-      "params": [["Duration.millis(100)",
+      "params": [["Duration.standardMinutes(2)",
         "Duration.millis(0)",
-        "WindowOptions(trigger =  Repeatedly.forever(AfterProcessingTime.pastFirstElementInPane().plusDelayOf(Duration.standardMinutes(2))), accumulationMode = AccumulationMode.ACCUMULATING_FIRED_PANES, allowedLateness =  Duration.standardMinutes(args.int(\"allowedLateness\", 120)))"]],
+        "WindowOptions(trigger =  Repeatedly.forever(AfterWatermark.pastEndOfWindow()), accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES, allowedLateness = Duration.standardMinutes(60))"]],
       "paramsEncoded": false
     },
     {
@@ -198,7 +198,7 @@
           "m => m.get('_1)",
           "(oldvalue, newvalue) => oldvalue.updateWith('depositAmount)(_ + newvalue.get('depositAmount))",
           "(row, state) => Row('userId ->> row.get('_1) :: 'depositAmount ->> state.get('depositAmount) :: 'rw2 ->> row.get('_2).get('_2).getOrElse(List()) :: 'rw1 ->> row.get('_2).get('_1).getOrElse(List()) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)",
-          "\"vipPersist2\""
+          "\"vipPersist5\""
         ]
       ],
       "paramsEncoded": false
