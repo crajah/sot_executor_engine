@@ -1,4 +1,3 @@
-/*
 package parallelai.sot.executor.builder
 
 import org.apache.beam.sdk.options.PipelineOptions
@@ -103,4 +102,4 @@ object SOTBuilder {
 
     job.execute(sotUtils, sc, args)
   }
-}*/
+}
