@@ -109,18 +109,7 @@ object SchemalessWriter {
   SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] =
     new SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] {
       def write(sColl: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
-
-        val project = utils.getProject
-        sColl.map { rec =>
-          val entity = rec.hList.toEntityBuilder
-          val key = h.head(rec.hList)
-          val keyEntity = key match {
-            case name: String => makeKey(tap.kind, name.asInstanceOf[AnyRef])
-            case id: Int => makeKey(tap.kind, id.asInstanceOf[AnyRef])
-          }
-          entity.setKey(keyEntity)
-          entity.build()
-        }.saveAsDatastore(project)
+        sColl.map(x => (h.head(x.hList), x.hList)).saveAsDatastoreSchemaless(utils.getProject, tap.kind, tap.dedupCommits)
       }
     }
 
