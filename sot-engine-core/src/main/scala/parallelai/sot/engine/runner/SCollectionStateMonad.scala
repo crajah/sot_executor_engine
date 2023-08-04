@@ -59,6 +59,16 @@ object SCollectionStateMonad {
     })
 
 
+  def flatMap[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])(f: Row.Aux[L] => TraversableOnce[Row.Aux[Out]])
+                                                                         (implicit
+                                                                          prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
+                                                                         ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, sCollection.flatMap(x=> f(x)) :: HNil)
+      (res, res)
+    })
+
+
   def predict[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
                                                                          (modelBucket: String, modelPath: String, fetchOps: Seq[String],
                                                                           inFn: Row.Aux[L] => Map[String, Tensor],

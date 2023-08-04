@@ -1,0 +1,480 @@
+package core;
+
+option java_package = "com.openbet.platform.activityfeeds.model.core";
+option java_outer_classname = "CoreModel";
+
+//A class for holding batches of activity messages. In addition,
+//it has monitoring capabilities thanks to the embedded monitoring
+//object.
+message Batch {
+  required string uniqueId = 1;
+  repeated Activity messages = 2;
+  optional Monitoring monitoring = 3;
+}
+
+
+message Activity {
+
+  message ActivityHeader {
+
+    required int64 activityId = 1;
+    optional int64 timeStamp = 2;
+    optional CrudType crudType = 3;
+    optional SequencingKey sequencingKey = 4;
+    optional int64 queueId = 5;
+    optional bytes payload = 6;
+    optional string uniqueId = 7;
+    optional ActivityDescriptor activityDescriptor = 8;
+    optional int64 firstSentTime = 9;
+    optional int32 sendRetries = 10;
+
+    optional string contextRef = 11;
+    optional string publisherRef = 12;
+    optional string operatorRef = 14;
+
+    //Not populated by default.
+    optional string operatorName = 16;
+
+    optional Monitoring monitoring = 13;
+    optional int64 correlationId = 15;
+
+  }
+
+  //An enumeration of all the possible creation types
+  //that an activity message can have.
+  enum CrudType {
+    CREATE = 1;
+    READ = 2;
+    UPDATE = 3;
+    DELETE = 4;
+    INSERT = 5; //Used for sports feed which uses INSERT as CREATE crud type
+    PURGE = 6; //Used for sending messages with null payload in compacted topics from daos
+  }
+
+  required ActivityHeader header = 1;
+
+  optional BetState state = 201;
+  optional SupportingState supportingState = 211;
+}
+
+message SequencingKey {
+  optional SequencingDescriptor sequencingDescriptor = 1;
+  optional int32 sequencingId = 2;
+}
+
+message ActivityDescriptor {
+  required int32 id = 1;
+  required string name = 2;
+  optional string description = 3;
+}
+
+message SequencingDescriptor {
+  required int32 id = 1;
+  required string name = 2;
+  optional string description = 3;
+}
+
+//A class being used to monitor an activity while it is processed.
+//These values can be used for statistical analysis.
+message Monitoring {
+  optional int64 initializeAtCollector = 1;
+  optional int64 beforeSubmitToComposer = 2;
+  optional int64 startComposerQuery = 3;
+  optional int64 endComposerQuery = 4;
+  optional int64 orchestratorReceive = 5;
+  optional int64 orchestratorSend = 6;
+}
+
+message Source {
+  optional string channelRef = 1;
+  optional string siteRef = 2;
+  optional string jurisdictionRef = 3;
+  optional string productRef = 4;
+  optional string platformRef = 5;
+  optional string deviceRef = 6;
+  optional string ipAddr = 7;
+}
+
+// Used to store references to external systems
+message ExternalRef {
+  required string provider = 1;
+  required string id = 2;
+  optional string refType = 3;
+  optional string uri = 4;
+}
+
+message Bet {
+  required string id = 1;
+  optional string creationDate = 2;//ISO 8601 Date Time Format
+
+  // The customer account associated with the bet
+  optional string accountRef = 3;
+
+  // The customer whose account placed the bet.
+  optional string customerRef = 4;
+
+  optional core.Source source = 5;
+
+  // Unique ids assigned by external systems.
+  repeated core.ExternalRef externalUID = 22;
+
+  // Indicates how the legs in the bet are combined.  Common bet types will be:
+  // SGL - Single
+  // DBL - Double
+  // TBL - Treble
+  // ACC4, ACC5 ... ACC9 - Straight accumulators of 4-9 legs
+  // ACnn - Straight accumulator of 10 legs or more
+  // TRX - Trixie
+  // PAT - Patent
+  optional string betTypeRef = 6;
+
+  // Date and time of when the bet was placed in ISO8601 format
+  optional string placedAt = 7;
+
+  // String given to the customer to identify the bet on successful placement.
+  optional string receipt = 8;
+
+  // Is the bet settled?
+  optional bool isSettled = 9;
+
+  // Has the bet been accepted?
+  optional bool isConfirmed = 10;
+
+  // Has the bet been cancelled?
+  optional bool isCancelled = 11;
+
+  // Has the bet been cashed out by the customer prior to resulting of the events?
+  optional bool isCashedOut = 12;
+
+  // Is this a pool bet?
+  optional bool isPoolBet = 13;
+
+  // Date and time of when the bet was placed in ISO8601 format
+  optional string settledAt = 14;
+
+  // How the bet was settled
+  optional string settledHow = 15;
+
+  //Leave a gap here for other common flags
+
+  // Placed By Customer:  Bets may be placed under a syndicate customer account
+  // If this is the case the customer in the syndicate that placed the bet
+  // is captured here:
+  optional string placedByCustomerRef = 20;
+
+  // Parked Bet
+  // A bet can be parked in one of two ways
+  // 1) Automatically parked, in the event is settled and a bet has returns of more
+  //    than 20,000 GBP the bet is automatically parked allowing a trader to review
+  //    and grant final settlement
+  // 2) A bet can be manually parked (irrespective of amount). A common reason is a
+  //    suspicion about the bet or any suspicious betting patterns. Typically a
+  //    trader would manually park a bet.
+  optional bool isParked = 21;
+
+  // The stake is constructed of both funds from the customer's account and
+  // freebet tokens. The monetary format is given to 2dp. $10 would be
+  // 10.00
+  message Stake {
+    // Total stake
+    optional string amount = 1;
+
+    // Stake wagered on each line
+    optional string stakePerLine = 2;
+
+    // Freebet contribution towards the stake.
+    optional string freeBet = 3;
+
+    // ISO 4217 three letter currency code
+    optional string currencyRef = 4;
+  }
+
+  optional Stake stake = 30;
+
+  // The amount in the pool's currency
+  optional Stake poolStake = 31;
+
+  message Payout {
+    // Amount paid back as winnings to 2dp e.g. 10.00
+    optional string winnings = 1;
+
+    // Amount paid back as a refund of stake to 2dp e.g. 10.00
+    optional string refunds = 2;
+
+    // The potential amount that a bet could win if each line were to win.
+    optional string potential = 3;
+  }
+
+  optional Payout payout = 40;
+
+  // Lines are the individual wagers that make up the bet. To give an example
+  // a trixie is made of a bet on three legs; the treble and all the possible
+  // doubles.  That is to say, on legs A,B and C we would have the following wagers:
+  // ABC, AB, BC, AC
+  // so this bet would have four lines.
+  message Lines {
+    // Number of lines in the bet
+    optional int32 number = 1;
+
+    // Number of lines in the bet that have won.  For example if in the trixie
+    // on selections A, B and C where C lost but A and B had won then the AB double
+    // line would be a winner but the other three lines would have lost.
+    // In this case Lines.win would be set to 1.
+    optional int32 win = 2;
+
+    // Number of losing lines in the bet.
+    optional int32 lose = 3;
+
+    // Number of voided lines in the bet.
+    optional int32 voided = 4;
+  }
+
+  optional Lines lines = 50;
+
+  // The legs of the bet are the items that we need to know the result of before we can settle
+  // the bet.
+  // Normally a leg would be made up of just one selection that we just need to know whether it
+  // won or not.  An example would be 'Liverpool to win the FA Cup'.
+  // In complex legs we need to know the result of multiple outcomes before we can decide whether
+  // the leg is a winner or not.  An example of this would be a forecast leg where a player
+  // would pick a horse to come first and one to come second and we need to know the final
+  // place of both selections to determine whether the leg has won or not.
+  message Leg {
+
+    // The price of the leg determines the potential unit return if that leg were to win.
+    // The price is stored as a fractional numerator / denominator (so as to not lose
+    // precision).  Where there are no settlement deductions the win unit stake leg return is
+    // given by (1 + Price.num / Price.den)
+    message Price {
+
+      // The numerator of the price.  eg if the price is 5/2 Price.num = 5
+      optional int32 num = 1;
+
+      // The denominator of the price.  eg if the price is 5/2 Price.den = 2
+      optional int32 den = 2;
+
+      // This is the decimal representation of the price for display purposes.
+      // There are instances where it differs from the value computed by dividing
+      // numerator by denominator
+      // (see https://jira.openbet.com/browse/OBBP-521).
+      optional string decimal = 3;
+
+      // Reference to a bet/priceType entity. Describes how the return price
+      // will be obtained.
+      // FORMAT: The ID will be of the form [A-Z_] and will naturally
+      // describe the price type eg LP for live price, SP starting price etc.
+      optional string priceTypeRef = 4;
+
+      // Mark availability of a early price.
+      optional bool isEarlyPriceActive = 5;
+    }
+
+    optional Price price = 1;
+
+    //  This entity will indicate how the final position of the outcome
+    //  should determine the result. Examples would be:
+    //  WIN: It has to win
+    //  PLACE: It has to finish in the top x places
+    //  EXPLICIT_PLACES: The outcomeCombi on the leg determines the number
+    //  of places. The legPart.place determines where the outcome must
+    //  finish within those restrictions.
+    optional string winPlaceRef = 2;
+
+    message LegPart {
+      // The outcome we are betting on (tEvOc.ev_oc_id)
+      optional string outcomeRef = 1;
+
+      // The market we are betting on (tEvMkt.ev_mkt_id)
+      optional string marketRef = 2;
+
+      // The event we are betting on (tEv.ev_id)
+      optional string eventRef = 3;
+
+      // This attribute indicates a comma separated list of places
+      // where this part can finish. '*' indicates that it may finish in any
+      // position. If I had a boxed tricast with one selection with 1,2 and
+      // two other parts marked with * it would give me all the permutations
+      // where the first selection finishes in the first two places.
+      optional string places = 8;
+
+      // If this bet is bet in running (tOBet.in_running)
+      optional bool isInRunning = 9;
+
+      // The preferred selection for the leg in the betting system
+      optional bool bettingSystemPreferred = 10;
+
+      message PlaceTerms {
+
+        // The numerator of the place terms
+        optional int32 num = 1;
+
+        // The denominator of place terms
+        optional int32 den = 2;
+
+        // The number of places offered
+        optional int32 places = 3;
+
+      }
+
+      optional PlaceTerms placeTerms = 11;
+
+    }
+
+    //The handicap field is used to capture levels associated with the
+    //outcome such as handicaps and financial line positions. The hi/lo
+    //values can capture split line handicaps or range betting in
+    //financials. The handicapTypeRef will indicate how these figures
+    //should be interpreted - The difference between the home and away
+    //scores, combined score at half-time etc...
+    message Handicap {
+      required string handicapTypeRef = 1;
+      optional string low = 2;
+      optional string high = 3;
+    }
+
+    repeated LegPart legParts = 3;
+    optional string result = 4;
+    optional string poolId = 5;
+    optional string legSort = 6;
+    optional int32 index = 7;
+    optional Handicap handicap = 8;
+
+    //Indicates that this selection can not be combined with others in the bet
+    optional string noCombi = 9;
+  }
+
+  message BetTermChange {
+
+    message LegChange {
+
+      message Price {
+        optional int32 num = 1;
+        optional int32 den = 2;
+        optional string priceTypeRef = 3;
+      }
+
+      optional Price price = 1;
+    }
+
+    required string betId = 1;
+    optional string changeTime = 2;
+    optional string legNumber = 3;
+    optional LegChange legChange = 4;
+
+  }
+
+  repeated Leg leg = 60;
+  repeated BetTermChange betTermChange = 61;
+
+  message PoolBetSystem {
+    optional string betSystemRef = 1;
+    optional string customLineRef = 2;
+  }
+
+  optional PoolBetSystem poolBetSystem = 62;
+  optional string poolBetSubscriptionRef = 63;
+
+  // Is the bet pending approval?
+  optional bool isPending = 64;
+
+  message BetOverride {
+    required string id = 1;
+    optional string operatorRef = 2;
+    optional string creationDate = 3;
+    optional string action = 4;
+    optional string callRef = 5;
+    optional string reason = 6;
+    optional int32  legNo = 7;
+    optional int32  partNo = 8;
+    optional string refId = 9;
+  }
+
+  repeated BetOverride betOverrides = 65;
+}
+
+message BetSlip {
+  required string id = 1;
+  optional string accountRef = 2;
+  // ISO 8601 date time format
+  optional string creationDate = 3;
+  optional Bet.Stake totalStake = 4;
+}
+
+// State of entities represented upon betting activity.
+message BetState {
+  //deprecated
+  optional Bet bet = 1;
+
+  repeated Bet bets = 2;
+  optional BetSlip betSlip = 3;
+}
+
+message SupportingState {
+
+  message Outcome {
+
+    // The outcome we are betting on (tEvOc.ev_oc_id)
+    optional string outcomeRef = 1;
+
+    // The market we are betting on (tEvMkt.ev_mkt_id)
+    optional string marketRef = 2;
+
+    // The event we are betting on (tEv.ev_id)
+    optional string eventRef = 3;
+
+    // The market template reference used (tEvMkt.ev_oc_grp_id)
+    optional string marketTemplateRef = 12;
+
+    // Duplicating marketTemplateRef, will be deprecated in the next major version
+    optional string templateMarketRef = 8 [deprecated=true];
+
+    // The event type we are betting on (tEv.ev_type_id)
+    optional string typeRef = 9;
+
+    // The event class we are betting on (tEv.ev_class_id)
+    optional string classRef = 10;
+
+    // The event category we are betting on (tEvClass.category)
+    optional string categoryRef = 11;
+
+    optional string outcomeName = 4;
+    optional string marketName = 5;
+    optional string marketSort = 13;
+    optional string eventName = 6;
+    optional string eventStartTime = 7;
+    optional string classSort = 14;
+
+    message PlaceTerms {
+
+      // The numerator of the place terms
+      optional int32 num = 1;
+
+      // The denominator of place terms
+      optional int32 den = 2;
+
+      // The number of places offered
+      optional int32 places = 3;
+
+    }
+
+    optional PlaceTerms marketPlaceTerms = 15;
+
+  }
+
+  message Pool {
+    optional string poolName = 1;
+    optional string poolTypeName = 2;
+    optional string poolTypeId = 3;
+    optional string closingTime = 4;
+    optional string jackpotName = 5;
+    optional string rakePercentage = 6;
+  }
+
+  message Customer {
+    optional string accountNumber = 1;
+  }
+
+  repeated Outcome outcome = 1;
+  repeated Pool pool = 2;
+  optional Customer customer = 3;
+}
