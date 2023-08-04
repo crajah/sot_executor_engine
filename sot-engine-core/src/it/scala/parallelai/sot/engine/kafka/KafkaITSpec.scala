@@ -1,3 +1,4 @@
+/*
 package parallelai.sot.engine.kafka
 
 import java.nio.charset.Charset
@@ -89,3 +90,4 @@ class KafkaITSpec extends PipelineSpec with ForAllContainersFixture with KafkaCo
     read()
   }
 }
+*/

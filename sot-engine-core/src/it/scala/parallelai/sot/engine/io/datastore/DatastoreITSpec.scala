@@ -36,9 +36,13 @@ import parallelai.sot.engine.ProjectFixture
   * i.e. we can configure and start up containers programmatically as use in this specification.
   */
 class DatastoreITSpec extends WordSpec with MustMatchers with ForAllContainersFixture with ProjectFixture with DatastoreContainerFixture {
-  case class Foo(one: String, two: String)
+  trait Blah
 
-  case class Foo1(one: Boolean, two: Int)
+  case class Foo(one: String, two: String) extends Blah
+
+  case class Foo1(one: Boolean, two: Int) extends Blah
+
+  implicit val blahGen: LabelledGeneric[Blah] = LabelledGeneric[Blah]
 
   implicit val fooGen: LabelledGeneric[Foo] = LabelledGeneric[Foo]
 
@@ -55,7 +59,7 @@ class DatastoreITSpec extends WordSpec with MustMatchers with ForAllContainersFi
     }
 
     "persist data by ID of type String" in {
-      val foo = Foo("oneValue", "twoValue")
+      val foo: Blah = Foo("oneValue", "twoValue")
       datastore.put("myFoo", foo)
 
       datastore.get[Foo]("myFoo") mustBe Some(foo)
