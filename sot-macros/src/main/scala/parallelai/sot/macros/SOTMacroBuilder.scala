@@ -121,26 +121,28 @@ object SOTMainMacroImpl {
     val idsStack = mutable.Map[String, Int]()
     val ops = tsortedVertices.map {opId =>
       val op = getOp(opId, config.steps)
-      setNextStackId(idsStack, opId)
       val stepParsed =  op match {
         case _: TransformationOp =>
+          setNextStackId(idsStack, opId)
           val opParsed = parseOperation(op, dag, config).get
           (opParsed._2, opParsed._3)
 
         case _: TFPredictOp =>
+          setNextStackId(idsStack, opId)
           val opParsed = parseOperation(op, dag, config).get
           (opParsed._2, opParsed._3)
+
+        case sourceOp: SourceOp =>
+          setNextStackId(idsStack, opId)
+          val sourceDef = sources.find(_._1._1 == sourceOp.id).get
+          (Term.Name("read"), List(List(Term.Name("sc"), buildTap(Term.Name("conf.sourceTaps"), sourceDef._1._2, sourceDef._1._3, sourceDef._2), Term.Name("sotUtils"))))
 
         case sinkOp: SinkOp =>
           val sinkDef = sinks.find(_._1 == sinkOp.id).get
           val writeMethod = if (sinkDef._2.isDefined) "write" else "writeSchemaless"
           (Term.Name(writeMethod), List(List(buildTap(Term.Name("conf.sinkTaps"), sinkDef._2, sinkDef._3, sinks.indexOf(sinkDef)), Term.Name("sotUtils"))))
 
-        case sourceOp: SourceOp =>
-          val sourceDef = sources.find(_._1._1 == sourceOp.id).get
-          (Term.Name("read"), List(List(Term.Name("sc"), buildTap(Term.Name("conf.sourceTaps"), sourceDef._1._2, sourceDef._1._3, sourceDef._2), Term.Name("sotUtils"))))
       }
-
       val inputScolls = opInputs.getOrElse(opId, Nil).map {e1 =>
           val inEdgeIndex = idsStack(e1)
           val idTerm = Term.Apply(Term.Name("Nat" + inEdgeIndex), List())
@@ -157,8 +159,10 @@ object SOTMainMacroImpl {
 
   private def setNextStackId(idsStack: mutable.Map[String, Int], id: String) = {
     val values = idsStack.values
-    val newId = if (values.isEmpty) 0 else values.max + 1
-    idsStack.put(id, newId)
+    if (!idsStack.contains(id)){
+      val newId = if (values.isEmpty) 0 else values.max + 1
+      idsStack.put(id, newId)
+    }
   }
 
   def bigQuerySchemaCodeGenerator(definition: BigQueryDefinition): Seq[Stat] = {
