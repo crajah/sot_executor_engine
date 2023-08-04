@@ -29,9 +29,9 @@ import scala.reflect.ClassTag
   * @tparam V     value
   * @tparam Value value type
   */
-class StatefulDoFn[K, V <: HList, Value <: HList](getValue: Row.Aux[V] => Row.Aux[Value],
+class StatefulDoFn[K, V <: HList, Value <: HList, UpdateValue <: HList](getValue: Row.Aux[V] => Row.Aux[UpdateValue],
                                                   defaultValue: Row.Aux[Value],
-                                                  aggr: (Row.Aux[Value], Row.Aux[Value]) => Row.Aux[Value],
+                                                  aggr: (Row.Aux[Value], Row.Aux[UpdateValue]) => Row.Aux[Value],
                                                   persistence: Option[Datastore],
                                                   coder: Coder[Row.Aux[Value]])(implicit toL: ToEntity[Value], fromL: FromEntity[Value])
   extends DoFn[KV[K, Row.Aux[V]], (Row.Aux[V], Row.Aux[Value], Instant)] {
@@ -85,10 +85,10 @@ class UpdateTimestampDoFn[V <: HList, Value <: HList] extends DoFn[(Row.Aux[V], 
 class AccumulatorSCollectionFunctions[V <: HList](@transient val self: SCollection[Row.Aux[V]])
   extends Serializable {
 
-  def accumulator[K: ClassTag, Out <: HList, Value <: HList](keyMapper: Row.Aux[V] => K,
-                                                             getValue: Row.Aux[V] => Row.Aux[Value],
+  def accumulator[K: ClassTag, Out <: HList, Value <: HList, UpdateValue <: UpdateValue](keyMapper: Row.Aux[V] => K,
+                                                             getValue: Row.Aux[V] => Row.Aux[UpdateValue],
                                                              defaultValue: Row.Aux[Value],
-                                                             aggr: (Row.Aux[Value], Row.Aux[Value]) => Row.Aux[Value],
+                                                             aggr: (Row.Aux[Value], Row.Aux[UpdateValue]) => Row.Aux[Value],
                                                              toOut: (Row.Aux[V], Row.Aux[Value]) => Row.Aux[Out],
                                                              datastoreSettings: Option[(Project, Kind)]
                                                             )(implicit toL: ToEntity[Value], fromL: FromEntity[Value]): SCollection[Row.Aux[Out]] = {
