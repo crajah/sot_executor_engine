@@ -71,18 +71,18 @@ object SCollectionStateMonad {
       (res, res)
     })
 
-  def accumulate[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
-                                                                                                      (getValue: Row.Aux[L] => Row.Aux[I])(
-                                                                                                        defaultValue: Row.Aux[I],
-                                                                                                        keyMapper: Row.Aux[L] => K,
-                                                                                                        aggr: (Row.Aux[I], Row.Aux[I]) => Row.Aux[I],
-                                                                                                        toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
-                                                                                                        kind: String = "")
-                                                                                                      (implicit
-                                                                                                       prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
-                                                                                                       toL: ToEntity[I],
-                                                                                                       fromL: FromEntity[I]
-                                                                                                      ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+  def accumulate[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList : ClassTag, Out <: HList, I <: HList : ClassTag](sCollection: SCollection[Row.Aux[L]])
+                                                                                                                           (getValue: L => I)(
+                                                                                                                             defaultValue: I,
+                                                                                                                             keyMapper: Row.Aux[L] => K,
+                                                                                                                             aggr: (I, I) => I,
+                                                                                                                             toOut: (L, I) => Out,
+                                                                                                                             kind: String = "")
+                                                                                                                           (implicit
+                                                                                                                            prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
+                                                                                                                            toL: ToEntity[I],
+                                                                                                                            fromL: FromEntity[I]
+                                                                                                                           ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val opKind: Option[String] = kind match {
         case "" => None
