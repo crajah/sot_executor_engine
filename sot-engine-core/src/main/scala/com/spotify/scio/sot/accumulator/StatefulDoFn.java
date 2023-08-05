@@ -2,9 +2,7 @@ package com.spotify.scio.sot.accumulator;
 
 import com.google.datastore.v1.Entity;
 import parallelai.sot.engine.generic.row.JavaRow;
-import parallelai.sot.engine.generic.row.Row;
 import parallelai.sot.engine.io.datatype.FromMappable;
-import org.apache.beam.sdk.coders.VarIntCoder;
 import org.apache.beam.sdk.state.StateSpec;
 import org.apache.beam.sdk.state.StateSpecs;
 import org.apache.beam.sdk.state.ValueState;
@@ -65,14 +63,11 @@ public class StatefulDoFn<K, V extends HList, Value extends HList>
         K key = context.element().getKey();
 
         JavaRow<Value> s = state.read();
-        LOG.error("reading state " + s);
-
-        scala.Option<JavaRow<Value>> current = DatastoreValueReader.readValue(key, scala.Option.apply(state.read()), persistence, fromL);
+        scala.Option<JavaRow<Value>> current = DatastoreValueReader.readValue(key, scala.Option.apply(s), persistence, fromL);
 
         JavaRow<Value> value = getValue.apply(context.element().getValue());
 
         JavaRow<Value> newValue;
-
         if (current.isEmpty()) {
             newValue = aggr.apply(defaultValue, value);
         } else {
@@ -80,9 +75,6 @@ public class StatefulDoFn<K, V extends HList, Value extends HList>
         }
 
         context.output(scala.Tuple3.apply(context.element().getValue(), newValue, Instant.now()));
-
-        LOG.error("writing state " + newValue);
-
         state.write(newValue);
     }
 

@@ -8,7 +8,7 @@ import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import org.joda.time.Duration
 import org.tensorflow.Tensor
 import parallelai.sot.engine.Project
-import parallelai.sot.engine.generic.row.{DeepRec, JavaRow, Row}
+import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.datastore.{FromEntity, Kind, ToEntity}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.executor.model.SOTMacroConfig.TapDefinition
@@ -72,17 +72,17 @@ object SCollectionStateMonad {
     })
 
   def accumulate[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList : ClassTag, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
-                                                                                                                           (getValue: Row.Aux[L] => Row.Aux[I])(
-                                                                                                                             defaultValue: Row.Aux[I],
-                                                                                                                             keyMapper: Row.Aux[L] => K,
-                                                                                                                             aggr: (Row.Aux[I], Row.Aux[I]) => Row.Aux[I],
-                                                                                                                             toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
-                                                                                                                             kind: String = "")
-                                                                                                                           (implicit
-                                                                                                                            prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
-                                                                                                                            toL: ToEntity[I],
-                                                                                                                            fromL: FromEntity[I]
-                                                                                                                           ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+                                                                                                                (getValue: Row.Aux[L] => Row.Aux[I])(
+                                                                                                                  defaultValue: Row.Aux[I],
+                                                                                                                  keyMapper: Row.Aux[L] => K,
+                                                                                                                  aggr: (Row.Aux[I], Row.Aux[I]) => Row.Aux[I],
+                                                                                                                  toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
+                                                                                                                  kind: String = "")
+                                                                                                                (implicit
+                                                                                                                 prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
+                                                                                                                 toL: ToEntity[I],
+                                                                                                                 fromL: FromEntity[I]
+                                                                                                                ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val opKind: Option[String] = kind match {
         case "" => None
@@ -104,6 +104,16 @@ object SCollectionStateMonad {
                                                                                   ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val res = prepend(sColls, sCollection.withFixedWindows(duration, offset, options) :: HNil)
+      (res, res)
+    })
+
+  def withGlobalWindow[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
+                                                                                  (options: WindowOptions = WindowOptions())
+                                                                                  (implicit
+                                                                                   prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[L]] :: HNil, SCOLOUT]
+                                                                                  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, sCollection.withGlobalWindow(options) :: HNil)
       (res, res)
     })
 

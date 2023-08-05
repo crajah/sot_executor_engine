@@ -110,6 +110,12 @@
     },
     {
       "type": "datastore",
+      "id": "vip_state_all",
+      "kind": "vip_state_all",
+      "dedupCommits": true
+    },
+    {
+      "type": "datastore",
       "id": "vip_state",
       "kind": "vip_state",
       "dedupCommits": true
@@ -176,6 +182,14 @@
     },
     {
       "type": "transformation",
+      "id": "global_window",
+      "name": "global_window",
+      "op": "withGlobalWindow",
+      "params": [[]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
       "id": "vip_states",
       "name": "vip_states",
       "op": "accumulate",
@@ -187,8 +201,7 @@
           "Row('depositAmount ->> 0.0f :: 'numDeposit ->> 0.0f :: 'turnover ->> 0.0f :: 'winAmnt ->> 0.0f :: 'numBets ->> 0.0f :: 'bonusStakeAmnt ->> 0.0f :: 'ggr ->> 0.0f :: HNil)",
           "m => m.get('_1)",
           "(oldvalue, newvalue) => oldvalue.updateWith('depositAmount)(_ + newvalue.get('depositAmount)).updateWith('numDeposit)(_ + newvalue.get('numDeposit)).updateWith('turnover)(_ + newvalue.get('turnover)).updateWith('winAmnt)(_ + newvalue.get('winAmnt)).updateWith('numBets)(_ + newvalue.get('numBets)).updateWith('bonusStakeAmnt)(_ + newvalue.get('bonusStakeAmnt)).updateWith('ggr)(_ + newvalue.get('ggr))",
-          "(row, state) => Row('userId ->> row.get('_1) :: 'numDeposit ->> state.get('numDeposit) :: 'depositAmount ->> state.get('depositAmount) :: 'firstDepAmnt ->> 0.0f :: 'ggr ->> 0.0f :: 'turnover ->> state.get('turnover) :: 'playerDays ->> 0.0f :: 'winAmnt ->> state.get('winAmnt) :: 'numBets ->> state.get('numBets) :: 'bonusStakeAmnt ->> state.get('bonusStakeAmnt) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)",
-          "\"vipPersist9\""
+          "(row, state) => Row('userId ->> row.get('_1) :: 'numDeposit ->> state.get('numDeposit) :: 'depositAmount ->> state.get('depositAmount) :: 'firstDepAmnt ->> 0.0f :: 'ggr ->> 0.0f :: 'turnover ->> state.get('turnover) :: 'playerDays ->> 0.0f :: 'winAmnt ->> state.get('winAmnt) :: 'numBets ->> state.get('numBets) :: 'bonusStakeAmnt ->> state.get('bonusStakeAmnt) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)"
         ]
       ],
       "paramsEncoded": false
@@ -213,11 +226,10 @@
           "m => Row('previousPrediction ->> 0L :: 'currentPrediction ->> m.get('prediction) :: HNil)"
         ],
         [
-          "Row('previousPrediction ->> 1000L :: 'currentPrediction ->> 1000L :: HNil)",
+          "Row('previousPrediction ->> 0L :: 'currentPrediction ->> 0L :: HNil)",
           "m => m.get('userId)",
           "(oldvalue, newvalue) => Row('previousPrediction ->> oldvalue.get('currentPrediction) :: 'currentPrediction ->> newvalue.get('currentPrediction) :: HNil)",
-          "(row, state) => Row('userId ->> row.get('userId) :: 'previousPrediction ->> state.get('previousPrediction) :: 'currentPrediction ->> state.get('currentPrediction) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)",
-          "\"teststate"
+          "(row, state) => Row('userId ->> row.get('userId) :: 'previousPrediction ->> state.get('previousPrediction) :: 'currentPrediction ->> state.get('currentPrediction) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)"
         ]
       ],
       "paramsEncoded": false
@@ -228,6 +240,20 @@
       "name": "filter_updates",
       "op": "filter",
       "params": [["m => m.get('previousPrediction) != m.get('currentPrediction)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "ds_out_state_all",
+      "name": "ds_out_state_all",
+      "source": "vip_state_all"
+    },
+    {
+      "type": "transformation",
+      "id": "map_to_vip_state",
+      "name": "map_to_vip_state",
+      "op": "map",
+      "params": [["m => Row('userId ->> m.get('userId) :: 'vipState ->> m.get('prediction) :: HNil)"]],
       "paramsEncoded": false
     },
     {
@@ -257,6 +283,10 @@
       "to": "join_bet_deposit"
     },
     {
+      "from": "join_bet_deposit",
+      "to": "global_window"
+    },
+    {
       "from": "deposits_in",
       "to": "window_deposit"
     },
@@ -269,7 +299,7 @@
       "to": "join_bet_deposit"
     },
     {
-      "from": "join_bet_deposit",
+      "from": "global_window",
       "to": "vip_states"
     },
     {
@@ -278,6 +308,14 @@
     },
     {
       "from": "vip_predict",
+      "to": "ds_out_state_all"
+    },
+    {
+      "from": "vip_predict",
+      "to": "map_to_vip_state"
+    },
+    {
+      "from": "map_to_vip_state",
       "to": "ds_out_state"
     },
     {
@@ -286,6 +324,10 @@
     },
     {
       "from": "previous_state",
+      "to": "filter_updates"
+    },
+    {
+      "from": "filter_updates",
       "to": "bq_out_update"
     }
   ]

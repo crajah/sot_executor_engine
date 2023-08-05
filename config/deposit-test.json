@@ -72,8 +72,7 @@
           "Row('depositAmount ->> 0.0f :: 'depositCount ->> 0 :: HNil)",
           "m => m.get('userId)",
           "(oldvalue, newvalue) => oldvalue.updateWith('depositAmount)(_ + newvalue.get('depositAmount)).updateWith('depositCount)(_ + newvalue.get('depositCount))",
-          "(row, state) => row.append('counter, state.get('depositAmount)).append('counter2, state.get('depositCount)).append('ts, Helper.fmt.print(Helper.Instant.now()))",
-          "\"persistState5\""
+          "(row, state) => row.append('counter, state.get('depositAmount)).append('counter2, state.get('depositCount)).append('ts, Helper.fmt.print(Helper.Instant.now()))"
         ]
       ],
       "paramsEncoded": false
