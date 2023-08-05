@@ -76,3 +76,16 @@ object Row {
       val hList = gen
     }
 }
+
+trait JavaRow[L0 <: HList] extends Row {
+  override type L = L0
+}
+
+object JavaRow {
+
+  def apply[Repr <: HList](gen: Repr): JavaRow[Repr] =
+    new JavaRow[Repr] {
+      val hList = gen
+    }
+
+}

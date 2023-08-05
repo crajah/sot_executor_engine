@@ -1,6 +1,7 @@
 package com.spotify.scio.sot.accumulator;
 
 import com.google.datastore.v1.Entity;
+import parallelai.sot.engine.generic.row.JavaRow;
 import parallelai.sot.engine.generic.row.Row;
 import parallelai.sot.engine.io.datatype.FromMappable;
 import org.apache.beam.sdk.coders.VarIntCoder;
@@ -19,17 +20,29 @@ import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+  * StatefulDoFn keeps track of a state of the marked variables and stores them to datastore if persistence is provided.
+  * @tparam K     key
+  * @tparam V     value
+  * @tparam Value value type
+  */
 public class StatefulDoFn<K, V extends HList, Value extends HList>
-        extends DoFn<KV<K, V>, scala.Tuple3<V, Value, Instant>> {
+        extends DoFn<KV<K, JavaRow<V>>, scala.Tuple3<JavaRow<V>, JavaRow<Value>, Instant>> {
 
-    private Function<V, Value> getValue;
-    private Value defaultValue;
-    private BiFunction<Value, Value, Value> aggr;
+    private Function<JavaRow<V>, JavaRow<Value>> getValue;
+    private JavaRow<Value> defaultValue;
+    private BiFunction<JavaRow<Value>, JavaRow<Value>, JavaRow<Value>> aggr;
     private scala.Option<Datastore> persistence;
     private FromMappable<Value, Entity.Builder> fromL;
 
-    public StatefulDoFn(Function<V, Value> getValue, Value defaultValue,
-                        BiFunction<Value, Value, Value> aggr,
+    /**
+     * @param getValue     function to get the value to keep track of from the data object
+     * @param defaultValue value to initialise the state
+     * @param aggr         aggregate values
+     * @param persistence  storage option to persist states
+     */
+    public StatefulDoFn(Function<JavaRow<V>, JavaRow<Value>> getValue, JavaRow<Value> defaultValue,
+                        BiFunction<JavaRow<Value>, JavaRow<Value>, JavaRow<Value>> aggr,
                         scala.Option<Datastore> persistence,
                         FromMappable<Value, Entity.Builder> fromL
                         ) {
@@ -41,28 +54,24 @@ public class StatefulDoFn<K, V extends HList, Value extends HList>
     }
 
 
-    public void test(Row r) {
-
-    }
-
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     @StateId("value")
-    private final StateSpec<ValueState<Value>> stateSpec = StateSpecs.value();
+    private final StateSpec<ValueState<JavaRow<Value>>> stateSpec = StateSpecs.value();
 
     @ProcessElement
-    public void processElement(ProcessContext context, @StateId("value") ValueState<Value> state) {
+    public void processElement(ProcessContext context, @StateId("value") ValueState<JavaRow<Value>> state) {
 
         K key = context.element().getKey();
 
-        Value s = state.read();
+        JavaRow<Value> s = state.read();
         LOG.error("reading state " + s);
 
-        scala.Option<Value> current = StatefulDoFnScala.readValue(key, scala.Option.apply(state.read()), persistence, fromL);
+        scala.Option<JavaRow<Value>> current = DatastoreValueReader.readValue(key, scala.Option.apply(state.read()), persistence, fromL);
 
-        Value value = getValue.apply(context.element().getValue());
+        JavaRow<Value> value = getValue.apply(context.element().getValue());
 
-        Value newValue;
+        JavaRow<Value> newValue;
 
         if (current.isEmpty()) {
             newValue = aggr.apply(defaultValue, value);

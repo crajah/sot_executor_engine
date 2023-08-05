@@ -46,7 +46,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "bigquerytest",
-      "table": "deposits25",
+      "table": "deposits26",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
@@ -79,14 +79,6 @@
       "paramsEncoded": false
     },
     {
-      "type": "transformation",
-      "id": "random",
-      "name": "mapper1",
-      "op": "map",
-      "params": [["m => if (scala.util.Random.nextDouble() > 0.9) throw new Exception(\"Unlucky \" + m.get('userId)) else m"]],
-      "paramsEncoded": false
-    },
-    {
       "type": "sink",
       "id": "out",
       "name": "out",
@@ -100,10 +92,6 @@
     },
     {
       "from": "mapper1",
-      "to": "random"
-    },
-    {
-      "from": "random",
       "to": "out"
     }
   ]

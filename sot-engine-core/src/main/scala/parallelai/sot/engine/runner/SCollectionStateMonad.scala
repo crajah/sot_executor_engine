@@ -8,7 +8,7 @@ import org.apache.beam.sdk.extensions.gcp.options.GcpOptions
 import org.joda.time.Duration
 import org.tensorflow.Tensor
 import parallelai.sot.engine.Project
-import parallelai.sot.engine.generic.row.{DeepRec, Row}
+import parallelai.sot.engine.generic.row.{DeepRec, JavaRow, Row}
 import parallelai.sot.engine.io.datastore.{FromEntity, Kind, ToEntity}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.executor.model.SOTMacroConfig.TapDefinition
@@ -71,12 +71,12 @@ object SCollectionStateMonad {
       (res, res)
     })
 
-  def accumulate[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList : ClassTag, Out <: HList, I <: HList : ClassTag](sCollection: SCollection[Row.Aux[L]])
-                                                                                                                           (getValue: L => I)(
-                                                                                                                             defaultValue: I,
+  def accumulate[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList : ClassTag, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
+                                                                                                                           (getValue: Row.Aux[L] => Row.Aux[I])(
+                                                                                                                             defaultValue: Row.Aux[I],
                                                                                                                              keyMapper: Row.Aux[L] => K,
-                                                                                                                             aggr: (I, I) => I,
-                                                                                                                             toOut: (L, I) => Out,
+                                                                                                                             aggr: (Row.Aux[I], Row.Aux[I]) => Row.Aux[I],
+                                                                                                                             toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
                                                                                                                              kind: String = "")
                                                                                                                            (implicit
                                                                                                                             prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
