@@ -1,7 +1,7 @@
 {
-  "id": "bet-filter-by-type-and-market",
-  "name": "BetFilterByTypeAndMarket",
-  "version": "v0.1.5",
+  "id": "vip-model-preprocessing",
+  "name": "vip-model-preprocessing",
+  "version": "v0.1.11",
   "schemas": [
     {
       "type": "protobuf",
@@ -21,19 +21,16 @@
     {
       "type": "kafka",
       "id": "kafkasource1",
-      "bootstrap": "10.101.180.162:9092",
+      "bootstrap": "10.101.177.185:9092",
       "topic": "coral.prod.digital.openbet.bets.1",
       "group": "pai-baf-filter-by-type-and-market",
       "defaultOffset": "latest",
       "autoCommit": false
     },
     {
-      "type": "bigquery",
-      "id": "bigquerysource1",
-      "dataset": "bigquerytest",
-      "table": "vip-data",
-      "createDisposition": "CREATE_IF_NEEDED",
-      "writeDisposition": "WRITE_APPEND"
+      "type": "pubsub",
+      "id": "betfeed",
+      "topic": "betfeedvip"
     }
   ],
   "steps": [
@@ -70,7 +67,7 @@
       "type": "sink",
       "id": "out",
       "name": "out",
-      "source": "bigquerysource1"
+      "source": "betfeed"
     }
   ],
   "dag": [
