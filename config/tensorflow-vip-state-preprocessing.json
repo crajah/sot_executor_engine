@@ -30,7 +30,7 @@
           },
           {
             "name": "winnings",
-            "type": "string"
+            "type": "float"
           },
           {
             "name": "outComeName",
@@ -58,7 +58,7 @@
           },
           {
             "name": "stake",
-            "type": "string"
+            "type": "float"
           },
           {
             "name": "crudType",
@@ -70,7 +70,7 @@
           },
           {
             "name": "freeBet",
-            "type": "string"
+            "type": "float"
           },
           {
             "name": "userid",
