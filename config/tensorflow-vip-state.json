@@ -103,7 +103,7 @@
     {
       "type": "bigquery",
       "id": "vip_update",
-      "dataset": "bigquerytest",
+      "dataset": "bi_crm_poc",
       "table": "vip_update",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
@@ -253,7 +253,7 @@
       "id": "map_to_vip_state",
       "name": "map_to_vip_state",
       "op": "map",
-      "params": [["m => Row('userId ->> m.get('userId) :: 'vipState ->> m.get('prediction) :: HNil)"]],
+      "params": [["m => Row('userId ->> m.get('userId) :: 'vipState ->> m.get('prediction) :: 'ts ->> m.get('ts) :: HNil)"]],
       "paramsEncoded": false
     },
     {
