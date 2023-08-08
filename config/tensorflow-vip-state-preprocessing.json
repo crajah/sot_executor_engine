@@ -129,7 +129,7 @@
       "op": "map",
       "params": [
         [
-          "m => m.updateWith('winnings)(_.toFloat).updateWith('state)(_.toFloat).updateWith('freeBet)(_.toFloat).append('ts, Helper.fmt.print(Helper.Instant.now()))"
+          "m => m.updateWith('winnings)(_.toFloat).updateWith('stake)(_.toFloat).updateWith('state)(_.name).updateWith('freeBet)(_.toFloat).append('ts, Helper.fmt.print(Helper.Instant.now()))"
         ]
       ],
       "paramsEncoded": false
