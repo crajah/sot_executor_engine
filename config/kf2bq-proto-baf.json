@@ -1,7 +1,7 @@
 {
   "id": "bet-filter-by-type-and-market",
   "name": "BetFilterByTypeAndMarket",
-  "version": "v0.1.5",
+  "version": "v0.1.8",
   "schemas": [    {
       "type": "protobuf",
       "id": "protoschema1",
@@ -20,7 +20,7 @@
     {
       "type": "kafka",
       "id": "kafkasource1",
-      "bootstrap": "10.101.180.162:9092",
+      "bootstrap": "10.101.177.185:9092",
       "topic": "coral.prod.digital.openbet.bets.1",
       "group": "pai-baf-filter-by-type-and-market",
       "defaultOffset": "latest",
@@ -56,7 +56,7 @@
       "id": "filter-type-and-market",
       "name": "filterMarketAndMarket",
       "op": "filter",
-      "params": [["m => m.get('betTypeRef)== Some(\"SGL\") && m.get('leg).filter(l => l.get('legParts).filter(lp => lp.get('marketRef) == Some(201360699)).length > 0).length > 0"]],
+      "params": [["m => m.get('betTypeRef)== Some(\"SGL\") && m.get('leg).filter(l => l.get('legParts).filter(lp => lp.get('marketRef) == Some(\"201360699\")).length > 0).length > 0"]],
       "paramsEncoded": false
     },
     {
