@@ -14,7 +14,7 @@ package object accumulator {
       * Implicit conversion from [[com.spotify.scio.values.SCollection SCollection]] to
       * [[AccumulatorSCollectionFunctions]].
       */
-    implicit def makeAccumulatorSCollectionFunctions[V <: HList](s: SCollection[Row.Aux[V]])
+    implicit def makeAccumulatorSCollectionFunctions[V <: HList: ClassTag](s: SCollection[Row.Aux[V]])
     : AccumulatorSCollectionFunctions[V] = new AccumulatorSCollectionFunctions(s)
 
 

@@ -81,18 +81,18 @@ object SCollectionStateMonad {
       (res, res)
     })
 
-  def accumulate[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
-                                                                                                      (getValue: Row.Aux[L] => Row.Aux[I])(
-                                                                                                        defaultValue: Row.Aux[I],
-                                                                                                        keyMapper: Row.Aux[L] => K,
-                                                                                                        aggr: (Row.Aux[I], Row.Aux[I]) => Row.Aux[I],
-                                                                                                        toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
-                                                                                                        kind: String = "")
-                                                                                                      (implicit
-                                                                                                       prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
-                                                                                                       toL: ToEntity[I],
-                                                                                                       fromL: FromEntity[I]
-                                                                                                      ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+  def accumulate[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList : ClassTag, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
+                                                                                                                (getValue: Row.Aux[L] => Row.Aux[I])(
+                                                                                                                  defaultValue: Row.Aux[I],
+                                                                                                                  keyMapper: Row.Aux[L] => K,
+                                                                                                                  aggr: (Row.Aux[I], Row.Aux[I]) => Row.Aux[I],
+                                                                                                                  toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
+                                                                                                                  kind: String = "")
+                                                                                                                (implicit
+                                                                                                                 prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
+                                                                                                                 toL: ToEntity[I],
+                                                                                                                 fromL: FromEntity[I]
+                                                                                                                ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val opKind: Option[String] = kind match {
         case "" => None
@@ -114,6 +114,16 @@ object SCollectionStateMonad {
                                                                                   ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val res = prepend(sColls, sCollection.withFixedWindows(duration, offset, options) :: HNil)
+      (res, res)
+    })
+
+  def withGlobalWindow[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
+                                                                                  (options: WindowOptions = WindowOptions())
+                                                                                  (implicit
+                                                                                   prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[L]] :: HNil, SCOLOUT]
+                                                                                  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, sCollection.withGlobalWindow(options) :: HNil)
       (res, res)
     })
 
@@ -222,6 +232,20 @@ object SCollectionStateMonad {
   ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
     IndexedState(sColls => {
       val res = prepend(sColls, pair1(sColl1).rightOuterJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+      (res, res)
+    }
+    )
+
+
+  def fullOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+  (implicit
+   pair1: IsPair.Aux[J1, K, L1],
+   pair2: IsPair.Aux[J2, K, L2],
+   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, Option[L1], Option[L2]] :: HNil, SCOLOUT]
+  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+    IndexedState(sColls => {
+      val res = prepend(sColls, pair1(sColl1).fullOuterJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
       (res, res)
     }
     )

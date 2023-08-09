@@ -1,0 +1,351 @@
+{
+  "id": "vip-model-predict",
+  "name": "vip-model-predict",
+  "version": "v0.1.11",
+  "schemas": [
+    {
+      "type": "avro",
+      "id": "avroschema_bet",
+      "name": "avroschema_bet",
+      "version": "version2",
+      "definition": {
+        "name": "Bet",
+        "doc": "A basic schema for storing user records",
+        "fields": [
+          {
+            "name": "customerRef",
+            "type": "string"
+          },
+          {
+            "name": "winnings",
+            "type": "float"
+          },
+          {
+            "name": "outComeName",
+            "type": "string"
+          },
+          {
+            "name": "marketName",
+            "type": "string"
+          },
+          {
+            "name": "eventName",
+            "type": "string"
+          },
+          {
+            "name": "categoryRef",
+            "type": "string"
+          },
+          {
+            "name": "stateBetsId",
+            "type": "string"
+          },
+          {
+            "name": "currency",
+            "type": "string"
+          },
+          {
+            "name": "stake",
+            "type": "float"
+          },
+          {
+            "name": "crudType",
+            "type": "string"
+          },
+          {
+            "name": "isSettled",
+            "type": "boolean"
+          },
+          {
+            "name": "freeBet",
+            "type": "float"
+          },
+          {
+            "name": "userid",
+            "type": "string"
+          },
+          {
+            "name": "ts",
+            "type": "string"
+          }
+        ],
+        "type": "record",
+        "namespace": "parallelai.sot.avro"
+      }
+    }
+  ],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource_bet",
+      "topic": "betfeedvip"
+    },
+    {
+      "type": "pubsub",
+      "id": "pubsubsource_deposit",
+      "topic": "betfeedvip"
+    },
+    {
+      "type": "bigquery",
+      "id": "vip_update",
+      "dataset": "bi_crm_poc",
+      "table": "vip_update",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    },
+    {
+      "type": "datastore",
+      "id": "vip_state_all",
+      "kind": "vip_state_all",
+      "dedupCommits": true
+    },
+    {
+      "type": "datastore",
+      "id": "vip_state",
+      "kind": "vip_state",
+      "dedupCommits": true
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "bets_in",
+      "name": "bests_in",
+      "schema": "avroschema_bet",
+      "source": "pubsubsource_bet"
+    },
+    {
+      "type": "source",
+      "id": "deposits_in",
+      "name": "deposits_in",
+      "schema": "avroschema_bet",
+      "source": "pubsubsource_deposit"
+    },
+    {
+      "type": "transformation",
+      "id": "deposits_filter_crud",
+      "name": "deposits_filter_crud",
+      "op": "map",
+      "params": [["m => m.get('crudType == \"CREATE\""]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "deposits_map",
+      "name": "deposits_map",
+      "op": "map",
+      "params": [["m => Row('userId ->> m.get('customerRef) :: 'depositAmount ->> m.get('stake) :: 'depositTime ->> m.get('ts) :: HNil)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "bets_map",
+      "name": "bets_map",
+      "op": "map",
+      "params": [["m => Row('userId ->> m.get('customerRef) :: 'eventId ->> m.get('eventName) :: 'status ->> m.get('crudType) :: 'stakeAmount ->> m.get('stake) :: 'stakeFreeBet ->> m.get('freeBet) :: 'payoutWinnings ->> m.get('winnings) :: 'isSettled ->> m.get('isSettled) :: 'betTime ->> m.get('ts) :: HNil)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "window_bet",
+      "name": "window_bet",
+      "op": "withFixedWindows",
+      "params": [["Duration.standardSeconds(30)",
+        "Duration.millis(0)",
+        "WindowOptions(trigger =  Repeatedly.forever(AfterWatermark.pastEndOfWindow()), accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES, allowedLateness = Duration.standardMinutes(3))"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "window_deposit",
+      "name": "window_deposit",
+      "op": "withFixedWindows",
+      "params": [["Duration.standardSeconds(30)",
+        "Duration.millis(0)",
+        "WindowOptions(trigger =  Repeatedly.forever(AfterWatermark.pastEndOfWindow()), accumulationMode = AccumulationMode.DISCARDING_FIRED_PANES, allowedLateness = Duration.standardMinutes(3))"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "groupby_deposit",
+      "name": "groupby_deposit",
+      "op": "groupBy",
+      "params": [["m => m.get('userId)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "groupby_bet",
+      "name": "groupby_bet",
+      "op": "groupBy",
+      "params": [["m => m.get('userId)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "join_bet_deposit",
+      "name": "join_bet_deposit",
+      "op": "fullOuterJoin",
+      "params": [],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "global_window",
+      "name": "global_window",
+      "op": "withGlobalWindow",
+      "params": [[]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "vip_states",
+      "name": "vip_states",
+      "op": "accumulate",
+      "params": [
+        [
+          "m => Row(('depositAmount ->> m.get('_2).get('_2).getOrElse(List()).map(l => l.get('depositAmount)).sum) :: 'numDeposit ->> m.get('_2).get('_2).getOrElse(List()).length.toFloat :: ('turnover ->> m.get('_2).get('_1).getOrElse(List()).filter(l => l.get('status) == \"CREATE\").map(l => l.get('stakeAmount)).sum) :: ('winAmnt ->> m.get('_2).get('_1).getOrElse(List()).filter(l => l.get('isSettled) == true).map(_.get('payoutWinnings)).sum) :: ('numBets ->> m.get('_2).get('_1).getOrElse(List()).filter(l => l.get('status) == \"CREATE\").length.toFloat) :: ('bonusStakeAmnt ->> m.get('_2).get('_1).getOrElse(List()).filter(l => l.get('status) == \"CREATE\").map(l => l.get('stakeFreeBet)).sum) :: ('ggr ->> m.get('_2).get('_1).getOrElse(List()).filter(l => l.get('isSettled) == true).map(l => l.get('stakeAmount) - l.get('payoutWinnings)).sum) :: HNil)"
+        ],
+        [
+          "Row('depositAmount ->> 0.0f :: 'numDeposit ->> 0.0f :: 'turnover ->> 0.0f :: 'winAmnt ->> 0.0f :: 'numBets ->> 0.0f :: 'bonusStakeAmnt ->> 0.0f :: 'ggr ->> 0.0f :: HNil)",
+          "m => m.get('_1)",
+          "(oldvalue, newvalue) => oldvalue.updateWith('depositAmount)(_ + newvalue.get('depositAmount)).updateWith('numDeposit)(_ + newvalue.get('numDeposit)).updateWith('turnover)(_ + newvalue.get('turnover)).updateWith('winAmnt)(_ + newvalue.get('winAmnt)).updateWith('numBets)(_ + newvalue.get('numBets)).updateWith('bonusStakeAmnt)(_ + newvalue.get('bonusStakeAmnt)).updateWith('ggr)(_ + newvalue.get('ggr))",
+          "(row, state) => Row('userId ->> row.get('_1) :: 'numDeposit ->> state.get('numDeposit) :: 'depositAmount ->> state.get('depositAmount) :: 'firstDepAmnt ->> 0.0f :: 'ggr ->> 0.0f :: 'turnover ->> state.get('turnover) :: 'playerDays ->> 0.0f :: 'winAmnt ->> state.get('winAmnt) :: 'numBets ->> state.get('numBets) :: 'bonusStakeAmnt ->> state.get('bonusStakeAmnt) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "tfpredict",
+      "id": "vip_predict",
+      "name": "vip_predict",
+      "modelBucket": "sot-ml",
+      "modelPath": "vip_model_dw_v7/export/recommender-final-exporter/1518453257/",
+      "fetchOps": ["head/predictions/classes"],
+      "inFn": "ee =>  Map(\"Placeholder_4\" -> Tensor.create(ee.get('numDeposit)),\"Placeholder\" -> Tensor.create(ee.get('depositAmount)),\"Placeholder_9\" -> Tensor.create(ee.get('firstDepAmnt)),\"Placeholder_2\" -> Tensor.create(ee.get('ggr)),\"Placeholder_6\" -> Tensor.create(ee.get('turnover)),\"Placeholder_7\" -> Tensor.create(ee.get('playerDays)),\"Placeholder_1\" -> Tensor.create(ee.get('winAmnt)),\"Placeholder_3\" -> Tensor.create(ee.get('numBets)),\"Placeholder_5\" -> Tensor.create(ee.get('bonusStakeAmnt)))",
+      "outFn": "(r, o) => {val pred = o.map {case (_, t) => val v = Array.ofDim[Long](1, 1);t.copyTo(v);v.apply(0).apply(0)}.head; r.append('prediction, pred)}"
+    },
+    {
+      "type": "transformation",
+      "id": "previous_state",
+      "name": "previous_state",
+      "op": "accumulate",
+      "params": [
+        [
+          "m => Row('previousPrediction ->> 0L :: 'currentPrediction ->> m.get('prediction) :: HNil)"
+        ],
+        [
+          "Row('previousPrediction ->> 0L :: 'currentPrediction ->> 0L :: HNil)",
+          "m => m.get('userId)",
+          "(oldvalue, newvalue) => Row('previousPrediction ->> oldvalue.get('currentPrediction) :: 'currentPrediction ->> newvalue.get('currentPrediction) :: HNil)",
+          "(row, state) => Row('userId ->> row.get('userId) :: 'previousPrediction ->> state.get('previousPrediction) :: 'currentPrediction ->> state.get('currentPrediction) :: 'ts ->> Helper.fmt.print(Helper.Instant.now()) :: HNil)"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "filter_updates",
+      "name": "filter_updates",
+      "op": "filter",
+      "params": [["m => m.get('previousPrediction) != m.get('currentPrediction)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "ds_out_state_all",
+      "name": "ds_out_state_all",
+      "source": "vip_state_all"
+    },
+    {
+      "type": "transformation",
+      "id": "map_to_vip_state",
+      "name": "map_to_vip_state",
+      "op": "map",
+      "params": [["m => Row('userId ->> m.get('userId) :: 'vipState ->> m.get('prediction) :: 'ts ->> m.get('ts) :: HNil)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "ds_out_state",
+      "name": "ds_out_state",
+      "source": "vip_state"
+    },
+    {
+      "type": "sink",
+      "id": "bq_out_update",
+      "name": "bq_out_update",
+      "source": "vip_update"
+    }
+  ],
+  "dag": [
+    {
+      "from": "bets_in",
+      "to": "bets_map"
+    },
+    {
+      "from": "bets_map",
+      "to": "window_bet"
+    },
+    {
+      "from": "window_bet",
+      "to": "groupby_bet"
+    },
+    {
+      "from": "groupby_bet",
+      "to": "join_bet_deposit"
+    },
+    {
+      "from": "join_bet_deposit",
+      "to": "global_window"
+    },
+    {
+      "from": "deposits_in",
+      "to": "deposits_map"
+    },
+    {
+      "from": "deposits_map",
+      "to": "window_deposit"
+    },
+    {
+      "from": "window_deposit",
+      "to": "groupby_deposit"
+    },
+    {
+      "from": "groupby_deposit",
+      "to": "join_bet_deposit"
+    },
+    {
+      "from": "global_window",
+      "to": "vip_states"
+    },
+    {
+      "from": "vip_states",
+      "to": "vip_predict"
+    },
+    {
+      "from": "vip_predict",
+      "to": "ds_out_state_all"
+    },
+    {
+      "from": "vip_predict",
+      "to": "map_to_vip_state"
+    },
+    {
+      "from": "map_to_vip_state",
+      "to": "ds_out_state"
+    },
+    {
+      "from": "vip_predict",
+      "to": "previous_state"
+    },
+    {
+      "from": "previous_state",
+      "to": "filter_updates"
+    },
+    {
+      "from": "filter_updates",
+      "to": "bq_out_update"
+    }
+  ]
+}
