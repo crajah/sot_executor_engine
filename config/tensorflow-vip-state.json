@@ -5,38 +5,6 @@
   "schemas": [
     {
       "type": "avro",
-      "id": "avroschema_deposit",
-      "name": "avroschema_deposit",
-      "version": "version2",
-      "definition": {
-        "name": "Deposit",
-        "doc": "A basic schema for storing user records",
-        "fields": [
-          {
-            "name": "userId",
-            "type": "string"
-          },
-          {
-            "name": "depositAmount",
-            "type": "float"
-          },
-          {
-            "name": "depositTime",
-            "type": "long",
-            "doc": "time when event created"
-          },
-          {
-            "name": "depositTimeStr",
-            "type": "string",
-            "doc": "event time string for debugging"
-          }
-        ],
-        "type": "record",
-        "namespace": "parallelai.sot.avro"
-      }
-    },
-    {
-      "type": "avro",
       "id": "avroschema_bet",
       "name": "avroschema_bet",
       "version": "version2",
@@ -45,60 +13,77 @@
         "doc": "A basic schema for storing user records",
         "fields": [
           {
-            "name": "userId",
+            "name": "customerRef",
             "type": "string"
           },
           {
-            "name": "eventId",
+            "name": "winnings",
+            "type": "float"
+          },
+          {
+            "name": "outComeName",
             "type": "string"
           },
           {
-            "name": "status",
+            "name": "marketName",
             "type": "string"
           },
           {
-            "name": "stakeAmount",
+            "name": "eventName",
+            "type": "string"
+          },
+          {
+            "name": "categoryRef",
+            "type": "string"
+          },
+          {
+            "name": "stateBetsId",
+            "type": "string"
+          },
+          {
+            "name": "currency",
+            "type": "string"
+          },
+          {
+            "name": "stake",
             "type": "float"
           },
           {
-            "name": "stakeFreeBet",
-            "type": "float"
-          },
-          {
-            "name": "payoutWinnings",
-            "type": "float"
+            "name": "crudType",
+            "type": "string"
           },
           {
             "name": "isSettled",
             "type": "boolean"
           },
           {
-            "name": "betTime",
-            "type": "long",
-            "doc": "time when event created"
+            "name": "freeBet",
+            "type": "float"
           },
           {
-            "name": "betTimeStr",
-            "type": "string",
-            "doc": "event time string for debugging"
+            "name": "userid",
+            "type": "string"
+          },
+          {
+            "name": "ts",
+            "type": "string"
           }
         ],
         "type": "record",
         "namespace": "parallelai.sot.avro"
       }
     }
-
   ],
   "taps": [
     {
       "type": "pubsub",
       "id": "pubsubsource_bet",
-      "topic": "pubsubsource_bet"
+      "topic": "betfeedvip"
     },
     {
       "type": "pubsub",
       "id": "pubsubsource_deposit",
-      "topic": "pubsubsource_deposit"
+      "topic": "betfeedvip"
     },
     {
       "type": "bigquery",
@@ -133,8 +118,32 @@
       "type": "source",
       "id": "deposits_in",
       "name": "deposits_in",
-      "schema": "avroschema_deposit",
+      "schema": "avroschema_bet",
       "source": "pubsubsource_deposit"
+    },
+    {
+      "type": "transformation",
+      "id": "deposits_filter_crud",
+      "name": "deposits_filter_crud",
+      "op": "map",
+      "params": [["m => m.get('crudType == \"CREATE\""]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "deposits_map",
+      "name": "deposits_map",
+      "op": "map",
+      "params": [["m => Row('userId ->> m.get('customerRef) :: 'depositAmount ->> m.get('stake) :: 'depositTime ->> m.get('ts) :: HNil)"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "bets_map",
+      "name": "bets_map",
+      "op": "map",
+      "params": [["m => Row('userId ->> m.get('customerRef) :: 'eventId ->> m.get('eventName) :: 'status ->> m.get('crudType) :: 'stakeAmount ->> m.get('stake) :: 'stakeFreeBet ->> m.get('freeBet) :: 'payoutWinnings ->> m.get('winnings) :: 'isSettled ->> m.get('isSettled) :: 'betTime ->> m.get('ts) :: HNil)"]],
+      "paramsEncoded": false
     },
     {
       "type": "transformation",
@@ -272,6 +281,10 @@
   "dag": [
     {
       "from": "bets_in",
+      "to": "bets_map"
+    },
+    {
+      "from": "bets_map",
       "to": "window_bet"
     },
     {
@@ -288,6 +301,10 @@
     },
     {
       "from": "deposits_in",
+      "to": "deposits_map"
+    },
+    {
+      "from": "deposits_map",
       "to": "window_deposit"
     },
     {
