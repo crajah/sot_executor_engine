@@ -109,7 +109,7 @@
       "type": "datastore",
       "id": "datastore1",
       "kind": "dataflowwrite",
-      "dedupCommits": true
+      "dedupeStrategy": "KEEP_LATEST"
     }
   ],
   "steps": [

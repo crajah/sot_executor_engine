@@ -71,9 +71,9 @@ object Writer {
   Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] =
     new Writer[DatastoreTapDefinition, SOTUtils, HasDatastoreAnnotation, T0, OutR] {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
-        sCollection.map(x => (h.head(x.hList), gen.from(x.hList))).saveAsDatastoreWithSchema(utils.getProject, tap.kind, tap.dedupCommits)
-      }
+      sCollection.map(x => (h.head(x.hList), gen.from(x.hList))).saveAsDatastoreWithSchema(utils.getProject, tap.kind, tap.dedupeStrategy, tap.allowPartialUpdates)
     }
+}
 }
 
 trait SchemalessWriter[TAP, UTIL, ANNO, OutR <: HList] extends Serializable {
@@ -109,8 +109,15 @@ object SchemalessWriter {
   SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] =
     new SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] {
       def write(sColl: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
-        sColl.map(x => (h.head(x.hList), x.hList)).saveAsDatastoreSchemaless(utils.getProject, tap.kind, tap.dedupCommits)
-      }
+
+      sColl.map { rec =>
+        val entity = rec.hList.toEntityBuilder
+        val key = h.head(rec.hList)
+
+        entity.setKey(makeKey(tap.kind, key.asInstanceOf[AnyRef]))
+        entity.build()
+        }.saveAsDatastoreSchemaless(utils.getProject, tap.kind, tap.dedupeStrategy, tap.allowPartialUpdates)
+    }
     }
 
   implicit def kafkaWriter[OutR <: HList](implicit ev: io.circe.Encoder[OutR]):

@@ -11,6 +11,7 @@ import org.joda.time.Instant
 import parallelai.sot.engine.Project
 import parallelai.sot.engine.generic.row.{JavaRow, Row}
 import parallelai.sot.engine.io.datastore._
+import parallelai.sot.executor.model.DedupeStrategy
 import shapeless.HList
 import java.util.function.{BiFunction => JBiFunction, Function => JFunction}
 
@@ -79,7 +80,7 @@ class AccumulatorSCollectionFunctions[V <: HList](@transient val self: SCollecti
           }
           entity.setKey(keyEntity)
           entity.build()
-        }.applyInternal(DatastoreIOSOT.v1.write.withProjectId(projectName.id).removeDuplicatesWithinCommits(true))
+        }.applyInternal(DatastoreIOSOT.v1.write.withProjectId(projectName.id).withDedupeStrategy(DedupeStrategy.KEEP_LATEST))
       case None =>
     }
     statefulStep.map { case (v, value, _) => toOut(Row(v.hList), Row(value.hList)) }
