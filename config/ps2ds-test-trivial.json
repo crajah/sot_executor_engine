@@ -1,0 +1,81 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "jsonschema1",
+      "name": "jsonschema1",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "Message",
+        "fields": [
+          {
+            "name": "user",
+            "type": "String",
+            "mode": "required"
+          },
+          {
+            "name": "team",
+            "type": "String",
+            "mode": "nullable"
+          },
+          {
+            "name": "score",
+            "type": "Int",
+            "mode": "nullable"
+          }
+        ]
+      }
+    }
+  ],
+  "lookups": [],
+  "taps": [
+    {
+      "type": "pubsub",
+      "id": "pubsubsource1",
+      "topic": "oztest"
+    },
+    {
+      "type": "datastore",
+      "id": "datastoresource1",
+      "kind": "oztest",
+      "dedupeStrategy": "MERGE"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "jsonschema1",
+      "source": "pubsubsource1"
+    },
+    {
+      "type": "transformation",
+      "id": "map1",
+      "name": "map1",
+      "op": "map",
+      "params": [["m => m"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "source": "datastoresource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "map1"
+    },
+    {
+      "from": "map1",
+      "to": "out"
+    }
+  ]
+}

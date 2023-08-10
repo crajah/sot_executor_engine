@@ -78,7 +78,7 @@
       "type": "datastore",
       "id": "datastoresource1",
       "kind": "dataflowwritededupe",
-      "dedupCommits": true
+      "dedupeStrategy": "KEEP_LATEST"
     }
   ],
   "steps": [

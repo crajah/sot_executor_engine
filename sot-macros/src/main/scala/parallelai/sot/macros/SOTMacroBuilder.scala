@@ -106,14 +106,14 @@ object SOTMainMacroImpl {
   }
 
   private def datastores(config: Config): Seq[Stat] = config.taps.collect {
-    case DatastoreTapDefinition(_, id, kind, _) =>
+    case DatastoreTapDefinition(_, id, kind, _, _) =>
       s"""val $id = Datastore(Project("$projectId"), Kind("$kind"))""".parse[Stat].get
   }
 
   private def lookups(config: Config): Seq[Stat] = config.lookups.flatMap {
     case DatastoreLookupDefinition(id,schema,linkedTapId) => {
       config.taps.collectFirst {
-        case DatastoreTapDefinition(_, tapId, kind, _) if tapId == linkedTapId =>
+        case DatastoreTapDefinition(_, tapId, kind, _, _) if tapId == linkedTapId =>
           s"""Datastore(Project("$projectId"), Kind("$kind"))"""
       }.flatMap { tap =>
         config.schemas.find(_.id == schema).map(_.definition.name).map {

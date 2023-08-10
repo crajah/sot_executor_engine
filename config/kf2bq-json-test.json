@@ -53,6 +53,7 @@
       }
     }
   ],
+  "lookups": [],
   "taps": [
     {
       "type": "kafka",
