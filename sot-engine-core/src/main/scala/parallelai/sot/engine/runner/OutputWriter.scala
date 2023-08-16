@@ -73,6 +73,26 @@ object Writer {
       def write(sCollection: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {
       sCollection.map(x => (h.head(x.hList), gen.from(x.hList))).saveAsDatastoreWithSchema(utils.getProject, tap.kind, tap.dedupeStrategy, tap.allowPartialUpdates)
     }
+
+  implicit def kafkaWriterAvro[T0 <: HasAvroAnnotation : Manifest, OutR <: HList](implicit
+                                                                                   gen: LabelledGeneric.Aux[T0, OutR]):
+  Writer[KafkaTapDefinition, SOTUtils, HasAvroAnnotation, T0, OutR] =
+    new Writer[KafkaTapDefinition, SOTUtils, HasAvroAnnotation, T0, OutR] {
+      def write(sCollection: SCollection[Row.Aux[OutR]], tap: KafkaTapDefinition, utils: SOTUtils): Unit = {
+        sCollection.map(x => gen.from(x.hList)).saveAsTypedKafkaAvro(tap, utils)
+      }
+    }
+
+  implicit def kafkaWriterProto[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0] : Manifest, OutR <: HList](implicit
+                                                                                                                           gen: LabelledGeneric.Aux[T0, OutR],
+                                                                                                                           messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]):
+  Writer[KafkaTapDefinition, SOTUtils, GeneratedMessage, T0, OutR] =
+    new Writer[KafkaTapDefinition, SOTUtils, GeneratedMessage, T0, OutR] {
+      def write(sCollection: SCollection[Row.Aux[OutR]], tap: KafkaTapDefinition, utils: SOTUtils): Unit = {
+        sCollection.map(x => gen.from(x.hList)).saveAsTypedKafkaProto(tap, utils)
+      }
+    }
+
 }
 }
 
