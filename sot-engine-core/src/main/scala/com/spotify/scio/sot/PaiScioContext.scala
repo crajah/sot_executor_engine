@@ -125,6 +125,18 @@ object PaiScioContext extends Serializable {
       c.map(r => AvroUtils.encodeAvro(toGenericRecordOut(r), schemaStringOut)).saveAsPubsub(s"projects/${utils.getProject}/topics/${tap.topic}",
         timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
     }
+
+    def saveAsTypedKafkaAvro(tap: KafkaTapDefinition, utils: SOTUtils): Unit = {
+      val avroT = AvroType[Out]
+      val schemaOut = avroT.schema
+      val toGenericRecordOut = avroT.toGenericRecord
+      val schemaStringOut = schemaOut.toString
+
+      val opt = KafkaOptions(tap.bootstrap, tap.topic, tap.group, tap.defaultOffset, tap.autoCommit)
+
+      c.map(r => AvroUtils.encodeAvro(toGenericRecordOut(r), schemaStringOut)).writeToKafka(opt)
+    }
+
   }
 
   implicit class PaiScioSCollectionProto[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0]](c: SCollection[T0]) {
@@ -136,6 +148,12 @@ object PaiScioContext extends Serializable {
 
       c.map(r => messageCompanion.toByteArray(r)).saveAsPubsub(s"projects/${utils.getProject}/topics/${tap.topic}",
         timestampAttribute = tap.timestampAttribute.orNull, idAttribute = tap.idAttribute.orNull)
+    }
+
+    def saveAsTypedKafkaProto(tap: KafkaTapDefinition, utils: SOTUtils)(implicit messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0]): Unit = {
+
+      val opt = KafkaOptions(tap.bootstrap, tap.topic, tap.group, tap.defaultOffset, tap.autoCommit)
+      c.map(r => messageCompanion.toByteArray(r)).writeToKafka(opt)
     }
   }
 
