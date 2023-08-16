@@ -51,7 +51,7 @@
       "id": "in",
       "name": "in",
       "schema": "jsonschema1",
-      "source": "pubsubsource1"
+      "tap": "pubsubsource1"
     },
     {
       "type": "transformation",
@@ -65,7 +65,7 @@
       "type": "sink",
       "id": "out",
       "name": "out",
-      "source": "datastoresource1"
+      "tap": "datastoresource1"
     }
   ],
   "dag": [

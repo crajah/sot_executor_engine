@@ -118,7 +118,7 @@
       "id": "in",
       "name": "in",
       "schema": "avroschema1",
-      "source": "pubsubsource1"
+      "tap": "pubsubsource1"
     },
     {
       "type": "transformation",
@@ -137,7 +137,7 @@
       "id": "out",
       "name": "out",
       "schema": "avroschema2",
-      "source": "pubsubsource2"
+      "tap": "pubsubsource2"
     }
   ],
   "dag": [

@@ -54,7 +54,7 @@
       "id": "in",
       "name": "in",
       "schema": "protoschema1",
-      "source": "pubsubsource1"
+      "tap": "pubsubsource1"
     },
     {
       "type": "transformation",
@@ -68,19 +68,19 @@
       "type": "sink",
       "id": "out",
       "name": "out",
-      "source": "bigquerysource1"
+      "tap": "bigquerysource1"
     },
     {
       "type": "sink",
       "id": "out2",
       "name": "out2",
-      "source": "bigquerysource2"
+      "tap": "bigquerysource2"
     },
     {
       "type": "sink",
       "id": "out3",
       "name": "out3",
-      "source": "bigquerysource3"
+      "tap": "bigquerysource3"
     }
   ],
   "dag": [

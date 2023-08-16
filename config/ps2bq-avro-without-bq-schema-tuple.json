@@ -75,7 +75,7 @@
       "id": "in",
       "name": "in",
       "schema": "avroschema1",
-      "source": "pubsubsource1"
+      "tap": "pubsubsource1"
     },
     {
       "type": "transformation",
@@ -105,19 +105,19 @@
       "type": "sink",
       "id": "out",
       "name": "out",
-      "source": "bigquerysource1"
+      "tap": "bigquerysource1"
     },
     {
       "type": "sink",
       "id": "out1",
       "name": "out1",
-      "source": "bigquerysource2"
+      "tap": "bigquerysource2"
     },
     {
       "type": "sink",
       "id": "out2",
       "name": "out2",
-      "source": "bigquerysource3"
+      "tap": "bigquerysource3"
     }
   ],
   "dag": [

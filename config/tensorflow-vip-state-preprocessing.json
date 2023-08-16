@@ -110,7 +110,7 @@
       "id": "in",
       "name": "in",
       "schema": "protoschema1",
-      "source": "kafkasource1"
+      "tap": "kafkasource1"
     },
     {
       "type": "transformation",
@@ -139,7 +139,7 @@
       "id": "out",
       "name": "out",
       "schema": "avroschema_bet",
-      "source": "betfeed"
+      "tap": "betfeed"
     }
   ],
   "dag": [

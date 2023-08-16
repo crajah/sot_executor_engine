@@ -74,7 +74,7 @@
       "id": "in",
       "name": "in",
       "schema": "schema-saf",
-      "source": "kafkatap-sportsbook"
+      "tap": "kafkatap-sportsbook"
     },
     {
       "type": "transformation",
@@ -104,13 +104,13 @@
       "type": "sink",
       "id": "out-selection",
       "name": "outSelection",
-      "source": "bigquerytap-selection"
+      "tap": "bigquerytap-selection"
     },
     {
       "type": "sink",
       "id": "out-market",
       "name": "outMarket",
-      "source": "bigquerytap-market"
+      "tap": "bigquerytap-market"
     }
 
   ],
