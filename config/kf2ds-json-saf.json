@@ -999,7 +999,7 @@
       "id": "in",
       "name": "in",
       "schema": "schema-saf",
-      "source": "kafkatap-sportsbook"
+      "tap": "kafkatap-sportsbook"
     },
     {
       "type": "transformation",
@@ -1110,37 +1110,37 @@
       "type": "sink",
       "id": "out-selection",
       "name": "outSelection",
-      "source": "datastoretap-selection"
+      "tap": "datastoretap-selection"
     },
     {
       "type": "sink",
       "id": "out-market",
       "name": "outMarket",
-      "source": "datastoretap-market"
+      "tap": "datastoretap-market"
     },
     {
       "type": "sink",
       "id": "out-event",
       "name": "outEvent",
-      "source": "datastoretap-event"
+      "tap": "datastoretap-event"
     },
     {
       "type": "sink",
       "id": "out-type",
       "name": "outType",
-      "source": "datastoretap-type"
+      "tap": "datastoretap-type"
     },
     {
       "type": "sink",
       "id": "out-class",
       "name": "outClass",
-      "source": "datastoretap-class"
+      "tap": "datastoretap-class"
     },
     {
       "type": "sink",
       "id": "out-category",
       "name": "outCategory",
-      "source": "datastoretap-category"
+      "tap": "datastoretap-category"
     }
 
   ],

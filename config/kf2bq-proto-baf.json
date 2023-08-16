@@ -41,7 +41,7 @@
       "id": "in",
       "name": "in",
       "schema": "protoschema1",
-      "source": "kafkasource1"
+      "tap": "kafkasource1"
     },
     {
       "type": "transformation",
@@ -71,7 +71,7 @@
       "type": "sink",
       "id": "out",
       "name": "out",
-      "source": "bigquerysource1"
+      "tap": "bigquerysource1"
     }
   ],
   "dag": [

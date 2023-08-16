@@ -112,14 +112,14 @@
       "id": "bets_in",
       "name": "bests_in",
       "schema": "avroschema_bet",
-      "source": "pubsubsource_bet"
+      "tap": "pubsubsource_bet"
     },
     {
       "type": "source",
       "id": "deposits_in",
       "name": "deposits_in",
       "schema": "avroschema_bet",
-      "source": "pubsubsource_deposit"
+      "tap": "pubsubsource_deposit"
     },
     {
       "type": "transformation",
@@ -255,7 +255,7 @@
       "type": "sink",
       "id": "ds_out_state_all",
       "name": "ds_out_state_all",
-      "source": "vip_state_all"
+      "tap": "vip_state_all"
     },
     {
       "type": "transformation",
@@ -269,13 +269,13 @@
       "type": "sink",
       "id": "ds_out_state",
       "name": "ds_out_state",
-      "source": "vip_state"
+      "tap": "vip_state"
     },
     {
       "type": "sink",
       "id": "bq_out_update",
       "name": "bq_out_update",
-      "source": "vip_update"
+      "tap": "vip_update"
     }
   ],
   "dag": [

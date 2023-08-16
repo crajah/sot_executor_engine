@@ -62,7 +62,7 @@
       "id": "in",
       "name": "in",
       "schema": "jsonschema1",
-      "source": "kafkasource1"
+      "tap": "kafkasource1"
     },
     {
       "type": "transformation",
@@ -76,7 +76,7 @@
       "type": "sink",
       "id": "out",
       "name": "out",
-      "source": "kafkasource2"
+      "tap": "kafkasource2"
     }
   ],
   "dag": [
