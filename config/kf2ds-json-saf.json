@@ -108,6 +108,11 @@
               },
               {
                 "mode": "nullable",
+                "name": "languages",
+                "type": "List[String]"
+              },
+              {
+                "mode": "nullable",
                 "name": "displayStatus",
                 "type": "String"
               },
@@ -192,6 +197,11 @@
                 "mode": "nullable",
                 "name": "displayOrder",
                 "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "channels",
+                "type": "List[String]"
               }
             ]
           },
@@ -223,11 +233,6 @@
               {
                 "mode": "nullable",
                 "name": "typeFlagCode",
-                "type": "String"
-              },
-              {
-                "mode": "nullable",
-                "name": "languages",
                 "type": "String"
               },
               {
@@ -336,6 +341,21 @@
                 "mode": "nullable",
                 "name": "maxPayout",
                 "type": "Double"
+              },
+              {
+                "mode": "nullable",
+                "name": "languages",
+                "type": "List[String]"
+              },
+              {
+                "mode": "nullable",
+                "name": "channels",
+                "type": "List[String]"
+              },
+              {
+                "mode": "nullable",
+                "name": "flags",
+                "type": "List[String]"
               }
             ]
           },
@@ -510,7 +530,7 @@
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "categoryKey",
                     "type": "Long"
                   },
@@ -565,6 +585,21 @@
                 "mode": "nullable",
                 "name": "isEventResulted",
                 "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "languages",
+                "type": "List[String]"
+              },
+              {
+                "mode": "nullable",
+                "name": "channels",
+                "type": "List[String]"
+              },
+              {
+                "mode": "nullable",
+                "name": "flags",
+                "type": "List[String]"
               }
             ]
           },
@@ -684,6 +719,21 @@
                 "mode": "nullable",
                 "name": "isForecastMarket",
                 "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "ncastTypeCodes",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "channels",
+                "type": "List[String]"
+              },
+              {
+                "mode": "nullable",
+                "name": "selectionPriceType",
+                "type": "String"
               }
             ]
           },
@@ -991,6 +1041,42 @@
       "kind": "safCategory",
       "dedupeStrategy": "MERGE",
       "allowPartialUpdates": true
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-selection",
+      "dataset": "bigquerytest",
+      "table": "saf_selection"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-market",
+      "dataset": "bigquerytest",
+      "table": "saf_market"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-type",
+      "dataset": "bigquerytest",
+      "table": "saf_type"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-event",
+      "dataset": "bigquerytest",
+      "table": "saf_event"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-class",
+      "dataset": "bigquerytest",
+      "table": "saf_class"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-category",
+      "dataset": "bigquerytest",
+      "table": "saf_category"
     }
   ],
   "steps": [
@@ -1006,7 +1092,11 @@
       "id": "mapper",
       "name": "mapper",
       "op": "map",
-      "params": [["m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"]],
+      "params": [
+        [
+          "m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1014,7 +1104,11 @@
       "id": "filter-selection",
       "name": "filterSelection",
       "op": "filter",
-      "params": [["m => m.get('selection) != None"]],
+      "params": [
+        [
+          "m => m.get('selection) != None"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1022,7 +1116,11 @@
       "id": "filter-market",
       "name": "filterMarket",
       "op": "filter",
-      "params": [["m => m.get('market) != None"]],
+      "params": [
+        [
+          "m => m.get('market) != None"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1030,7 +1128,11 @@
       "id": "filter-event",
       "name": "filterEvent",
       "op": "filter",
-      "params": [["m => m.get('event) != None"]],
+      "params": [
+        [
+          "m => m.get('event) != None"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1038,7 +1140,11 @@
       "id": "filter-type",
       "name": "filterType",
       "op": "filter",
-      "params": [["m => m.get('type) != None"]],
+      "params": [
+        [
+          "m => m.get('type) != None"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1046,7 +1152,11 @@
       "id": "filter-class",
       "name": "filterClass",
       "op": "filter",
-      "params": [["m => m.get('class) != None"]],
+      "params": [
+        [
+          "m => m.get('class) != None"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1054,16 +1164,23 @@
       "id": "filter-category",
       "name": "filterCategory",
       "op": "filter",
-      "params": [["m => m.get('category) != None"]],
+      "params": [
+        [
+          "m => m.get('category) != None"
+        ]
+      ],
       "paramsEncoded": false
     },
-
     {
       "type": "transformation",
       "id": "map-selection",
       "name": "mapSelection",
       "op": "map",
-      "params": [["m => { val selection = Row(m.get('selection).get); val meta = selection.get('meta); selection.remove('meta).appendList(meta) }"]],
+      "params": [
+        [
+          "m => { val selection = Row(m.get('selection).get); val meta = selection.get('meta); selection.remove('meta).appendList(meta) }"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1071,7 +1188,11 @@
       "id": "map-market",
       "name": "mapMarket",
       "op": "map",
-      "params": [["m => { val market = Row(m.get('market).get); val meta = market.get('meta); market.remove('meta).appendList(meta) }"]],
+      "params": [
+        [
+          "m => { val market = Row(m.get('market).get); val meta = market.get('meta); market.remove('meta).appendList(meta) }"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1079,7 +1200,11 @@
       "id": "map-event",
       "name": "mapEvent",
       "op": "map",
-      "params": [["m => { val event = Row(m.get('event).get); val meta = event.get('meta); event.remove('meta).appendList(meta)  }"]],
+      "params": [
+        [
+          "m => { val event = Row(m.get('event).get); val meta = event.get('meta); event.remove('meta).appendList(meta)  }"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1087,7 +1212,11 @@
       "id": "map-type",
       "name": "mapType",
       "op": "map",
-      "params": [["m => { val typeRow = Row(m.get('type).get); val meta = typeRow.get('meta); typeRow.remove('meta).appendList(meta)  }"]],
+      "params": [
+        [
+          "m => { val typeRow = Row(m.get('type).get); val meta = typeRow.get('meta); typeRow.remove('meta).appendList(meta)  }"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1095,7 +1224,11 @@
       "id": "map-class",
       "name": "mapClass",
       "op": "map",
-      "params": [["m => { val classRow = Row(m.get('class).get); val meta = classRow.get('meta); classRow.remove('meta).appendList(meta)  }"]],
+      "params": [
+        [
+          "m => { val classRow = Row(m.get('class).get); val meta = classRow.get('meta); classRow.remove('meta).appendList(meta)  }"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -1103,46 +1236,145 @@
       "id": "map-category",
       "name": "mapCategory",
       "op": "map",
-      "params": [["m => { val category = Row(m.get('category).get); val meta = category.get('meta); category.remove('meta).appendList(meta) }"]],
+      "params": [
+        [
+          "m => { val category = Row(m.get('category).get); val meta = category.get('meta); category.remove('meta).appendList(meta) }"
+        ]
+      ],
       "paramsEncoded": false
     },
+
+
+    {
+      "type": "transformation",
+      "id": "map-class-options",
+      "name": "mapClassOptions",
+      "op": "map",
+      "params": [
+        [
+          "m => { m.update('languages, m.get('languages).getOrElse(Nil)).update('channels, m.get('channels).getOrElse(Nil)) }"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+
+
+    {
+      "type": "transformation",
+      "id": "map-type-options",
+      "name": "mapTypeOptions",
+      "op": "map",
+      "params": [
+        [
+          "m => { m.update('languages, m.get('languages).getOrElse(Nil)).update('channels, m.get('channels).getOrElse(Nil)).update('flags, m.get('flags).getOrElse(Nil)) }"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+
+
+    {
+      "type": "transformation",
+      "id": "map-event-options",
+      "name": "mapEventOptions",
+      "op": "map",
+      "params": [
+        [
+          "m => { m.update('languages, m.get('languages).getOrElse(Nil)).update('channels, m.get('channels).getOrElse(Nil)).update('flags, m.get('flags).getOrElse(Nil)) }"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+
+
+
+    {
+      "type": "transformation",
+      "id": "map-market-options",
+      "name": "mapMarketOptions",
+      "op": "map",
+      "params": [
+        [
+          "m => { m.update('channels, m.get('channels).getOrElse(Nil)) }"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+
+
     {
       "type": "sink",
-      "id": "out-selection",
-      "name": "outSelection",
+      "id": "out-ds-selection",
+      "name": "outDSSelection",
       "tap": "datastoretap-selection"
     },
     {
       "type": "sink",
-      "id": "out-market",
-      "name": "outMarket",
+      "id": "out-ds-market",
+      "name": "outDSMarket",
       "tap": "datastoretap-market"
     },
     {
       "type": "sink",
-      "id": "out-event",
-      "name": "outEvent",
+      "id": "out-ds-event",
+      "name": "outDSEvent",
       "tap": "datastoretap-event"
     },
     {
       "type": "sink",
-      "id": "out-type",
-      "name": "outType",
+      "id": "out-ds-type",
+      "name": "outDSType",
       "tap": "datastoretap-type"
     },
     {
       "type": "sink",
-      "id": "out-class",
-      "name": "outClass",
+      "id": "out-ds-class",
+      "name": "outDSClass",
       "tap": "datastoretap-class"
     },
     {
       "type": "sink",
-      "id": "out-category",
-      "name": "outCategory",
+      "id": "out-ds-category",
+      "name": "outDSCategory",
       "tap": "datastoretap-category"
-    }
+    },
 
+    {
+      "type": "sink",
+      "id": "out-bq-selection",
+      "name": "outBQSelection",
+      "tap": "bigquerytap-selection"
+    },
+    {
+      "type": "sink",
+      "id": "out-bq-market",
+      "name": "outBQMarket",
+      "tap": "bigquerytap-market"
+    },
+    {
+      "type": "sink",
+      "id": "out-bq-event",
+      "name": "outBQEvent",
+      "tap": "bigquerytap-event"
+    },
+    {
+      "type": "sink",
+      "id": "out-bq-type",
+      "name": "outBQType",
+      "tap": "bigquerytap-type"
+    },
+    {
+      "type": "sink",
+      "id": "out-bq-class",
+      "name": "outBQClass",
+      "tap": "bigquerytap-class"
+    },
+    {
+      "type": "sink",
+      "id": "out-bq-category",
+      "name": "outBQCategory",
+      "tap": "bigquerytap-category"
+    }
   ],
   "dag": [
     {
@@ -1197,30 +1429,69 @@
       "from": "filter-category",
       "to": "map-category"
     },
-
     {
       "from": "map-selection",
-      "to": "out-selection"
+      "to": "out-ds-selection"
     },
     {
       "from": "map-market",
-      "to": "out-market"
+      "to": "out-ds-market"
     },
     {
       "from": "map-event",
-      "to": "out-event"
+      "to": "out-ds-event"
     },
     {
       "from": "map-type",
-      "to": "out-type"
+      "to": "out-ds-type"
     },
     {
       "from": "map-class",
-      "to": "out-class"
+      "to": "out-ds-class"
     },
     {
       "from": "map-category",
-      "to": "out-category"
+      "to": "out-ds-category"
+    },
+    {
+      "from": "map-selection",
+      "to": "out-bq-selection"
+    },
+    {
+      "from": "map-market",
+      "to": "map-market-options"
+    },
+    {
+      "from": "map-market-options",
+      "to": "out-bq-market"
+    },
+    {
+      "from": "map-event",
+      "to": "map-event-options"
+    },
+    {
+      "from": "map-event-options",
+      "to": "out-bq-event"
+    },
+    {
+      "from": "map-type",
+      "to": "map-type-options"
+    },
+    {
+      "from": "map-type-options",
+      "to": "out-bq-type"
+    },
+    {
+      "from": "map-class",
+      "to": "map-class-options"
+    },
+    {
+      "from": "map-class-options",
+      "to": "out-bq-class"
+    },
+    {
+      "from": "map-category",
+      "to": "out-bq-category"
     }
   ]
 }

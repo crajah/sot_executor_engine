@@ -25,10 +25,7 @@ import org.joda.time.Duration;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -351,19 +348,22 @@ public class DatastoreV1SOT {
                             .addAllKeys(mutations.stream().map(this::getKey).collect(Collectors.toList()))
                             .build();
 
-                    Map<Key, Entity> foundEntities = datastore.lookup(lookupRequest).getFoundList().stream()
-                            .map(EntityResult::getEntity).collect(Collectors.toMap(Entity::getKey, Function.identity()));
+                    Map<List<Key.PathElement>, Entity> foundEntities = datastore.lookup(lookupRequest).getFoundList().stream()
+                            .map(EntityResult::getEntity).collect(Collectors.toMap(e -> e.getKey().getPathList(), Function.identity()));
 
                     mutations = mutations.stream().map(m -> {
                         Key key = getKey(m);
 
-                        boolean containsKey = foundEntities.containsKey(key);
-                        if (containsKey) {
-                            Entity entity = foundEntities.get(key);
+                        List<Key.PathElement> pathList = key.getPathList();
 
-                            return Mutation.newBuilder()
-                                    .mergeUpdate(m.getUpsert().toBuilder().clearKey()
-                                            .mergeFrom(entity).build())
+                        //Entity::getKey cannot be used for this, as the key returned from Datastore contains
+                        // the partitionId as well, while the one returned by getKey(m) doesn't contain the partitionId
+                        if (foundEntities.containsKey(pathList)) {
+                            Entity entity = foundEntities.get(pathList);
+
+                            return  Mutation.newBuilder()
+                                    .mergeUpdate(entity.toBuilder()
+                                            .putAllProperties(m.getUpsert().getPropertiesMap()).build())
                                     .build();
                         }
                         return m;

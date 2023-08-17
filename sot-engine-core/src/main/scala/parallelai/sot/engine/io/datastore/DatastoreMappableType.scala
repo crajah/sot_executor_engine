@@ -3,7 +3,7 @@ package parallelai.sot.engine.io.datastore
 import scala.collection.JavaConverters._
 import org.joda.time.{DateTimeConstants, Instant}
 import com.google.datastore.v1.client.DatastoreHelper._
-import com.google.datastore.v1.{Entity, Value}
+import com.google.datastore.v1.{ArrayValue, Entity, Value}
 import com.google.protobuf.{ByteString, Timestamp}
 import parallelai.sot.engine.io.datatype.{BaseMappableType, MappableType}
 
@@ -59,6 +59,7 @@ trait DatastoreMappableType {
   implicit val stringEntityMappableType = DatastoreType.at[String](_.getStringValue, makeValue(_).build())
   implicit val byteStringEntityMappableType = DatastoreType.at[ByteString](_.getBlobValue, makeValue(_).build())
   implicit val byteArrayEntityMappableType = DatastoreType.at[Array[Byte]](_.getBlobValue.toByteArray, v => makeValue(ByteString.copyFrom(v)).build())
+  implicit val optionalListMappableType = DatastoreType.at[List[String]](valueToStrings, stringsToValue)
   implicit val timestampEntityMappableType = DatastoreType.at[Instant](toInstant, fromInstant)
 
   private def toInstant(v: Value): Instant = {
@@ -71,5 +72,14 @@ trait DatastoreMappableType {
       .setSeconds(i.getMillis / DateTimeConstants.MILLIS_PER_SECOND)
       .setNanos((i.getMillis % 1000).toInt * 1000000)
     Value.newBuilder().setTimestampValue(t).build()
+  }
+
+  private def valueToStrings(value: Value): List[String] = {
+    value.getArrayValue.getValuesList.asScala.map(_.getStringValue).toList
+  }
+
+  private def stringsToValue(list: List[String]): Value = {
+    val arrayValue: ArrayValue = makeValue(list.map(s => makeValue(s).build()).asJava).getArrayValue
+    Value.newBuilder().setArrayValue(arrayValue).build()
   }
 }
