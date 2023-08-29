@@ -1,0 +1,101 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "jsonschema1",
+      "name": "jsonschema1Name",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "BetSlip",
+        "fields": [
+          {
+            "mode": "nullable",
+            "name": "`type`",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "data",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "nullable",
+                "name": "terminalId",
+                "type": "String"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "lookups": [],
+  "taps": [
+    {
+      "type": "kafka",
+      "id": "kafkasource1",
+      "bootstrap": "internal-coral-epos2-stg0-kafka-lb-998826191.eu-west-2.elb.amazonaws.com:9092",
+      "topic": "my-topic",
+      "group": "pai-test-group",
+      "defaultOffset": "earliest",
+      "autoCommit": false
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "betslips",
+      "table": "slips_translated",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "jsonschema1",
+      "tap": "kafkasource1"
+    },
+    {
+      "type": "transformation",
+      "id": "filter-slip-translated",
+      "name": "filterSlipTranslated",
+      "op": "filter",
+      "params": [["m => m.get('type) == Some(\"SLIP_TRANSLATED\")"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "mapper",
+      "name": "mapper",
+      "op": "map",
+      "params": [["m => { val t = Helper.fmt.print(Helper.Instant.now()); m.append('ts, t) }"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "tap": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "filter-slip-translated"
+    },
+    {
+      "from": "filter-slip-translated",
+      "to": "mapper"
+    },
+    {
+      "from": "mapper",
+      "to": "out"
+    }
+  ]
+}
