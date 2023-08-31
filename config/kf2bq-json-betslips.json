@@ -13,21 +13,513 @@
         "name": "BetSlip",
         "fields": [
           {
-            "mode": "nullable",
-            "name": "`type`",
-            "type": "String"
-          },
-          {
-            "mode": "nullable",
+            "mode": "optional",
             "name": "data",
             "type": "record",
             "fields": [
               {
-                "mode": "nullable",
+                "mode": "optional",
                 "name": "terminalId",
                 "type": "String"
+              },
+              {
+                "mode": "optional",
+                "name": "storeId",
+                "type": "String"
+              },
+              {
+                "mode": "optional",
+                "name": "userId",
+                "type": "String"
+              },
+              {
+                "mode": "optional",
+                "name": "content",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "optional",
+                    "name": "id",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "alien",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "alienExpectedResultDate",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "alienOtherReason",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "alienReason",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "barcodeNumber",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "betLegTotal",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "blockedPayment",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "cancelled",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "cancelledByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "cancelledByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "cancelledByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "cancelledByUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "colleagueVerifier",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "connectCardNumber",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "connectCardPIN",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "connectCardUID",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "connectCardUsername",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "customerId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "dateCancelled",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "dateCreated",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "datePaidOut",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "dateScanned",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "dateSettled",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "dateStruck",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "dateTranslated",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "dateUpdated",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "image",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "imageUrl",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "lockAcquired",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "lockComment",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "lockDetails",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "lockExpires",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "lockState",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "lockStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "lockTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "lockUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "lockUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "lockWarns",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "locked",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "monitored",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paidAsLost",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paidOut",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paidOutByExternalSystem",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paidOutByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paidOutByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paidOutByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paidOutByUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paidOutPartial",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paidOutPaymentTypes",
+                    "type": "List[String]"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paidOutWithoutScanningBarcode",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paymentReference",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "paymentType",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "pendingApproval",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "pendingColleagueVerification",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "printReceipts",
+                    "type": "List[String]"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "priority",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "receiptNumber",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "returnsPaid",
+                    "type": "Int"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "scanned",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "scannedByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "scannedByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "scannedByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "scannedByUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "searchOrder",
+                    "type": "Int"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "sections",
+                    "type": "List[String]"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "settleInProportion",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "settled",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "shopId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "slipType",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "state",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "struck",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "struckByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "struckByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "struckByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "struckByUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "totalPotentialWins",
+                    "type": "Int"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "totalReturns",
+                    "type": "Int"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "totalStake",
+                    "type": "Int"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "translated",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "translatedByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "translatedByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "translatedByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "translationInProgress",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "unpaidVerified",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "updatedByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "updatedByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "updatedByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "voidPaid",
+                    "type": "Int"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "voidPaidAmended",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "voidReturns",
+                    "type": "Int"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "voidSlip",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "winPaid",
+                    "type": "Int"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "winPaidAmended",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "optional",
+                    "name": "winReturns",
+                    "type": "Int"
+                  }
+                ]
               }
             ]
+          },
+          {
+            "mode": "optional",
+            "name": "type",
+            "type": "String"
           }
         ]
       }
@@ -39,9 +531,9 @@
       "type": "kafka",
       "id": "kafkasource1",
       "bootstrap": "internal-coral-epos2-stg0-kafka-lb-998826191.eu-west-2.elb.amazonaws.com:9092",
-      "topic": "my-topic",
-      "group": "pai-test-group",
-      "defaultOffset": "earliest",
+      "topic": "betslips",
+      "group": "pai-betslip-group",
+      "defaultOffset": "latest",
       "autoCommit": false
     },
     {
