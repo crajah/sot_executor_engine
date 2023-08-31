@@ -13,502 +13,512 @@
         "name": "BetSlip",
         "fields": [
           {
-            "mode": "optional",
+            "mode": "nullable",
             "name": "data",
             "type": "record",
             "fields": [
               {
-                "mode": "optional",
+                "mode": "nullable",
                 "name": "terminalId",
                 "type": "String"
               },
               {
-                "mode": "optional",
+                "mode": "nullable",
                 "name": "storeId",
                 "type": "String"
               },
               {
-                "mode": "optional",
+                "mode": "nullable",
                 "name": "userId",
                 "type": "String"
               },
               {
-                "mode": "optional",
+                "mode": "nullable",
                 "name": "content",
                 "type": "record",
                 "fields": [
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "id",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "alien",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "alienExpectedResultDate",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "alienOtherReason",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "alienReason",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "barcodeNumber",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "betLegTotal",
                     "type": "Double"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "blockedPayment",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "cancelled",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "cancelledByStoreId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "cancelledByTerminalId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "cancelledByUserId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "cancelledByUserName",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "colleagueVerifier",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "connectCardNumber",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "connectCardPIN",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "connectCardUID",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "connectCardUsername",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "customerId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "dateCancelled",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "dateCreated",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "datePaidOut",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "dateScanned",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "dateSettled",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "dateStruck",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "dateTranslated",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "dateUpdated",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "image",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "imageUrl",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "lockAcquired",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "lockComment",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "lockDetails",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "lockExpires",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "lockState",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "lockStoreId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "lockTerminalId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "lockUserId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "lockUserName",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "lockWarns",
                     "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "locked",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "monitored",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paidAsLost",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paidOut",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paidOutByExternalSystem",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paidOutByStoreId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paidOutByTerminalId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paidOutByUserId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paidOutByUserName",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paidOutPartial",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paidOutPaymentTypes",
                     "type": "List[String]"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paidOutWithoutScanningBarcode",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paymentReference",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "paymentType",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
+                    "name": "paymentTypeChangeReason",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
                     "name": "pendingApproval",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "pendingColleagueVerification",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "printReceipts",
                     "type": "List[String]"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "priority",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
+                    "name": "promoCode",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
                     "name": "receiptNumber",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "returnsPaid",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "scanned",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "scannedByStoreId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "scannedByTerminalId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "scannedByUserId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "scannedByUserName",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "searchOrder",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "sections",
                     "type": "List[String]"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "settleInProportion",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "settled",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "shopId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "slipType",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "state",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "struck",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "struckByStoreId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "struckByTerminalId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "struckByUserId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "struckByUserName",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "totalPotentialWins",
                     "type": "Int"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "totalReturns",
                     "type": "Int"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "totalStake",
                     "type": "Int"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "translated",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "translatedByStoreId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "translatedByTerminalId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "translatedByUserId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "translationInProgress",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "unpaidVerified",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "updatedByStoreId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "updatedByTerminalId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "updatedByUserId",
                     "type": "String"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "voidPaid",
                     "type": "Int"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "voidPaidAmended",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "voidReturns",
                     "type": "Int"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "voidSlip",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "winPaid",
                     "type": "Int"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "winPaidAmended",
                     "type": "Boolean"
                   },
                   {
-                    "mode": "optional",
+                    "mode": "nullable",
                     "name": "winReturns",
                     "type": "Int"
                   }
@@ -517,7 +527,7 @@
             ]
           },
           {
-            "mode": "optional",
+            "mode": "nullable",
             "name": "type",
             "type": "String"
           }
