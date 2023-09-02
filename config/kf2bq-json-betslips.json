@@ -181,6 +181,366 @@
                     "mode": "nullable",
                     "name": "imageUrl",
                     "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lockAcquired",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lockComment",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lockDetails",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lockExpires",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lockState",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lockStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lockTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lockUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lockUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lockWarns",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "locked",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "monitored",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paidAsLost",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paidOut",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paidOutByExternalSystem",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paidOutByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paidOutByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paidOutByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paidOutByUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paidOutPartial",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paidOutWithoutScanningBarcode",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paymentReference",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paymentType",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paymentTypeChangeReason",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "pendingApproval",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "pendingColleagueVerification",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "priority",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "promoCode",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "receiptNumber",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "returnsPaid",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "scanned",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "scannedByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "scannedByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "scannedByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "scannedByUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "searchOrder",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "settleInProportion",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "settleInProportionPct",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "settled",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "settledByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "settledByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "settledByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "settledByUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "shopId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "slipType",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "state",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "struck",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "struckByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "struckByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "struckByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "struckByUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "totalPotentialWins",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "totalReturns",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "totalStake",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "translated",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "translatedByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "translatedByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "translatedByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "translatedByUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "translationInProgress",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "unpaidVerified",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "updatedByStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "updatedByTerminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "updatedByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "updatedByUserName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "voidPaid",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "voidPaidAmended",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "voidReturns",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "voidSlip",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "winPaid",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "winPaidAmended",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "winReturns",
+                    "type": "Long"
                   }
                 ]
               }
@@ -202,7 +562,7 @@
       "id": "kafkasource1",
       "bootstrap": "internal-coral-epos2-stg0-kafka-lb-998826191.eu-west-2.elb.amazonaws.com:9092",
       "topic": "betslips",
-      "group": "pai-betslip-group",
+      "group": "pai-betslip-group-1",
       "defaultOffset": "latest",
       "autoCommit": false
     },
@@ -210,7 +570,7 @@
       "type": "bigquery",
       "id": "bigquerysource1",
       "dataset": "coral_retail_stg_omnia_betslips",
-      "table": "betslips",
+      "table": "betslips_1",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }

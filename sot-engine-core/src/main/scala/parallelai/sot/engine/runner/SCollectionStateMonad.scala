@@ -273,6 +273,18 @@ object SCollectionStateMonad {
       (sColls, sColls)
     })
 
+//  def writeSchemaless1[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO](sCollection: SCollection[Row.Aux[L]])
+//                                                                                                     (tap: SchemalessTapDef[TAP, UTIL, ANNO], utils: UTIL)
+//                                                                                                     (implicit
+//                                                                                                      hListSchemaProvider: HListSchemaProvider[L],
+//                                                                                                      toL: ToTableRow[L]
+////                                                                                                      writer: SchemalessWriter[TAP, UTIL, ANNO, L]
+//                                                                                                     ): IndexedState[SCOLS, SCOLS, SCOLS] =
+//    IndexedState(sColls => {
+////      writer.write(sCollection, tap.tapDefinition, utils)
+//      (sColls, sColls)
+//    })
+
 
   def fromTuple[A <: Product, Repr <: HList](a: A)(implicit
                                                    gen: LabelledGeneric.Aux[A, Repr],

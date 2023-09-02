@@ -27,6 +27,7 @@ object Common {
       "-language:postfixOps",
       "-language:higherKinds",
       "-language:existentials"
+//      ,"-Xlog-implicits"
     ),
     parallelExecution in ThisBuild := false,
     fork in Test := true,
