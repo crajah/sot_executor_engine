@@ -1,0 +1,78 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "schema-saf",
+      "name": "SAFSchema",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "saf",
+        "fields": [
+          {
+            "mode": "required",
+            "name": "selectionKey",
+            "type": "Long"
+          },
+          {
+            "mode": "nullable-repeated",
+            "name": "price",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "selectionPriceType",
+                "type": "String"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "lookups": [],
+  "taps": [
+    {
+      "type": "kafka",
+      "id": "kafkatap-sportsbook",
+      "bootstrap": "lc-df-nonprod-kafka-lb-1656149905.eu-west-2.elb.amazonaws.com:9092",
+      "topic": "coral.prod.digital.sportsbook.1",
+      "group": "pai-saf-group-2",
+      "defaultOffset": "earliest",
+      "autoCommit": true
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-selection",
+      "dataset": "bigquerytest",
+      "table": "saf_selection_test"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "schema-saf",
+      "tap": "kafkatap-sportsbook"
+    },
+
+
+
+    {
+      "type": "sink",
+      "id": "out-bq-selection",
+      "name": "outBQSelection",
+      "tap": "bigquerytap-selection"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "out-bq-selection"
+    }
+  ]
+}

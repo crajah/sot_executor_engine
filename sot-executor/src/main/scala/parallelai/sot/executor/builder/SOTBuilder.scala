@@ -80,26 +80,35 @@ import parallelai.sot.executor.SOTNats._
   * </pre>
   * NOTE That application configurations can also be set/overridden via system and environment properties.
   */
-@SOTBuilder
 object SOTBuilder {
+  case class saf(price: Option[List[String]]) extends parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
+//  case class saf(selectionKey: Long, price: Option[List[Saf$1]]) extends parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
+//  case class Saf$1(selectionPriceType: String) extends parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
   object conf {
     val jobConfig = SOTMacroJsonConfig(SchemaResourcePath().value)
     val sourceTaps = getSources(jobConfig)
     val sinkTaps = getSinks(jobConfig)
+    val sources = TapDef[parallelai.sot.executor.model.SOTMacroConfig.KafkaTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation, saf](conf.sourceTaps(0)._3) :: HNil
+    val sinks = SchemalessTapDef[parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, parallelai.sot.engine.io.utils.annotations.Schemaless](conf.sinkTaps(0)._3) :: HNil
   }
-
+  class Job extends Serializable {
+    def execute(sotUtils: SOTUtils, sc: ScioContext, args: Args): Unit = {
+      val job = init[HNil]
+        .flatMap(sColls => read(sc, TapDef[parallelai.sot.executor.model.SOTMacroConfig.KafkaTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation, saf](conf.sourceTaps(0)._3), sotUtils))
+        .flatMap(sColls => writeSchemaless1(sColls.at(Nat0()))(SchemalessTapDef[parallelai.sot.executor.model.SOTMacroConfig.BigQueryTapDefinition, parallelai.sot.engine.config.gcp.SOTUtils, parallelai.sot.engine.io.utils.annotations.Schemaless](conf.sinkTaps(0)._3), sotUtils))
+      job.run(HNil)._1
+      val result = sc.close()
+      if (args.getOrElse("waitToFinish", "true").toBoolean) sotUtils.waitToFinish(result.internal)
+    }
+  }
   def main(cmdArg: Array[String]): Unit = {
     val (sotOptions, sotArgs) = executionContext(cmdArg)
-    execute(new Job, sotOptions, sotArgs)
+    execute(new Job(), sotOptions, sotArgs)
   }
-
-  def executionContext(cmdArg: Array[String]): (SOTOptions, Args) =
-    ScioContext.parseArguments[SOTOptions](cmdArg)
-
+  def executionContext(cmdArg: Array[String]): (SOTOptions, Args) = ScioContext.parseArguments[SOTOptions](cmdArg)
   def execute[P <: PipelineOptions](job: Job, pipelineOptions: P, args: Args): Unit = {
     val sotUtils = new SOTUtils(pipelineOptions)
     val sc = ScioContext(pipelineOptions)
-
     job.execute(sotUtils, sc, args)
   }
 }
