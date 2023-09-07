@@ -277,8 +277,9 @@ object SCollectionStateMonad {
   def writeSchemaless1[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO](sCollection: SCollection[Row.Aux[L]])
                                                                                                      (tap: SchemalessTapDef[TAP, UTIL, ANNO], utils: UTIL)
                                                                                                      (implicit
-                                                                                                      hListSchemaProvider: HListSchemaProvider[L],
-                                                                                                      toL: ToTableRow[L]
+                                                                                                      deepRec: DeepRec[L],
+                                                                                                      hListSchemaProvider: HListSchemaProvider[L]
+//                                                                                                      toL: ToTableRow[L]
 //                                                                                                      writer: SchemalessWriter[TAP, UTIL, ANNO, L]
                                                                                                      ): IndexedState[SCOLS, SCOLS, SCOLS] =
     IndexedState(sColls => {

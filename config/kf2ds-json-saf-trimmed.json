@@ -13,11 +13,6 @@
         "name": "saf",
         "fields": [
           {
-            "mode": "required",
-            "name": "selectionKey",
-            "type": "Long"
-          },
-          {
             "mode": "nullable-repeated",
             "name": "price",
             "type": "record",
