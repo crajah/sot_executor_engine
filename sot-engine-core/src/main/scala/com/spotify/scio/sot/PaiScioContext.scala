@@ -28,6 +28,10 @@ import shapeless.{HList, LabelledGeneric}
 
 object PaiScioContext extends Serializable {
 
+  //replace io.circe.Decoder[List[T]] with io.circe.Decoder[Option[List[T]]]
+  //adding the type to the definition results in java.lang.StackOverflowError
+  implicit def listDecoder[T](implicit decoder: Decoder[T]) = io.circe.Decoder[Option[List[T]]].map(_.toList.flatten)
+
   def getSubscription(tap: PubSubTapDefinition, utils: SOTUtils) =
     s"projects/${utils.getProject}/subscriptions/${utils.getJobName}-${tap.topic}-${tap.id}-managed"
 
