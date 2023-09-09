@@ -1,0 +1,708 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "schema-bets",
+      "name": "BETSSchema",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "bets",
+        "fields": [
+          {
+            "mode": "required",
+            "name": "betslipKey",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "countryCode",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "betChannel",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "betslipDateTime",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "customerID",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "username",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "formatType",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "formatSize",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "takeDateTime",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "takenBy",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "takeMethod",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "captureToFollow",
+            "type": "Boolean"
+          },
+          {
+            "mode": "nullable",
+            "name": "captureDateTime",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "capturedBy",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "captureMethod",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "isRecapture",
+            "type": "Boolean"
+          },
+          {
+            "mode": "nullable",
+            "name": "shopNumber",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "tillNumber",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "barcode",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "loyaltyCardNo",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "isSettled",
+            "type": "Boolean"
+          },
+          {
+            "mode": "nullable",
+            "name": "settleMethod",
+            "type": "String"
+          },
+          {
+            "fields": [
+              {
+                "fields": [
+                  {
+                    "mode": "required",
+                    "name": "betKey",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "betType",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "stake",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "legType",
+                    "type": "String"
+                  },
+                  {
+                    "fields": [
+                      {
+                        "mode": "nullable",
+                        "name": "legNo",
+                        "type": "String"
+                      },
+                      {
+                        "fields": [
+                          {
+                            "mode": "nullable",
+                            "name": "partNo",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "priceType",
+                            "type": "String"
+                          },
+                          {
+                            "fields": [
+                              {
+                                "mode": "nullable",
+                                "name": "priceType",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "priceStatus",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "num",
+                                "type": "Int"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "den",
+                                "type": "Int"
+                              }
+                            ],
+                            "mode": "nullable",
+                            "name": "betPrice",
+                            "type": "record"
+                          },
+                          {
+                            "fields": [
+                              {
+                                "mode": "nullable",
+                                "name": "priceType",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "priceStatus",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "num",
+                                "type": "Int"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "den",
+                                "type": "Int"
+                              }
+                            ],
+                            "mode": "nullable",
+                            "name": "currentPrice",
+                            "type": "record"
+                          },
+                          {
+                            "fields": [
+                              {
+                                "mode": "nullable",
+                                "name": "priceType",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "priceStatus",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "num",
+                                "type": "Int"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "den",
+                                "type": "Int"
+                              }
+                            ],
+                            "mode": "nullable",
+                            "name": "startingPrice",
+                            "type": "record"
+                          },
+                          {
+                            "fields": [
+                              {
+                                "mode": "nullable",
+                                "name": "priceType",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "priceStatus",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "num",
+                                "type": "Int"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "den",
+                                "type": "Int"
+                              }
+                            ],
+                            "mode": "nullable",
+                            "name": "settlementPrice",
+                            "type": "record"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "cashoutType",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "cashoutLadder",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "resultCode",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "result",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "resultPlaces",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "eachWayNum",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "eachWayDen",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "eachWayPlaces",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "placeTerms",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "rawHandicapValue",
+                            "type": "String"
+                          },
+                          {
+                            "fields": [
+                              {
+                                "mode": "nullable",
+                                "name": "`type`",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "num",
+                                "type": "Int"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "den",
+                                "type": "Int"
+                              }
+                            ],
+                            "mode": "nullable-repeated",
+                            "name": "deductionDetail",
+                            "type": "record"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "selectionKey",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "selectionName",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "outcomeMeaningMinorCode",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "marketKey",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "marketName",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "marketSort",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "eventKey",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "eventName",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "eventDateTime",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "typeKey",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "typeName",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "classKey",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "className",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "categoryKey",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "categoryName",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "runnerNumber",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "isResultConfirmed",
+                            "type": "Boolean"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "resultDateTime",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "handicapType",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "handicapValue",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "marketType",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "winPlace",
+                            "type": "String"
+                          }
+                        ],
+                        "mode": "nullable-repeated",
+                        "name": "part",
+                        "type": "record"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "legSort",
+                        "type": "String"
+                      }
+                    ],
+                    "mode": "nullable-repeated",
+                    "name": "leg",
+                    "type": "record"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "cashoutAmount",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "cashoutStatus",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "cumulativeStrikePrice",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "cumulativeStrikeTrueChance",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "driftBoundary",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "premium",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "cashoutDelayKey",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "cashoutDelay",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "freebetAmount",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "betPlacedTime",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "channelCode",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "betReciept",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "betStatus",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "createDateTime",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "maxStake",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "winningAmount",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "refundAmount",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "bonusAmount",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "stakePerLine",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "fundedAmount",
+                    "type": "Double"
+                  }
+                ],
+                "mode": "nullable-repeated",
+                "name": "bet",
+                "type": "record"
+              },
+              {
+                "mode": "nullable",
+                "name": "numLines",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "numVoidLines",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "numWinLines",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "numLoseLines",
+                "type": "Int"
+              }
+            ],
+            "mode": "nullable",
+            "name": "bets",
+            "type": "record"
+          },
+          {
+            "fields": [
+              {
+                "mode": "nullable",
+                "name": "operation",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "messageType",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "messageID",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "source",
+                "type": "String"
+              }
+            ],
+            "mode": "nullable",
+            "name": "meta",
+            "type": "record"
+          },
+          {
+            "mode": "nullable",
+            "name": "payoutStatus",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "payoutDateTime",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "payoutMethod",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "isPaidDirect",
+            "type": "Boolean"
+          },
+          {
+            "mode": "nullable",
+            "name": "settlementStatus",
+            "type": "String"
+          },
+          {
+            "mode": "nullable",
+            "name": "cancelled",
+            "type": "Boolean"
+          },
+          {
+            "mode": "nullable",
+            "name": "paid",
+            "type": "Boolean"
+          }
+        ]
+      }
+    }
+  ],
+  "lookups": [],
+  "taps": [
+    {
+      "type": "kafka",
+      "id": "kafkatap-bets",
+      "bootstrap": "lc-df-nonprod-kafka-lb-1656149905.eu-west-2.elb.amazonaws.com:9092",
+      "topic": "coral.stage.retail.betslip.1",
+      "group": "pai-bets-group-111",
+      "defaultOffset": "earliest",
+      "autoCommit": true
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-bets",
+      "dataset": "coral_retail_df_stg",
+      "table": "bets"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "schema-bets",
+      "tap": "kafkatap-bets"
+    },
+    {
+      "type": "sink",
+      "id": "bigquery-bets-sink",
+      "name": "bigquery-bets-sink",
+      "tap": "bigquerytap-bets"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "bigquery-bets-sink"
+    }
+  ]
+}

@@ -60,196 +60,196 @@ object SCollectionStateMonad {
     })
 
 
-  def flatMap[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])(f: Row.Aux[L] => TraversableOnce[Row.Aux[Out]])
-                                                                         (implicit
-                                                                          prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
-                                                                         ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, sCollection.flatMap(x=> f(x)) :: HNil)
-      (res, res)
-    })
+//  def flatMap[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])(f: Row.Aux[L] => TraversableOnce[Row.Aux[Out]])
+//                                                                         (implicit
+//                                                                          prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
+//                                                                         ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, sCollection.flatMap(x=> f(x)) :: HNil)
+//      (res, res)
+//    })
+//
+//
+//  def predict[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
+//                                                                         (modelBucket: String, modelPath: String, fetchOps: Seq[String],
+//                                                                          inFn: Row.Aux[L] => Map[String, Tensor],
+//                                                                          outFn: (Row.Aux[L], Map[String, Tensor]) => Row.Aux[Out])
+//                                                                         (implicit
+//                                                                          prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
+//                                                                         ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, sCollection.predict(modelBucket, modelPath, fetchOps)(inFn)(outFn) :: HNil)
+//      (res, res)
+//    })
+//
+//  def accumulate[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList : ClassTag, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
+//                                                                                                                (getValue: Row.Aux[L] => Row.Aux[I])(
+//                                                                                                                  defaultValue: Row.Aux[I],
+//                                                                                                                  keyMapper: Row.Aux[L] => K,
+//                                                                                                                  aggr: (Row.Aux[I], Row.Aux[I]) => Row.Aux[I],
+//                                                                                                                  toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
+//                                                                                                                  kind: String = "")
+//                                                                                                                (implicit
+//                                                                                                                 prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
+//                                                                                                                 toL: ToEntity[I],
+//                                                                                                                 fromL: FromEntity[I]
+//                                                                                                                ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val opKind: Option[String] = kind match {
+//        case "" => None
+//        case s => Some(s)
+//      }
+//      val project = sCollection.context.optionsAs[GcpOptions].getProject
+//      val datastoreSettings = opKind.map { k => (Project(project), Kind(k)) }
+//      val res = prepend(sColls, sCollection.accumulator(keyMapper, getValue, defaultValue, aggr, toOut, datastoreSettings) :: HNil)
+//      (res, res)
+//    })
+//
+//
+//  def withFixedWindows[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
+//                                                                                  (duration: Duration,
+//                                                                                   offset: Duration = Duration.ZERO,
+//                                                                                   options: WindowOptions = WindowOptions())
+//                                                                                  (implicit
+//                                                                                   prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[L]] :: HNil, SCOLOUT]
+//                                                                                  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, sCollection.withFixedWindows(duration, offset, options) :: HNil)
+//      (res, res)
+//    })
+//
+//  def withGlobalWindow[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
+//                                                                                  (options: WindowOptions = WindowOptions())
+//                                                                                  (implicit
+//                                                                                   prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[L]] :: HNil, SCOLOUT]
+//                                                                                  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, sCollection.withGlobalWindow(options) :: HNil)
+//      (res, res)
+//    })
+//
+//
+//  def aggregate[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
+//                                                                           (zeroValue: Row.Aux[Out])
+//                                                                           (seqOp: (Row.Aux[Out], Row.Aux[L]) => Row.Aux[Out],
+//                                                                            combOp: (Row.Aux[Out], Row.Aux[Out]) => Row.Aux[Out])
+//                                                                           (implicit
+//                                                                            prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
+//                                                                           ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, sCollection.aggregate(zeroValue)(seqOp, combOp) :: HNil)
+//      (res, res)
+//    })
+//
+//
+//  def combine[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
+//                                                                         (createCombiner: Row.Aux[L] => Row.Aux[Out])
+//                                                                         (mergeValue: (Row.Aux[Out], Row.Aux[L]) => Row.Aux[Out],
+//                                                                          mergeCombiners: (Row.Aux[Out], Row.Aux[Out]) => Row.Aux[Out])
+//                                                                         (implicit
+//                                                                          prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
+//                                                                         ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, sCollection.combine(createCombiner)(mergeValue)(mergeCombiners) :: HNil)
+//      (res, res)
+//    })
+//
+//
+//  def groupBy[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, K: Manifest](sCollection: SCollection[Row.Aux[L]])
+//                                                                                      (f: Row.Aux[L] => K)
+//                                                                                      (implicit
+//                                                                                       prepend: Prepend.Aux[SCOLS, GroupedSCollection[K, L] :: HNil, SCOLOUT]
+//                                                                                      ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, sCollection.groupBy(f).map({
+//        case (k: K, it: Iterable[Row.Aux[L]]) => fromTuple((k, it.toList.map(_.hList)))
+//      }) :: HNil)
+//      (res, res)
+//    })
+//
+//
+//  def join[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+//  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+//  (implicit
+//   pair1: IsPair.Aux[J1, K, L1],
+//   pair2: IsPair.Aux[J2, K, L2],
+//   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, L1, L2] :: HNil, SCOLOUT]
+//  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, pair1(sColl1).join(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+//      (res, res)
+//    }
+//    )
+//
+//
+//  def hashJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+//  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+//  (implicit
+//   pair1: IsPair.Aux[J1, K, L1],
+//   pair2: IsPair.Aux[J2, K, L2],
+//   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, L1, L2] :: HNil, SCOLOUT]
+//  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, pair1(sColl1).hashJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+//      (res, res)
+//    }
+//    )
+//
+//
+//  def leftOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+//  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+//  (implicit
+//   pair1: IsPair.Aux[J1, K, L1],
+//   pair2: IsPair.Aux[J2, K, L2],
+//   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, L1, Option[L2]] :: HNil, SCOLOUT]
+//  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, pair1(sColl1).leftOuterJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+//      (res, res)
+//    }
+//    )
+//
+//
+//  def hashLeftJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+//  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+//  (implicit
+//   pair1: IsPair.Aux[J1, K, L1],
+//   pair2: IsPair.Aux[J2, K, L2],
+//   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, L1, Option[L2]] :: HNil, SCOLOUT]
+//  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, pair1(sColl1).hashLeftJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+//      (res, res)
+//    }
+//    )
+//
+//
+//  def rightOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+//  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+//  (implicit
+//   pair1: IsPair.Aux[J1, K, L1],
+//   pair2: IsPair.Aux[J2, K, L2],
+//   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, Option[L1], L2] :: HNil, SCOLOUT]
+//  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, pair1(sColl1).rightOuterJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+//      (res, res)
+//    }
+//    )
 
 
-  def predict[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
-                                                                         (modelBucket: String, modelPath: String, fetchOps: Seq[String],
-                                                                          inFn: Row.Aux[L] => Map[String, Tensor],
-                                                                          outFn: (Row.Aux[L], Map[String, Tensor]) => Row.Aux[Out])
-                                                                         (implicit
-                                                                          prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
-                                                                         ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, sCollection.predict(modelBucket, modelPath, fetchOps)(inFn)(outFn) :: HNil)
-      (res, res)
-    })
-
-  def accumulate[K: ClassTag, SCOLS <: HList, SCOLOUT <: HList, L <: HList : ClassTag, Out <: HList, I <: HList](sCollection: SCollection[Row.Aux[L]])
-                                                                                                                (getValue: Row.Aux[L] => Row.Aux[I])(
-                                                                                                                  defaultValue: Row.Aux[I],
-                                                                                                                  keyMapper: Row.Aux[L] => K,
-                                                                                                                  aggr: (Row.Aux[I], Row.Aux[I]) => Row.Aux[I],
-                                                                                                                  toOut: (Row.Aux[L], Row.Aux[I]) => Row.Aux[Out],
-                                                                                                                  kind: String = "")
-                                                                                                                (implicit
-                                                                                                                 prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT],
-                                                                                                                 toL: ToEntity[I],
-                                                                                                                 fromL: FromEntity[I]
-                                                                                                                ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val opKind: Option[String] = kind match {
-        case "" => None
-        case s => Some(s)
-      }
-      val project = sCollection.context.optionsAs[GcpOptions].getProject
-      val datastoreSettings = opKind.map { k => (Project(project), Kind(k)) }
-      val res = prepend(sColls, sCollection.accumulator(keyMapper, getValue, defaultValue, aggr, toOut, datastoreSettings) :: HNil)
-      (res, res)
-    })
-
-
-  def withFixedWindows[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
-                                                                                  (duration: Duration,
-                                                                                   offset: Duration = Duration.ZERO,
-                                                                                   options: WindowOptions = WindowOptions())
-                                                                                  (implicit
-                                                                                   prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[L]] :: HNil, SCOLOUT]
-                                                                                  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, sCollection.withFixedWindows(duration, offset, options) :: HNil)
-      (res, res)
-    })
-
-  def withGlobalWindow[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
-                                                                                  (options: WindowOptions = WindowOptions())
-                                                                                  (implicit
-                                                                                   prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[L]] :: HNil, SCOLOUT]
-                                                                                  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, sCollection.withGlobalWindow(options) :: HNil)
-      (res, res)
-    })
-
-
-  def aggregate[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
-                                                                           (zeroValue: Row.Aux[Out])
-                                                                           (seqOp: (Row.Aux[Out], Row.Aux[L]) => Row.Aux[Out],
-                                                                            combOp: (Row.Aux[Out], Row.Aux[Out]) => Row.Aux[Out])
-                                                                           (implicit
-                                                                            prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
-                                                                           ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, sCollection.aggregate(zeroValue)(seqOp, combOp) :: HNil)
-      (res, res)
-    })
-
-
-  def combine[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList](sCollection: SCollection[Row.Aux[L]])
-                                                                         (createCombiner: Row.Aux[L] => Row.Aux[Out])
-                                                                         (mergeValue: (Row.Aux[Out], Row.Aux[L]) => Row.Aux[Out],
-                                                                          mergeCombiners: (Row.Aux[Out], Row.Aux[Out]) => Row.Aux[Out])
-                                                                         (implicit
-                                                                          prepend: Prepend.Aux[SCOLS, SCollection[Row.Aux[Out]] :: HNil, SCOLOUT]
-                                                                         ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, sCollection.combine(createCombiner)(mergeValue)(mergeCombiners) :: HNil)
-      (res, res)
-    })
-
-
-  def groupBy[SCOLS <: HList, SCOLOUT <: HList, L <: HList, Out <: HList, K: Manifest](sCollection: SCollection[Row.Aux[L]])
-                                                                                      (f: Row.Aux[L] => K)
-                                                                                      (implicit
-                                                                                       prepend: Prepend.Aux[SCOLS, GroupedSCollection[K, L] :: HNil, SCOLOUT]
-                                                                                      ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, sCollection.groupBy(f).map({
-        case (k: K, it: Iterable[Row.Aux[L]]) => fromTuple((k, it.toList.map(_.hList)))
-      }) :: HNil)
-      (res, res)
-    })
-
-
-  def join[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
-  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
-  (implicit
-   pair1: IsPair.Aux[J1, K, L1],
-   pair2: IsPair.Aux[J2, K, L2],
-   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, L1, L2] :: HNil, SCOLOUT]
-  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, pair1(sColl1).join(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
-      (res, res)
-    }
-    )
-
-
-  def hashJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
-  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
-  (implicit
-   pair1: IsPair.Aux[J1, K, L1],
-   pair2: IsPair.Aux[J2, K, L2],
-   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, L1, L2] :: HNil, SCOLOUT]
-  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, pair1(sColl1).hashJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
-      (res, res)
-    }
-    )
-
-
-  def leftOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
-  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
-  (implicit
-   pair1: IsPair.Aux[J1, K, L1],
-   pair2: IsPair.Aux[J2, K, L2],
-   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, L1, Option[L2]] :: HNil, SCOLOUT]
-  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, pair1(sColl1).leftOuterJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
-      (res, res)
-    }
-    )
-
-
-  def hashLeftJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
-  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
-  (implicit
-   pair1: IsPair.Aux[J1, K, L1],
-   pair2: IsPair.Aux[J2, K, L2],
-   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, L1, Option[L2]] :: HNil, SCOLOUT]
-  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, pair1(sColl1).hashLeftJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
-      (res, res)
-    }
-    )
-
-
-  def rightOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
-  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
-  (implicit
-   pair1: IsPair.Aux[J1, K, L1],
-   pair2: IsPair.Aux[J2, K, L2],
-   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, Option[L1], L2] :: HNil, SCOLOUT]
-  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, pair1(sColl1).rightOuterJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
-      (res, res)
-    }
-    )
-
-
-  def fullOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
-  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
-  (implicit
-   pair1: IsPair.Aux[J1, K, L1],
-   pair2: IsPair.Aux[J2, K, L2],
-   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, Option[L1], Option[L2]] :: HNil, SCOLOUT]
-  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
-    IndexedState(sColls => {
-      val res = prepend(sColls, pair1(sColl1).fullOuterJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
-      (res, res)
-    }
-    )
+//  def fullOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
+//  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
+//  (implicit
+//   pair1: IsPair.Aux[J1, K, L1],
+//   pair2: IsPair.Aux[J2, K, L2],
+//   prepend: Prepend.Aux[SCOLS, JoinedSCollection[K, Option[L1], Option[L2]] :: HNil, SCOLOUT]
+//  ): IndexedState[SCOLS, SCOLOUT, SCOLOUT] =
+//    IndexedState(sColls => {
+//      val res = prepend(sColls, pair1(sColl1).fullOuterJoin(pair2(sColl2)).map(m => fromTuple(m)) :: HNil)
+//      (res, res)
+//    }
+//    )
 
 
   def write[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO, In <: ANNO : Manifest](sCollection: SCollection[Row.Aux[L]])
