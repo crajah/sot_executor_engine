@@ -236,8 +236,8 @@ object SCollectionStateMonad {
 //      (res, res)
 //    }
 //    )
-
-
+//
+//
 //  def fullOuterJoin[J1 <: HList, J2 <: HList, K: ClassTag, L1: ClassTag, L2: ClassTag, SCOLS <: HList, SCOLOUT <: HList, W: ClassTag]
 //  (sColl1: SCollection[Row.Aux[J1]], sColl2: SCollection[Row.Aux[J2]])
 //  (implicit

@@ -12,16 +12,16 @@ trait DeepRec[L] extends DepFn1[L] with Serializable {
 trait LowPriorityDeepRec {
   type Aux[L, Out0] = DeepRec[L] { type Out = Out0 }
 
-  implicit def hconsDeepRec0[H, T <: HList](implicit tdr: Lazy[DeepRec[T]]): DeepRec.Aux[H :: T, H :: tdr.value.Out] =
-    new DeepRec[H :: T] {
-      type Out = H :: tdr.value.Out
-
-      def apply(in: H :: T): H :: tdr.value.Out =
-        in.head :: tdr.value(in.tail)
-
-      def fromRec(out: H :: tdr.value.Out): H :: T =
-        out.head :: tdr.value.fromRec(out.tail)
-    }
+//  implicit def hconsDeepRec0[H, T <: HList](implicit tdr: Lazy[DeepRec[T]]): DeepRec.Aux[H :: T, H :: tdr.value.Out] =
+//    new DeepRec[H :: T] {
+//      type Out = H :: tdr.value.Out
+//
+//      def apply(in: H :: T): H :: tdr.value.Out =
+//        in.head :: tdr.value(in.tail)
+//
+//      def fromRec(out: H :: tdr.value.Out): H :: T =
+//        out.head :: tdr.value.fromRec(out.tail)
+//    }
 }
 
 object DeepRec extends LowPriorityDeepRec {
