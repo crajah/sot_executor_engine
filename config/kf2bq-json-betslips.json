@@ -436,7 +436,7 @@
                               },
                               {
                                 "mode": "nullable",
-                                "name": "type",
+                                "name": "`type`",
                                 "type": "String"
                               }
                             ]
@@ -639,7 +639,7 @@
                               },
                               {
                                 "mode": "nullable",
-                                "name": "type",
+                                "name": "`type`",
                                 "type": "String"
                               }
                             ]
