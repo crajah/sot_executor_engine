@@ -40,7 +40,7 @@ object DeepRec extends LowPriorityDeepRec {
   }
 
   implicit def hconsDeepRec1[K <: Symbol, V, Repr <: HList, T <: HList](implicit
-                                                                        hdr: Lazy[FirstNonConstructor[V]],
+                                                                        hdr: Lazy[FirstNonTypeConstructor[V]],
                                                                         tdr: Lazy[DeepRec[T]]
                                                                        ): DeepRec.Aux[FieldType[K, V] :: T, FieldType[K, hdr.value.Out] :: tdr.value.Out] =
     new DeepRec[FieldType[K, V] :: T] {
