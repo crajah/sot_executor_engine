@@ -363,6 +363,349 @@
                     "type": "Long"
                   },
                   {
+                    "mode": "repeated",
+                    "name": "sections",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "nullable",
+                        "name": "alien",
+                        "type": "Boolean"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "alienExpectedResultDate",
+                        "type": "Int"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "alienOtherReason",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "repeated",
+                        "name": "bets",
+                        "type": "record",
+                        "fields": [
+                          {
+                            "mode": "nullable",
+                            "name": "betCount",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "repeated",
+                            "name": "betIds",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "betType",
+                            "type": "record",
+                            "fields": [
+                              {
+                                "mode": "nullable",
+                                "name": "id",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "numberOfLines",
+                                "type": "Int"
+                              }
+                            ]
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "betTypeSingle",
+                            "type": "Boolean"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "cost",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "criteria",
+                            "type": "record",
+                            "fields": [
+                              {
+                                "mode": "nullable",
+                                "name": "id",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "`type`",
+                                "type": "String"
+                              }
+                            ]
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "id",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "repeated",
+                            "name": "openBetIds",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "status",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "totalReturns",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "unitStake",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "voidReturns",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "winReturns",
+                            "type": "Int"
+                          }
+                        ]
+                      },
+                      {
+                        "mode": "repeated",
+                        "name": "cashedOutBets",
+                        "type": "record",
+                        "fields": [
+                          {
+                            "mode": "nullable",
+                            "name": "betType",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "cashedOutAmount",
+                            "type": "Double"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "cost",
+                            "type": "Double"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "dateCashedOut",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "event",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "market",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "participant",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "sectionId",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "unitStake",
+                            "type": "Double"
+                          }
+                        ]
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "id",
+                        "type": "Int"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "lottoMultiId",
+                        "type": "Int"
+                      },
+                      {
+                        "mode": "repeated",
+                        "name": "picks",
+                        "type": "Int"
+                      },
+                      {
+                        "mode": "repeated",
+                        "name": "selections",
+                        "type": "record",
+                        "fields": [
+                          {
+                            "mode": "nullable",
+                            "name": "banker",
+                            "type": "Boolean"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "market",
+                            "type": "record",
+                            "fields": [
+                              {
+                                "mode": "nullable",
+                                "name": "event",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "eventId",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "id",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "name",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "startTime",
+                                "type": "String"
+                              }
+                            ]
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "order",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "participant",
+                            "type": "record",
+                            "fields": [
+                              {
+                                "mode": "nullable",
+                                "name": "event",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "eventId",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "id",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "marketSort",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "name",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "outcomeMeaningMinorCode",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "startTime",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "status",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "`type`",
+                                "type": "String"
+                              }
+                            ]
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "placePotentialReturns",
+                            "type": "Int"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "price",
+                            "type": "record",
+                            "fields": [
+                              {
+                                "mode": "nullable",
+                                "name": "manual",
+                                "type": "Boolean"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "odds",
+                                "type": "String"
+                              }
+                            ]
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "sportName",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "winPotentialReturns",
+                            "type": "Int"
+                          }
+                        ]
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "status",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "totalReturns",
+                        "type": "Int"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "voidReturns",
+                        "type": "Int"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "voidSection",
+                        "type": "Boolean"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "winReturns",
+                        "type": "Int"
+                      }
+                    ]
+                  },
+                  {
                     "mode": "nullable",
                     "name": "settleInProportion",
                     "type": "Boolean"
@@ -562,15 +905,15 @@
       "id": "kafkasource1",
       "bootstrap": "internal-coral-epos2-stg0-kafka-lb-998826191.eu-west-2.elb.amazonaws.com:9092",
       "topic": "betslips",
-      "group": "pai-betslip-group-1",
+      "group": "pai-betslip-group-2",
       "defaultOffset": "latest",
       "autoCommit": false
     },
     {
       "type": "bigquery",
       "id": "bigquerysource1",
-      "dataset": "coral_retail_stg_omnia_betslips",
-      "table": "betslips_1",
+      "dataset": "coral_retail_omnia_stg",
+      "table": "betslips",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
     }
