@@ -1,0 +1,186 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "jsonschema1",
+      "name": "jsonschema1Name",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "Cashflow",
+        "fields": [
+          {
+            "mode": "required",
+            "name": "data",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "nullable",
+                "name": "terminalId",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "storeId",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "userId",
+                "type": "String"
+              },
+              {
+                "mode": "required",
+                "name": "content",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "nullable",
+                    "name": "companion",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "cancelled",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "system",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "headOffice",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "amount",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "datetime",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "shopId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "terminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "userId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "transactionTypeId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "location",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "locationType",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "slipId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "receiptNumber",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paymentMethod",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "toLocation",
+                    "type": "String"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "mode": "required",
+            "name": "`type`",
+            "type": "String"
+          }
+        ]
+      }
+    }
+  ],
+  "lookups": [],
+  "taps": [
+    {
+      "type": "kafka",
+      "id": "kafkasource1",
+      "bootstrap": "internal-coral-epos2-stg0-kafka-lb-998826191.eu-west-2.elb.amazonaws.com:9092",
+      "topic": "cashflow",
+      "group": "pai-cashflow-group-1",
+      "defaultOffset": "earliest",
+      "autoCommit": false
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "coral_retail_omnia_stg",
+      "table": "cashflow",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "jsonschema1",
+      "tap": "kafkasource1"
+    },
+    {
+      "type": "transformation",
+      "id": "add-timestamp",
+      "name": "addTimestamp",
+      "op": "map",
+      "params": [["m => { val t = Helper.fmt.print(Helper.Instant.now()); m.append('ts, t) }"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "tap": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "add-timestamp"
+    },
+    {
+      "from": "add-timestamp",
+      "to": "out"
+    }
+  ]
+}
