@@ -107,9 +107,9 @@
                 "type": "Boolean"
               },
               {
-                "mode": "nullable",
+                "mode": "nullable-repeated",
                 "name": "languages",
-                "type": "List[String]"
+                "type": "String"
               },
               {
                 "mode": "nullable",
@@ -199,9 +199,9 @@
                 "type": "Int"
               },
               {
-                "mode": "nullable",
+                "mode": "nullable-repeated",
                 "name": "channels",
-                "type": "List[String]"
+                "type": "String"
               }
             ]
           },
@@ -343,19 +343,19 @@
                 "type": "Double"
               },
               {
-                "mode": "nullable",
+                "mode": "nullable-repeated",
                 "name": "languages",
-                "type": "List[String]"
+                "type": "String"
               },
               {
-                "mode": "nullable",
+                "mode": "nullable-repeated",
                 "name": "channels",
-                "type": "List[String]"
+                "type": "String"
               },
               {
-                "mode": "nullable",
+                "mode": "nullable-repeated",
                 "name": "flags",
-                "type": "List[String]"
+                "type": "String"
               }
             ]
           },
@@ -587,19 +587,19 @@
                 "type": "Boolean"
               },
               {
-                "mode": "nullable",
+                "mode": "nullable-repeated",
                 "name": "languages",
-                "type": "List[String]"
+                "type": "String"
               },
               {
-                "mode": "nullable",
+                "mode": "nullable-repeated",
                 "name": "channels",
-                "type": "List[String]"
+                "type": "String"
               },
               {
-                "mode": "nullable",
+                "mode": "nullable-repeated",
                 "name": "flags",
-                "type": "List[String]"
+                "type": "String"
               }
             ]
           },
@@ -726,9 +726,9 @@
                 "type": "String"
               },
               {
-                "mode": "nullable",
+                "mode": "nullable-repeated",
                 "name": "channels",
-                "type": "List[String]"
+                "type": "String"
               },
               {
                 "mode": "nullable",
@@ -843,7 +843,7 @@
                 "type": "record",
                 "fields": [
                   {
-                    "mode": "repeated",
+                    "mode": "nullable-repeated",
                     "name": "price",
                     "type": "record",
                     "fields": [
@@ -1046,37 +1046,37 @@
       "type": "bigquery",
       "id": "bigquerytap-selection",
       "dataset": "bigquerytest",
-      "table": "saf_selection"
+      "table": "saf_selection_test"
     },
     {
       "type": "bigquery",
       "id": "bigquerytap-market",
       "dataset": "bigquerytest",
-      "table": "saf_market"
+      "table": "saf_market_test"
     },
     {
       "type": "bigquery",
       "id": "bigquerytap-type",
       "dataset": "bigquerytest",
-      "table": "saf_type"
+      "table": "saf_type_test"
     },
     {
       "type": "bigquery",
       "id": "bigquerytap-event",
       "dataset": "bigquerytest",
-      "table": "saf_event"
+      "table": "saf_event_test"
     },
     {
       "type": "bigquery",
       "id": "bigquerytap-class",
       "dataset": "bigquerytest",
-      "table": "saf_class"
+      "table": "saf_class_test"
     },
     {
       "type": "bigquery",
       "id": "bigquerytap-category",
       "dataset": "bigquerytest",
-      "table": "saf_category"
+      "table": "saf_category_test"
     }
   ],
   "steps": [
@@ -1428,30 +1428,6 @@
     {
       "from": "filter-category",
       "to": "map-category"
-    },
-    {
-      "from": "map-selection",
-      "to": "out-ds-selection"
-    },
-    {
-      "from": "map-market",
-      "to": "out-ds-market"
-    },
-    {
-      "from": "map-event",
-      "to": "out-ds-event"
-    },
-    {
-      "from": "map-type",
-      "to": "out-ds-type"
-    },
-    {
-      "from": "map-class",
-      "to": "out-ds-class"
-    },
-    {
-      "from": "map-category",
-      "to": "out-ds-category"
     },
     {
       "from": "map-selection",

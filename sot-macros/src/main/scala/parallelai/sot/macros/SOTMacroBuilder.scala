@@ -210,6 +210,7 @@ object SOTMainMacroImpl {
   }
 
   def SOTFieldParser(fieldName: String, fieldType: String, fieldMode: String): Term.Param = fieldMode match {
+    case "nullable-repeated" => s"$fieldName: Option[List[$fieldType]]".parse[Term.Param].get
     case "nullable" => s"$fieldName: Option[$fieldType]".parse[Term.Param].get
     case "repeated" => s"$fieldName: List[$fieldType]".parse[Term.Param].get
     case "required" => s"$fieldName: $fieldType".parse[Term.Param].get

@@ -5,6 +5,7 @@ trait BaseMappableType[M] extends Serializable {
   def get(m: M, key: String): Option[M]
   def getAll(m: M, key: String): Seq[M]
   def put(key: String, value: M, tail: M): M
+  //TODO: do we need an Option[Seq[M]] ?
   def put(key: String, value: Option[M], tail: M): M
   def put(key: String, values: Seq[M], tail: M): M
 }
