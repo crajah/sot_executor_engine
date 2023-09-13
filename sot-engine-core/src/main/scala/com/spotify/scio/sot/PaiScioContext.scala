@@ -23,7 +23,7 @@ import parallelai.sot.engine.io.datastore._
 import parallelai.sot.engine.io.utils.annotations.{HasDatastoreAnnotation, HasJSONAnnotation, Schemaless}
 import parallelai.sot.engine.serialization.avro.AvroUtils
 import parallelai.sot.executor.model.DedupeStrategy
-import parallelai.sot.executor.model.SOTMacroConfig.{KafkaTapDefinition, PubSubTapDefinition}
+import parallelai.sot.executor.model.SOTMacroConfig.{GoogleStoreTapDefinition, KafkaTapDefinition, PubSubTapDefinition}
 import shapeless.{HList, LabelledGeneric}
 
 object PaiScioContext extends Serializable {
@@ -109,6 +109,15 @@ object PaiScioContext extends Serializable {
         val charset = Charset.forName("UTF-8")
         val f1 = new String(f, charset)
         decode[In](f1) match {
+          case Right(in) => in
+          case Left(p) => throw p.fillInStackTrace()
+        }
+      }
+    }
+
+    def typedGoogleStorageJSON[In <: HasJSONAnnotation : Manifest](path: String)(implicit ev: io.circe.Decoder[In]): SCollection[In] = {
+      sc.textFile(path).map { f =>
+        decode[In](f) match {
           case Right(in) => in
           case Left(p) => throw p.fillInStackTrace()
         }

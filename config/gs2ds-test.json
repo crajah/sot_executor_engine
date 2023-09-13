@@ -1,0 +1,108 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "json1",
+      "name": "TestSchema",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "saf",
+        "fields": [
+          {
+            "mode": "required",
+            "name": "f1",
+            "type": "Long"
+          },
+          {
+            "mode": "nullable",
+            "name": "f2",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "f21",
+                "type": "Long"
+              }
+            ]
+          },
+          {
+            "mode": "nullable-repeated",
+            "name": "f3",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "f31",
+                "type": "Long"
+              }
+            ]
+          },
+          {
+            "mode": "nullable-repeated",
+            "name": "f4",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "f41",
+                "type": "Long"
+              },
+              {
+                "mode": "required",
+                "name": "f42",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "required",
+                    "name": "f421",
+                    "type": "Long"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "lookups": [],
+  "taps": [
+    {
+      "type": "googlestore",
+      "id": "googlestore1",
+      "bucket": "pai-test-bucket1",
+      "blob": "optionlisttest.json"
+    },
+    {
+      "type": "datastore",
+      "id": "datastore1",
+      "kind": "optionlistest",
+      "dedupeStrategy": "KEEP_LATEST"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "json1",
+      "tap": "googlestore1"
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "tap": "datastore1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "out"
+    }
+  ]
+}

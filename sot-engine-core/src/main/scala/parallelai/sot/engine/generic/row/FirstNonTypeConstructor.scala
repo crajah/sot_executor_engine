@@ -11,53 +11,6 @@ trait FirstNonTypeConstructor[T] {
 }
 
 trait FirstLowPriority {
-  implicit def caseInt: FirstNonTypeConstructor.Aux[Int, Int] =
-    new FirstNonTypeConstructor[Int] {
-      type Out = Int
-
-      def to(t: Int): Out = t
-
-      def from(r: Out): Int = r
-    }
-
-  implicit def caseString: FirstNonTypeConstructor.Aux[String, String] =
-    new FirstNonTypeConstructor[String] {
-      type Out = String
-
-      def to(t: String): Out = t
-
-      def from(r: Out): String = r
-    }
-
-  implicit def caseDouble: FirstNonTypeConstructor.Aux[Double, Double] =
-    new FirstNonTypeConstructor[Double] {
-      type Out = Double
-
-      def to(t: Double): Out = t
-
-      def from(r: Out): Double = r
-    }
-
-  implicit def caseBoolean: FirstNonTypeConstructor.Aux[Boolean, Boolean] =
-    new FirstNonTypeConstructor[Boolean] {
-      type Out = Boolean
-
-      def to(t: Boolean): Out = t
-
-      def from(r: Out): Boolean = r
-    }
-
-  implicit def caseLong: FirstNonTypeConstructor.Aux[Long, Long] =
-    new FirstNonTypeConstructor[Long] {
-      type Out = Long
-
-      def to(t: Long): Out = t
-
-      def from(r: Out): Long = r
-    }
-}
-
-trait SecondLowPriority extends FirstLowPriority {
 
   implicit def baseProduct[K <: Symbol, T, R <: HList, V, H, TAIL <: HList, HR, TR <: HList](implicit
                                                                                              gen: LabelledGeneric.Aux[T, R],
@@ -72,7 +25,7 @@ trait SecondLowPriority extends FirstLowPriority {
     }
 }
 
-object FirstNonTypeConstructor extends SecondLowPriority {
+object FirstNonTypeConstructor extends FirstLowPriority {
 
   type Aux[T, Out0] = FirstNonTypeConstructor[T] {type Out = Out0}
 
