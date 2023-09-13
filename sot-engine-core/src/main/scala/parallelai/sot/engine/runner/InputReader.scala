@@ -7,7 +7,7 @@ import com.trueaccord.scalapb.GeneratedMessage
 import parallelai.sot.engine.config.gcp.SOTUtils
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
 import parallelai.sot.engine.io.utils.annotations.HasJSONAnnotation
-import parallelai.sot.executor.model.SOTMacroConfig.{PubSubTapDefinition, KafkaTapDefinition, SeqTapDefinition}
+import parallelai.sot.executor.model.SOTMacroConfig.{GoogleStoreTapDefinition, KafkaTapDefinition, PubSubTapDefinition, SeqTapDefinition}
 import com.spotify.scio.sot.PaiScioContext._
 import shapeless.{HList, LabelledGeneric}
 import io.circe.generic.auto._
@@ -24,6 +24,31 @@ object Reader {
   type Aux[TAP, UTIL, ANNO, I <: ANNO, In0 <: HList] = Reader[TAP, UTIL, ANNO, I] {type In = In0}
 
   def apply[TAP, UTIL, ANNO, TIN <: ANNO](implicit reader: Reader[TAP, UTIL, ANNO, TIN]) = reader
+
+  implicit def googleStoreAvroReader[T0 <: HasAvroAnnotation, Repr <: HList](implicit
+                                                                             gen: LabelledGeneric.Aux[T0, Repr],
+                                                                             rdr: DeepRec[Repr]): Reader.Aux[GoogleStoreTapDefinition, SOTUtils, HasAvroAnnotation, T0, rdr.Out] =
+    new Reader[GoogleStoreTapDefinition, SOTUtils, HasAvroAnnotation, T0] {
+      type In = rdr.Out
+
+      def read(sc: ScioContext, tap: GoogleStoreTapDefinition, utils: SOTUtils)(implicit m: Manifest[T0]): SCollection[Row.Aux[rdr.Out]] = {
+        val path = s"gs://${tap.bucket}/${tap.blob}"
+        sc.typedAvroFile[T0](path).map(a => Row[rdr.Out](rdr(gen.to(a))))
+      }
+    }
+
+  implicit def googleStoreJsonReader[T0 <: HasJSONAnnotation, Repr <: HList](implicit
+                                                                             ev: io.circe.Decoder[T0],
+                                                                             gen: LabelledGeneric.Aux[T0, Repr],
+                                                                             rdr: DeepRec[Repr]): Reader.Aux[GoogleStoreTapDefinition, SOTUtils, HasJSONAnnotation, T0, rdr.Out] =
+    new Reader[GoogleStoreTapDefinition, SOTUtils, HasJSONAnnotation, T0] {
+      type In = rdr.Out
+
+      def read(sc: ScioContext, tap: GoogleStoreTapDefinition, utils: SOTUtils)(implicit m: Manifest[T0]): SCollection[Row.Aux[rdr.Out]] = {
+        val path = s"gs://${tap.bucket}/${tap.blob}"
+        sc.typedGoogleStorageJSON[T0](path).map(a => Row[rdr.Out](rdr(gen.to(a))))
+      }
+    }
 
   implicit def pubSubAvroReader[T0 <: HasAvroAnnotation, Repr <: HList](implicit
                                                                         gen: LabelledGeneric.Aux[T0, Repr],
@@ -60,10 +85,10 @@ object Reader {
       }
     }
 
-  implicit def kafkaProtobuf[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0], Repr <: HList]( implicit
-                                                                                                             messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0],
-                                                                                                             gen: LabelledGeneric.Aux[T0, Repr],
-                                                                                                             rdr: DeepRec[Repr]): Reader.Aux[KafkaTapDefinition, SOTUtils, GeneratedMessage, T0, rdr.Out] =
+  implicit def kafkaProtobuf[T0 <: GeneratedMessage with com.trueaccord.scalapb.Message[T0], Repr <: HList](implicit
+                                                                                                            messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[T0],
+                                                                                                            gen: LabelledGeneric.Aux[T0, Repr],
+                                                                                                            rdr: DeepRec[Repr]): Reader.Aux[KafkaTapDefinition, SOTUtils, GeneratedMessage, T0, rdr.Out] =
     new Reader[KafkaTapDefinition, SOTUtils, GeneratedMessage, T0] {
       type In = rdr.Out
 
@@ -73,9 +98,9 @@ object Reader {
     }
 
   implicit def kafkaJSON[T0 <: HasJSONAnnotation, Repr <: HList](implicit
-                                                                  ev: io.circe.Decoder[T0],
-                                                                  gen: LabelledGeneric.Aux[T0, Repr],
-                                                                  rdr: DeepRec[Repr]): Reader.Aux[KafkaTapDefinition, SOTUtils, HasJSONAnnotation, T0, rdr.Out] =
+                                                                 ev: io.circe.Decoder[T0],
+                                                                 gen: LabelledGeneric.Aux[T0, Repr],
+                                                                 rdr: DeepRec[Repr]): Reader.Aux[KafkaTapDefinition, SOTUtils, HasJSONAnnotation, T0, rdr.Out] =
     new Reader[KafkaTapDefinition, SOTUtils, HasJSONAnnotation, T0] {
       type In = rdr.Out
 

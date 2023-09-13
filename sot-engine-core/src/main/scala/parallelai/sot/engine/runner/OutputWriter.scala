@@ -126,6 +126,7 @@ object SchemalessWriter {
     }
 
   implicit def datastoreSchemalessWriter[OutR <: HList](implicit h: IsHCons[OutR], toL: ToEntity[OutR]):
+  //TODO: unable to find implicit val toL:ToEntity[OutR]
   SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] =
     new SchemalessWriter[DatastoreTapDefinition, SOTUtils, Schemaless, OutR] {
       def write(sColl: SCollection[Row.Aux[OutR]], tap: DatastoreTapDefinition, utils: SOTUtils): Unit = {

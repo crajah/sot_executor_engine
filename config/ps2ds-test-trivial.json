@@ -19,8 +19,15 @@
           },
           {
             "name": "team",
-            "type": "String",
-            "mode": "nullable"
+            "type": "record",
+            "mode": "nullable-repeated",
+            "fields": [
+              {
+                "name": "user",
+                "type": "String",
+                "mode": "required"
+              }
+            ]
           },
           {
             "name": "score",

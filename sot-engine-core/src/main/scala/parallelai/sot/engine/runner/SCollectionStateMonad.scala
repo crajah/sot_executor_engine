@@ -9,6 +9,7 @@ import org.joda.time.Duration
 import org.tensorflow.Tensor
 import parallelai.sot.engine.Project
 import parallelai.sot.engine.generic.row.{DeepRec, Row}
+import parallelai.sot.engine.io.bigquery.{HListSchemaProvider, ToTableRow}
 import parallelai.sot.engine.io.datastore.{FromEntity, Kind, ToEntity}
 import parallelai.sot.engine.io.{SchemalessTapDef, TapDef}
 import parallelai.sot.executor.model.SOTMacroConfig.TapDefinition
@@ -272,18 +273,6 @@ object SCollectionStateMonad {
       writer.write(sCollection, tap.tapDefinition, utils)
       (sColls, sColls)
     })
-
-//  def writeSchemaless1[L <: HList, SCOLS <: HList, SCOLOUT <: HList, UTIL, TAP <: TapDefinition, ANNO](sCollection: SCollection[Row.Aux[L]])
-//                                                                                                     (tap: SchemalessTapDef[TAP, UTIL, ANNO], utils: UTIL)
-//                                                                                                     (implicit
-//                                                                                                      hListSchemaProvider: HListSchemaProvider[L],
-//                                                                                                      toL: ToTableRow[L]
-////                                                                                                      writer: SchemalessWriter[TAP, UTIL, ANNO, L]
-//                                                                                                     ): IndexedState[SCOLS, SCOLS, SCOLS] =
-//    IndexedState(sColls => {
-////      writer.write(sCollection, tap.tapDefinition, utils)
-//      (sColls, sColls)
-//    })
 
 
   def fromTuple[A <: Product, Repr <: HList](a: A)(implicit

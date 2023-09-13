@@ -94,6 +94,9 @@ trait BigQueryMappableType {
   implicit val localDateTimeBigQueryMappableType =
     BigQueryType.at[LocalDateTime](toLocalDateTime, fromLocalDateTime)
 
+  implicit def optionalExtractor[T](implicit mappableType: BaseBigQueryMappableType[List[T]]): BaseBigQueryMappableType[Option[List[T]]] =
+    BigQueryType.at[Option[List[T]]](a => Some(mappableType.from(a)),t => mappableType.to(t.toList.flatten))
+
   implicit def emunExtractor[A <: GeneratedEnum] = BigQueryType.at[A](toEnum, fromEnum)
 }
 
