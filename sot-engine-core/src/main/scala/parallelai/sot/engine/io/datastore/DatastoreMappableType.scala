@@ -60,6 +60,7 @@ trait DatastoreMappableType {
   implicit val byteStringEntityMappableType = DatastoreType.at[ByteString](_.getBlobValue, makeValue(_).build())
   implicit val byteArrayEntityMappableType = DatastoreType.at[Array[Byte]](_.getBlobValue.toByteArray, v => makeValue(ByteString.copyFrom(v)).build())
   implicit val optionalListMappableType = DatastoreType.at[List[String]](valueToStrings, stringsToValue)
+  implicit val optionalListMappableTypeLong = DatastoreType.at[List[Long]](valueToLongs, longsToValue)
   implicit val timestampEntityMappableType = DatastoreType.at[Instant](toInstant, fromInstant)
 
   private def toInstant(v: Value): Instant = {
@@ -77,8 +78,16 @@ trait DatastoreMappableType {
   private def valueToStrings(value: Value): List[String] = {
     value.getArrayValue.getValuesList.asScala.map(_.getStringValue).toList
   }
+  private def valueToLongs(value: Value): List[Long] = {
+    value.getArrayValue.getValuesList.asScala.map(_.getIntegerValue).toList
+  }
 
   private def stringsToValue(list: List[String]): Value = {
+    val arrayValue: ArrayValue = makeValue(list.map(s => makeValue(s).build()).asJava).getArrayValue
+    Value.newBuilder().setArrayValue(arrayValue).build()
+  }
+
+  private def longsToValue(list: List[Long]): Value = {
     val arrayValue: ArrayValue = makeValue(list.map(s => makeValue(s).build()).asJava).getArrayValue
     Value.newBuilder().setArrayValue(arrayValue).build()
   }

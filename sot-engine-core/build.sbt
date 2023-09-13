@@ -29,7 +29,8 @@ libraryDependencies ++= Seq(
   gcloudStorage,
   logbackClassic,
   scalacheck,
-  javaKafkaBeam
+  javaKafkaBeam,
+  flinkBeam
   //, springExpression
 )
 

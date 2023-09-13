@@ -8,7 +8,7 @@ object Dependencies {
   val monocleVersion = "1.4.0"
   val trueAccordVersion = "0.6.6"
   val twitterBijectionVersion = "0.9.5"
-  val spotifyScioVersion = "0.4.5"
+  val spotifyScioVersion = "0.5.1"
   val shapelessDataTypeDataVersion = "0.1.7"
   val tensorflowVersion = "1.3.0"
   val gcloudVersion = "1.6.0"
@@ -83,6 +83,7 @@ object Dependencies {
   val avro4sMacros = "com.sksamuel.avro4s" %% "avro4s-macros" % avro4sVersion
 
   val javaKafkaBeam = "org.apache.beam" % "beam-sdks-java-io-kafka" % "2.1.0"
+  val flinkBeam = "org.apache.beam" % "beam-runners-flink_2.11" % "2.4.0"
   val slfLoggingApi = "org.slf4j" % "slf4j-api" % "1.7.5"
   val slfLoggingSimple =  "org.slf4j" % "slf4j-simple" % "1.7.5"
   val springExpression = "org.springframework" % "spring-expression" % "4.3.5.RELEASE"

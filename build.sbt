@@ -6,6 +6,7 @@ lazy val configResources = file("config")
 
 lazy val assembySettings = assemblyMergeStrategy in assembly := {
   case PathList("javax", "servlet", xs @ _*) => MergeStrategy.first
+  case PathList("org", "flink", "runtime", xs @ _*) => MergeStrategy.discard
   case PathList(ps @ _*) if ps.last endsWith ".html" => MergeStrategy.first
   case PathList(ps @ _*) if ps.last endsWith ".class" => MergeStrategy.first
   case PathList(ps @ _*) if ps.last endsWith ".properties" => MergeStrategy.first

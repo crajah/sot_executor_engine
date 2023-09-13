@@ -64,6 +64,11 @@
                 ]
               }
             ]
+          },
+          {
+            "mode": "nullable-repeated",
+            "name": "f5",
+            "type": "Long"
           }
         ]
       }
