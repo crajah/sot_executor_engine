@@ -38,6 +38,11 @@
                 "type": "record",
                 "fields": [
                   {
+                    "mode": "required",
+                    "name": "id",
+                    "type": "String"
+                  },
+                  {
                     "mode": "nullable",
                     "name": "alien",
                     "type": "Boolean"
@@ -45,7 +50,7 @@
                   {
                     "mode": "nullable",
                     "name": "alienExpectedResultDate",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -56,83 +61,6 @@
                     "mode": "nullable",
                     "name": "alienReason",
                     "type": "String"
-                  },
-                  {
-                    "mode": "nullable-repeated",
-                    "name": "barcodeData",
-                    "type": "record",
-                    "fields": [
-                      {
-                        "mode": "nullable",
-                        "name": "barcodeNumber",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "dateAdded",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "dateCreated",
-                        "type": "Int"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "dateUpdated",
-                        "type": "Int"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "defaultBetType",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "defaultBetTypeSelections",
-                        "type": "Int"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "defaultCriteria",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "formGroup",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "formMember",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "format",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "friendlyName",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "id",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "name",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "rotate",
-                        "type": "String"
-                      }
-                    ]
                   },
                   {
                     "mode": "nullable",
@@ -207,47 +135,42 @@
                   {
                     "mode": "nullable",
                     "name": "dateCancelled",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateCreated",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "datePaidOut",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateScanned",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateSettled",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateStruck",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateTranslated",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateUpdated",
-                    "type": "String"
-                  },
-                  {
-                    "mode": "nullable",
-                    "name": "id",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -262,7 +185,7 @@
                   {
                     "mode": "nullable",
                     "name": "lockAcquired",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -277,7 +200,7 @@
                   {
                     "mode": "nullable",
                     "name": "lockExpires",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -291,12 +214,12 @@
                   },
                   {
                     "mode": "nullable",
-                    "name": "lockTerminalId",
+                    "name": "lockType",
                     "type": "String"
                   },
                   {
                     "mode": "nullable",
-                    "name": "lockType",
+                    "name": "lockTerminalId",
                     "type": "String"
                   },
                   {
@@ -365,49 +288,7 @@
                     "type": "Boolean"
                   },
                   {
-                    "mode": "nullable-repeated",
-                    "name": "paidOutPartialData",
-                    "type": "record",
-                    "fields": [
-                      {
-                        "mode": "nullable",
-                        "name": "date",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "paymentType",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "storeId",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "terminalId",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "totalPaid",
-                        "type": "Int"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "userId",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "userName",
-                        "type": "String"
-                      }
-                    ]
-                  },
-                  {
-                    "mode": "nullable-repeated",
+                    "mode": "repeated",
                     "name": "paidOutPaymentTypes",
                     "type": "String"
                   },
@@ -442,68 +323,6 @@
                     "type": "Boolean"
                   },
                   {
-                    "mode": "nullable-repeated",
-                    "name": "printReceipts",
-                    "type": "record",
-                    "fields": [
-                      {
-                        "mode": "nullable",
-                        "name": "customerFirstName",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "customerLastName",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "dateAdded",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "dateCreated",
-                        "type": "Int"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "dateUpdated",
-                        "type": "Int"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "id",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "reason",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "shopId",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "slipId",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "terminalId",
-                        "type": "String"
-                      },
-                      {
-                        "mode": "nullable",
-                        "name": "userId",
-                        "type": "String"
-                      }
-                    ]
-                  },
-                  {
                     "mode": "nullable",
                     "name": "priority",
                     "type": "Boolean"
@@ -521,7 +340,7 @@
                   {
                     "mode": "nullable",
                     "name": "returnsPaid",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -551,10 +370,10 @@
                   {
                     "mode": "nullable",
                     "name": "searchOrder",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
-                    "mode": "nullable-repeated",
+                    "mode": "repeated",
                     "name": "sections",
                     "type": "record",
                     "fields": [
@@ -566,7 +385,7 @@
                       {
                         "mode": "nullable",
                         "name": "alienExpectedResultDate",
-                        "type": "String"
+                        "type": "Int"
                       },
                       {
                         "mode": "nullable",
@@ -579,7 +398,7 @@
                         "type": "String"
                       },
                       {
-                        "mode": "nullable-repeated",
+                        "mode": "repeated",
                         "name": "bets",
                         "type": "record",
                         "fields": [
@@ -589,7 +408,7 @@
                             "type": "Int"
                           },
                           {
-                            "mode": "nullable-repeated",
+                            "mode": "repeated",
                             "name": "betIds",
                             "type": "String"
                           },
@@ -600,11 +419,6 @@
                             "fields": [
                               {
                                 "mode": "nullable",
-                                "name": "criteria",
-                                "type": "String"
-                              },
-                              {
-                                "mode": "nullable",
                                 "name": "id",
                                 "type": "String"
                               },
@@ -612,11 +426,6 @@
                                 "mode": "nullable",
                                 "name": "numberOfLines",
                                 "type": "Int"
-                              },
-                              {
-                                "mode": "nullable",
-                                "name": "price",
-                                "type": "String"
                               }
                             ]
                           },
@@ -642,7 +451,7 @@
                               },
                               {
                                 "mode": "nullable",
-                                "name": "type",
+                                "name": "`type`",
                                 "type": "String"
                               }
                             ]
@@ -653,24 +462,9 @@
                             "type": "Int"
                           },
                           {
-                            "mode": "nullable-repeated",
+                            "mode": "repeated",
                             "name": "openBetIds",
-                            "type": "Int"
-                          },
-                          {
-                            "mode": "nullable",
-                            "name": "poolCriteria",
-                            "type": "String"
-                          },
-                          {
-                            "mode": "nullable",
-                            "name": "poolType",
-                            "type": "String"
-                          },
-                          {
-                            "mode": "nullable",
-                            "name": "potentialWin",
-                            "type": "Int"
+                            "type": "Long"
                           },
                           {
                             "mode": "nullable",
@@ -700,7 +494,7 @@
                         ]
                       },
                       {
-                        "mode": "nullable-repeated",
+                        "mode": "repeated",
                         "name": "cashedOutBets",
                         "type": "record",
                         "fields": [
@@ -712,12 +506,12 @@
                           {
                             "mode": "nullable",
                             "name": "cashedOutAmount",
-                            "type": "Int"
+                            "type": "Double"
                           },
                           {
                             "mode": "nullable",
                             "name": "cost",
-                            "type": "Int"
+                            "type": "Double"
                           },
                           {
                             "mode": "nullable",
@@ -742,12 +536,12 @@
                           {
                             "mode": "nullable",
                             "name": "sectionId",
-                            "type": "Int"
+                            "type": "Long"
                           },
                           {
                             "mode": "nullable",
                             "name": "unitStake",
-                            "type": "Int"
+                            "type": "Double"
                           }
                         ]
                       },
@@ -762,12 +556,12 @@
                         "type": "Int"
                       },
                       {
-                        "mode": "nullable-repeated",
+                        "mode": "repeated",
                         "name": "picks",
                         "type": "Int"
                       },
                       {
-                        "mode": "nullable-repeated",
+                        "mode": "repeated",
                         "name": "selections",
                         "type": "record",
                         "fields": [
@@ -778,46 +572,9 @@
                           },
                           {
                             "mode": "nullable",
-                            "name": "handicap",
-                            "type": "String"
-                          },
-                          {
-                            "mode": "nullable",
-                            "name": "initialPrice",
-                            "type": "record",
-                            "fields": [
-                              {
-                                "mode": "nullable",
-                                "name": "createdDate",
-                                "type": "Int"
-                              },
-                              {
-                                "mode": "nullable",
-                                "name": "manual",
-                                "type": "Boolean"
-                              },
-                              {
-                                "mode": "nullable",
-                                "name": "nextPriceDate",
-                                "type": "Int"
-                              },
-                              {
-                                "mode": "nullable",
-                                "name": "odds",
-                                "type": "String"
-                              }
-                            ]
-                          },
-                          {
-                            "mode": "nullable",
                             "name": "market",
                             "type": "record",
                             "fields": [
-                              {
-                                "mode": "nullable",
-                                "name": "category",
-                                "type": "String"
-                              },
                               {
                                 "mode": "nullable",
                                 "name": "event",
@@ -872,7 +629,7 @@
                               },
                               {
                                 "mode": "nullable",
-                                "name": "lowerCaseNameFav",
+                                "name": "marketSort",
                                 "type": "String"
                               },
                               {
@@ -882,7 +639,22 @@
                               },
                               {
                                 "mode": "nullable",
-                                "name": "type",
+                                "name": "outcomeMeaningMinorCode",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "startTime",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "status",
+                                "type": "String"
+                              },
+                              {
+                                "mode": "nullable",
+                                "name": "`type`",
                                 "type": "String"
                               }
                             ]
@@ -899,45 +671,8 @@
                             "fields": [
                               {
                                 "mode": "nullable",
-                                "name": "createdDate",
-                                "type": "Int"
-                              },
-                              {
-                                "mode": "nullable",
                                 "name": "manual",
                                 "type": "Boolean"
-                              },
-                              {
-                                "mode": "nullable",
-                                "name": "nextPriceDate",
-                                "type": "Int"
-                              },
-                              {
-                                "mode": "nullable",
-                                "name": "odds",
-                                "type": "String"
-                              }
-                            ]
-                          },
-                          {
-                            "mode": "nullable",
-                            "name": "priceWhenStruck",
-                            "type": "record",
-                            "fields": [
-                              {
-                                "mode": "nullable",
-                                "name": "createdDate",
-                                "type": "Int"
-                              },
-                              {
-                                "mode": "nullable",
-                                "name": "manual",
-                                "type": "Boolean"
-                              },
-                              {
-                                "mode": "nullable",
-                                "name": "nextPriceDate",
-                                "type": "Int"
                               },
                               {
                                 "mode": "nullable",
@@ -1063,17 +798,17 @@
                   {
                     "mode": "nullable",
                     "name": "totalPotentialWins",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "totalReturns",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "totalStake",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -1106,11 +841,6 @@
                     "type": "Boolean"
                   },
                   {
-                    "mode": "nullable-repeated",
-                    "name": "ucmsTransactionRefs",
-                    "type": "String"
-                  },
-                  {
                     "mode": "nullable",
                     "name": "unpaidVerified",
                     "type": "Boolean"
@@ -1138,7 +868,7 @@
                   {
                     "mode": "nullable",
                     "name": "voidPaid",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -1148,7 +878,7 @@
                   {
                     "mode": "nullable",
                     "name": "voidReturns",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -1156,14 +886,14 @@
                     "type": "Boolean"
                   },
                   {
-                    "mode": "nullable-repeated",
+                    "mode": "repeated",
                     "name": "walletTransactionRefs",
                     "type": "String"
                   },
                   {
                     "mode": "nullable",
                     "name": "winPaid",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -1173,7 +903,7 @@
                   {
                     "mode": "nullable",
                     "name": "winReturns",
-                    "type": "Int"
+                    "type": "Long"
                   }
                 ]
               }
