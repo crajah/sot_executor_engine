@@ -28,68 +28,26 @@ trait LowPriorityToMappableOption1 extends LowPriorityToMappable1 {
   }
 }
 
-trait LowPriorityToMappableOptionList1 extends LowPriorityToMappable1 {
-  implicit def hconsToMappableOptionList1[TAP, K <: Symbol, V, T <: HList, M, S[_]]
-  (implicit wit: Witness.Aux[K], mt: MappableType[M, V], toT: Lazy[ToMappable[TAP, T, M]], toSeq: S[V] => Seq[V], fieldNaming: FieldNaming[TAP])
-  : ToMappable[TAP, FieldType [K, Option[S[V]]] :: T, M] = new ToMappable[TAP, FieldType [K, Option[S[V]]] :: T, M] {
-    override def apply(l: FieldType[K, Option[S[V]]] :: T): M =
-      mt.put(fieldNaming(wit.value.name), l.head.toList.flatMap(toSeq), toT.value(l.tail))
+trait LowPriorityToMappableOptionList1 extends LowPriorityToMappableOption1 {
+  implicit def hconsToMappableOptionList1[TAP, K <: Symbol, V, T <: HList, M]
+  (implicit wit: Witness.Aux[K], mt: MappableType[M, V], toT: Lazy[ToMappable[TAP, T, M]], fieldNaming: FieldNaming[TAP])
+  : ToMappable[TAP, FieldType [K, Option[List[V]]] :: T, M] = new ToMappable[TAP, FieldType [K, Option[List[V]]] :: T, M] {
+    override def apply(l: FieldType[K, Option[List[V]]] :: T): M =
+      mt.put(fieldNaming(wit.value.name), l.head.toList.flatten, toT.value(l.tail))
   }
 }
 
-trait LowPriorityToMappableSeq1 extends LowPriorityToMappableOption1 {
-  implicit def hconsToMappableSeq1[TAP, K <: Symbol, V, T <: HList, M, S[_]]
-  (implicit wit: Witness.Aux[K], mt: MappableType[M, V], toT: Lazy[ToMappable[TAP, T, M]],
-   toSeq: S[V] => Seq[V], fieldNaming: FieldNaming[TAP])
-  : ToMappable[TAP, FieldType [K, S[V]] :: T, M] = new ToMappable[TAP, FieldType [K, S[V]] :: T, M] {
-    override def apply(l: FieldType[K, S[V]] :: T): M =
-      mt.put(fieldNaming(wit.value.name), toSeq(l.head), toT.value(l.tail))
-  }
-}
-
-trait LowPriorityToMappable0 extends LowPriorityToMappableSeq1 {
-  implicit def hconsToMappable0[TAP, K <: Symbol, V, H <: HList, T <: HList, M]
-  (implicit wit: Witness.Aux[K], gen: LabelledGeneric.Aux[V, H], mbt: BaseMappableType[M],
-   toH: Lazy[ToMappable[TAP, H, M]], toT: Lazy[ToMappable[TAP, T, M]], fieldNaming: FieldNaming[TAP])
-  : ToMappable[TAP, FieldType [K, V] :: T, M] = new ToMappable[TAP, FieldType [K, V] :: T, M] {
-    override def apply(l: FieldType[K, V] :: T): M =
-      mbt.put(fieldNaming(wit.value.name), toH.value(gen.to(l.head)), toT.value(l.tail))
-  }
-}
-
-trait LowPriorityToMappableOption0 extends LowPriorityToMappable0 {
-  implicit def hconsToMappableOption0[TAP, K <: Symbol, V, H <: HList, T <: HList, M]
-  (implicit wit: Witness.Aux[K], gen: LabelledGeneric.Aux[V, H], mbt: BaseMappableType[M],
-   toH: Lazy[ToMappable[TAP, H, M]], toT: Lazy[ToMappable[TAP, T, M]], fieldNaming: FieldNaming[TAP])
-  : ToMappable[TAP, FieldType [K, Option[V]] :: T, M] = new ToMappable[TAP, FieldType [K, Option[V]] :: T, M] {
-    override def apply(l: FieldType[K, Option[V]] :: T): M =
-      mbt.put(fieldNaming(wit.value.name), l.head.map(h => toH.value(gen.to(h))), toT.value(l.tail))
-  }
-}
-
-trait LowPriorityToMappableOptionList0 extends LowPriorityToMappable0 {
-  implicit def hconsToMappableOptionList0[TAP, K <: Symbol, V, H <: HList, T <: HList, M, S[_]]
-  (implicit wit: Witness.Aux[K], gen: LabelledGeneric.Aux[V, H], mbt: BaseMappableType[M],
-   toH: Lazy[ToMappable[TAP, H, M]], toT: Lazy[ToMappable[TAP, T, M]], toSeq: S[V] => Seq[V], fieldNaming: FieldNaming[TAP])
-  : ToMappable[TAP, FieldType [K, Option[S[V]]] :: T, M] = new ToMappable[TAP, FieldType [K, Option[S[V]]] :: T, M] {
-    override def apply(l: FieldType[K, Option[S[V]]] :: T): M =
-      mbt.put(fieldNaming(wit.value.name), l.head.toList.flatMap(toSeq).map(h => toH.value(gen.to(h))), toT.value(l.tail))
-  }
-}
-
-trait LowPriorityToMappableSeq0 extends LowPriorityToMappableOption0 {
-  implicit def hconsToMappableSeq0[TAP, K <: Symbol, V, H <: HList, T <: HList, M, S[_]]
-  (implicit wit: Witness.Aux[K], gen: LabelledGeneric.Aux[V, H], mbt: BaseMappableType[M],
-   toH: Lazy[ToMappable[TAP, H, M]], toT: Lazy[ToMappable[TAP, T, M]],
-   toSeq: S[V] => Seq[V], fieldNaming: FieldNaming[TAP])
-  : ToMappable[TAP, FieldType [K, S[V]] :: T, M] = new ToMappable[TAP, FieldType [K, S[V]] :: T, M] {
-    override def apply(l: FieldType[K, S[V]] :: T): M =
-      mbt.put(fieldNaming(wit.value.name), toSeq(l.head).map(h => toH.value(gen.to(h))), toT.value(l.tail))
+trait LowPriorityToMappableSeq1 extends LowPriorityToMappableOptionList1 {
+  implicit def hconsToMappableSeq1[TAP, K <: Symbol, V, T <: HList, M]
+  (implicit wit: Witness.Aux[K], mt: MappableType[M, V], toT: Lazy[ToMappable[TAP, T, M]], fieldNaming: FieldNaming[TAP])
+  : ToMappable[TAP, FieldType [K, List[V]] :: T, M] = new ToMappable[TAP, FieldType [K, List[V]] :: T, M] {
+    override def apply(l: FieldType[K, List[V]] :: T): M =
+      mt.put(fieldNaming(wit.value.name), l.head, toT.value(l.tail))
   }
 }
 
 //Implicits for nested HList
-trait LowPriorityNestedMappable extends LowPriorityToMappableSeq0 {
+trait LowPriorityNestedMappable extends LowPriorityToMappableSeq1 {
 
   implicit def nestedHListToMappable[TAP, K <: Symbol, H <: HList, T <: HList, M]
   (implicit wit: Witness.Aux[K], mbt: BaseMappableType[M],
