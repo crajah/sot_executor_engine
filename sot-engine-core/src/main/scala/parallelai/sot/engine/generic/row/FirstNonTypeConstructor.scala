@@ -2,7 +2,7 @@ package parallelai.sot.engine.generic.row
 
 import shapeless.{HList, LabelledGeneric}
 
-trait FirstNonTypeConstructor[T] {
+trait FirstNonTypeConstructor[T] extends Serializable {
   type Out
 
   def to(t: T): Out
