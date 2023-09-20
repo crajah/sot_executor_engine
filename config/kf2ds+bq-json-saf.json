@@ -48,27 +48,27 @@
                 "type": "record",
                 "fields": [
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "messageID",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "channel",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "operation",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "source",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "recordModifiedTime",
                     "type": "String"
                   }
@@ -107,7 +107,7 @@
                 "type": "Boolean"
               },
               {
-                "mode": "nullable-repeated",
+                "mode": "repeated",
                 "name": "languages",
                 "type": "String"
               },
@@ -157,37 +157,37 @@
                 "type": "record",
                 "fields": [
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "messageID",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "parents",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "categoryKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "channel",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "operation",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "source",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "recordModifiedTime",
                     "type": "String"
                   }
@@ -199,7 +199,7 @@
                 "type": "Int"
               },
               {
-                "mode": "nullable-repeated",
+                "mode": "repeated",
                 "name": "channels",
                 "type": "String"
               }
@@ -281,42 +281,42 @@
                 "type": "record",
                 "fields": [
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "messageID",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "parents",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "classKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "categoryKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "channel",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "operation",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "source",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "recordModifiedTime",
                     "type": "String"
                   }
@@ -343,17 +343,17 @@
                 "type": "Double"
               },
               {
-                "mode": "nullable-repeated",
+                "mode": "repeated",
                 "name": "languages",
                 "type": "String"
               },
               {
-                "mode": "nullable-repeated",
+                "mode": "repeated",
                 "name": "channels",
                 "type": "String"
               },
               {
-                "mode": "nullable-repeated",
+                "mode": "repeated",
                 "name": "flags",
                 "type": "String"
               }
@@ -515,17 +515,17 @@
                 "type": "record",
                 "fields": [
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "messageID",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "parents",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "classKey",
                     "type": "Long"
                   },
@@ -535,27 +535,27 @@
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "channel",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "typeKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "operation",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "source",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "recordModifiedTime",
                     "type": "String"
                   }
@@ -587,17 +587,17 @@
                 "type": "Boolean"
               },
               {
-                "mode": "nullable-repeated",
+                "mode": "repeated",
                 "name": "languages",
                 "type": "String"
               },
               {
-                "mode": "nullable-repeated",
+                "mode": "repeated",
                 "name": "channels",
                 "type": "String"
               },
               {
-                "mode": "nullable-repeated",
+                "mode": "repeated",
                 "name": "flags",
                 "type": "String"
               }
@@ -619,52 +619,52 @@
                 "type": "record",
                 "fields": [
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "messageID",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "eventKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "parents",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "classKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "categoryKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "channel",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "typeKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "operation",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "source",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "recordModifiedTime",
                     "type": "String"
                   }
@@ -726,7 +726,7 @@
                 "type": "String"
               },
               {
-                "mode": "nullable-repeated",
+                "mode": "repeated",
                 "name": "channels",
                 "type": "String"
               },
@@ -843,7 +843,7 @@
                 "type": "record",
                 "fields": [
                   {
-                    "mode": "nullable-repeated",
+                    "mode": "repeated",
                     "name": "price",
                     "type": "record",
                     "fields": [
@@ -892,57 +892,57 @@
                 "type": "record",
                 "fields": [
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "messageID",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "eventKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "parents",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "marketKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "classKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "categoryKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "channel",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "typeKey",
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "operation",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "source",
                     "type": "String"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "recordModifiedTime",
                     "type": "String"
                   }
@@ -1243,65 +1243,6 @@
       ],
       "paramsEncoded": false
     },
-
-
-    {
-      "type": "transformation",
-      "id": "map-class-options",
-      "name": "mapClassOptions",
-      "op": "map",
-      "params": [
-        [
-          "m => { m.update('languages, m.get('languages).getOrElse(Nil)).update('channels, m.get('channels).getOrElse(Nil)) }"
-        ]
-      ],
-      "paramsEncoded": false
-    },
-
-
-    {
-      "type": "transformation",
-      "id": "map-type-options",
-      "name": "mapTypeOptions",
-      "op": "map",
-      "params": [
-        [
-          "m => { m.update('languages, m.get('languages).getOrElse(Nil)).update('channels, m.get('channels).getOrElse(Nil)).update('flags, m.get('flags).getOrElse(Nil)) }"
-        ]
-      ],
-      "paramsEncoded": false
-    },
-
-
-    {
-      "type": "transformation",
-      "id": "map-event-options",
-      "name": "mapEventOptions",
-      "op": "map",
-      "params": [
-        [
-          "m => { m.update('languages, m.get('languages).getOrElse(Nil)).update('channels, m.get('channels).getOrElse(Nil)).update('flags, m.get('flags).getOrElse(Nil)) }"
-        ]
-      ],
-      "paramsEncoded": false
-    },
-
-
-
-    {
-      "type": "transformation",
-      "id": "map-market-options",
-      "name": "mapMarketOptions",
-      "op": "map",
-      "params": [
-        [
-          "m => { m.update('channels, m.get('channels).getOrElse(Nil)) }"
-        ]
-      ],
-      "paramsEncoded": false
-    },
-
-
     {
       "type": "sink",
       "id": "out-ds-selection",
@@ -1435,34 +1376,18 @@
     },
     {
       "from": "map-market",
-      "to": "map-market-options"
-    },
-    {
-      "from": "map-market-options",
       "to": "out-bq-market"
     },
     {
       "from": "map-event",
-      "to": "map-event-options"
-    },
-    {
-      "from": "map-event-options",
       "to": "out-bq-event"
     },
     {
       "from": "map-type",
-      "to": "map-type-options"
-    },
-    {
-      "from": "map-type-options",
       "to": "out-bq-type"
     },
     {
       "from": "map-class",
-      "to": "map-class-options"
-    },
-    {
-      "from": "map-class-options",
       "to": "out-bq-class"
     },
     {
