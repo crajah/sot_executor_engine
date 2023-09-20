@@ -277,7 +277,7 @@
                   {
                     "mode": "nullable",
                     "name": "lockExpires",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
