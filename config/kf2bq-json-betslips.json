@@ -262,7 +262,7 @@
                   {
                     "mode": "nullable",
                     "name": "lockAcquired",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
