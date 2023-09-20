@@ -82,6 +82,14 @@
       "id": "datastore1",
       "kind": "optionlistest",
       "dedupeStrategy": "KEEP_LATEST"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquery1",
+      "dataset": "bigquerytest",
+      "table": "optionlistest",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
     }
   ],
   "steps": [
@@ -97,12 +105,22 @@
       "id": "out",
       "name": "out",
       "tap": "datastore1"
+    },
+    {
+      "type": "sink",
+      "id": "out1",
+      "name": "out",
+      "tap": "bigquery1"
     }
   ],
   "dag": [
     {
       "from": "in",
       "to": "out"
+    },
+    {
+      "from": "in",
+      "to": "out1"
     }
   ]
 }
