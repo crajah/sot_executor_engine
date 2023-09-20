@@ -185,7 +185,7 @@
                     "type": "record",
                     "fields": [
                       {
-                        "mode": "repeated",
+                        "mode": "nullable",
                         "name": "`type`",
                         "type": "String"
                       },
