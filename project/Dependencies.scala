@@ -8,7 +8,7 @@ object Dependencies {
   val monocleVersion = "1.4.0"
   val trueAccordVersion = "0.6.6"
   val twitterBijectionVersion = "0.9.5"
-  val spotifyScioVersion = "0.5.1"
+  val spotifyScioVersion = "0.4.5"
   val shapelessDataTypeDataVersion = "0.1.7"
   val tensorflowVersion = "1.3.0"
   val gcloudVersion = "1.6.0"

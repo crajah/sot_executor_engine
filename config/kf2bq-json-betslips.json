@@ -566,7 +566,7 @@
                       {
                         "mode": "nullable",
                         "name": "alienExpectedResultDate",
-                        "type": "String"
+                        "type": "Long"
                       },
                       {
                         "mode": "nullable",
@@ -789,7 +789,7 @@
                               {
                                 "mode": "nullable",
                                 "name": "createdDate",
-                                "type": "Int"
+                                "type": "Long"
                               },
                               {
                                 "mode": "nullable",
@@ -799,7 +799,7 @@
                               {
                                 "mode": "nullable",
                                 "name": "nextPriceDate",
-                                "type": "Int"
+                                "type": "Long"
                               },
                               {
                                 "mode": "nullable",
@@ -900,7 +900,7 @@
                               {
                                 "mode": "nullable",
                                 "name": "createdDate",
-                                "type": "Int"
+                                "type": "Long"
                               },
                               {
                                 "mode": "nullable",
@@ -910,7 +910,7 @@
                               {
                                 "mode": "nullable",
                                 "name": "nextPriceDate",
-                                "type": "Int"
+                                "type": "Long"
                               },
                               {
                                 "mode": "nullable",
@@ -927,7 +927,7 @@
                               {
                                 "mode": "nullable",
                                 "name": "createdDate",
-                                "type": "Int"
+                                "type": "Long"
                               },
                               {
                                 "mode": "nullable",
@@ -937,7 +937,7 @@
                               {
                                 "mode": "nullable",
                                 "name": "nextPriceDate",
-                                "type": "Int"
+                                "type": "Long"
                               },
                               {
                                 "mode": "nullable",
