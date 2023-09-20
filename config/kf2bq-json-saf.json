@@ -14,13 +14,592 @@
         "fields": [
           {
             "mode": "nullable",
-            "name": "selection",
+            "name": "category",
             "type": "record",
             "fields": [
               {
                 "mode": "required",
-                "name": "selectionKey",
+                "name": "categoryKey",
                 "type": "Long"
+              },
+              {
+                "mode": "nullable",
+                "name": "displayStatus",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "categoryName",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isCashoutAvailable",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "categoryCode",
+                "type": "String"
+              },
+              {
+                "mode": "required",
+                "name": "meta",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "nullable",
+                    "name": "messageID",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "channel",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "operation",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "source",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "recordModifiedTime",
+                    "type": "String"
+                  }
+                ]
+              },
+              {
+                "mode": "nullable",
+                "name": "displayOrder",
+                "type": "Int"
+              }
+            ]
+          },
+          {
+            "mode": "nullable",
+            "name": "`class`",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "classKey",
+                "type": "Long"
+              },
+              {
+                "mode": "nullable",
+                "name": "hasLiveNowOrFutureEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "ladderKey",
+                "type": "Long"
+              },
+              {
+                "mode": "nullable",
+                "name": "hasLiveNowEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "repeated",
+                "name": "languages",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "displayStatus",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isCashoutAvailable",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "classNameTranslated",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "className",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "hasNext24HourEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "hasOpenEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "categoryCode",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "classStatus",
+                "type": "String"
+              },
+              {
+                "mode": "required",
+                "name": "meta",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "nullable",
+                    "name": "messageID",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "parents",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "categoryKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "channel",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "operation",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "source",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "recordModifiedTime",
+                    "type": "String"
+                  }
+                ]
+              },
+              {
+                "mode": "nullable",
+                "name": "displayOrder",
+                "type": "Int"
+              },
+              {
+                "mode": "repeated",
+                "name": "channels",
+                "type": "String"
+              }
+            ]
+          },
+          {
+            "mode": "nullable",
+            "name": "`type`",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "typeKey",
+                "type": "Long"
+              },
+              {
+                "mode": "nullable",
+                "name": "blurb",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "hasLiveNowOrFutureEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "hasLiveNowEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "typeFlagCode",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "displayStatus",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isCashoutAvailable",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "typeName",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "eventMaxBet",
+                "type": "Double"
+              },
+              {
+                "mode": "nullable",
+                "name": "hasNext24HourEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "eventMinBet",
+                "type": "Double"
+              },
+              {
+                "mode": "nullable",
+                "name": "hasOpenEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "gpStartTime",
+                "type": "String"
+              },
+              {
+                "mode": "required",
+                "name": "meta",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "nullable",
+                    "name": "messageID",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "parents",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "classKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "categoryKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "channel",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "operation",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "source",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "recordModifiedTime",
+                    "type": "String"
+                  }
+                ]
+              },
+              {
+                "mode": "nullable",
+                "name": "displayOrder",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "gpStartDays",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "typeStatus",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "maxPayout",
+                "type": "Double"
+              },
+              {
+                "mode": "repeated",
+                "name": "languages",
+                "type": "String"
+              },
+              {
+                "mode": "repeated",
+                "name": "channels",
+                "type": "String"
+              },
+              {
+                "mode": "repeated",
+                "name": "flags",
+                "type": "String"
+              }
+            ]
+          },
+          {
+            "mode": "nullable",
+            "name": "event",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "eventKey",
+                "type": "Long"
+              },
+              {
+                "mode": "nullable",
+                "name": "streamAvailable",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "blurb",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "blurbLanguage",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "eventSort",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "classSortCode",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isLiveNowEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "eventStatus",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "eventNameTranslated",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "hasBIRMarkets",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "isOpenEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "eventNotes",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "bodyText",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "eventName",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "typeFlagCode",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "statusCode",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "suspendAtDateTime",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "displayStatus",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "settledDateTime",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isCashoutAvailable",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "maxPayout",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "region",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "betMinStake",
+                "type": "Double"
+              },
+              {
+                "mode": "nullable",
+                "name": "betMaxStake",
+                "type": "Double"
+              },
+              {
+                "mode": "nullable",
+                "name": "offTime",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "gpStartTime",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isNext24HourEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "isLiveNowOrFutureEvent",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "isEventStarted",
+                "type": "Boolean"
+              },
+              {
+                "mode": "required",
+                "name": "meta",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "nullable",
+                    "name": "messageID",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "parents",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "classKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "categoryKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "channel",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "typeKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "operation",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "source",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "recordModifiedTime",
+                    "type": "String"
+                  }
+                ]
+              },
+              {
+                "mode": "nullable",
+                "name": "displayOrder",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "isEventFinished",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "gpStartDays",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "eventDateTime",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isEventResulted",
+                "type": "Boolean"
+              },
+              {
+                "mode": "repeated",
+                "name": "languages",
+                "type": "String"
+              },
+              {
+                "mode": "repeated",
+                "name": "channels",
+                "type": "String"
+              },
+              {
+                "mode": "repeated",
+                "name": "flags",
+                "type": "String"
               }
             ]
           },
@@ -33,6 +612,376 @@
                 "mode": "required",
                 "name": "marketKey",
                 "type": "Long"
+              },
+              {
+                "mode": "required",
+                "name": "meta",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "nullable",
+                    "name": "messageID",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "eventKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "parents",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "classKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "categoryKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "channel",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "typeKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "operation",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "source",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "recordModifiedTime",
+                    "type": "String"
+                  }
+                ]
+              },
+              {
+                "mode": "nullable",
+                "name": "eachWayFactorNum",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "displayOrder",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "overUnderLineValue",
+                "type": "Double"
+              },
+              {
+                "mode": "nullable",
+                "name": "handicapMakeup",
+                "type": "Double"
+              },
+              {
+                "mode": "nullable",
+                "name": "isGpAvailable",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "marketTypeKey",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "marketMeaningMajorCode",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isResultConfirmed",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "isPMAvailable",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "isForecastMarket",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "ncastTypeCodes",
+                "type": "String"
+              },
+              {
+                "mode": "repeated",
+                "name": "channels",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "selectionPriceType",
+                "type": "String"
+              }
+            ]
+          },
+          {
+            "mode": "nullable",
+            "name": "selection",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "required",
+                "name": "selectionKey",
+                "type": "Long"
+              },
+              {
+                "mode": "nullable",
+                "name": "isResulted",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "marketStatusDerived",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "runnerStatus",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "handicapValue",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "resultCode",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "selectionNameTranslated",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "selectionStatusDerived",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "place",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "unnamedFavPos",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "runnerNumber",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "outcomeMeaningMajorCode",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isSettled",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "correctScoreHome",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "finalPosition",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "multiKey",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "suspensionReason",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "absoluteBetMin",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isRule4Applied",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "prices",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "repeated",
+                    "name": "price",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "required",
+                        "name": "selectionPriceType",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "required",
+                        "name": "denPrice",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "required",
+                        "name": "numPrice",
+                        "type": "Long"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "mode": "nullable",
+                "name": "score",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isUnnamedFav",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "isDeadHeatApplied",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "correctScoreAway",
+                "type": "String"
+              },
+              {
+                "mode": "required",
+                "name": "meta",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "nullable",
+                    "name": "messageID",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "eventKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "parents",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "marketKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "classKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "categoryKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "channel",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "typeKey",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "operation",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "source",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "recordModifiedTime",
+                    "type": "String"
+                  }
+                ]
+              },
+              {
+                "mode": "nullable",
+                "name": "displayOrder",
+                "type": "Int"
+              },
+              {
+                "mode": "nullable",
+                "name": "isNonRunner",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "absoluteBetMax",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "selectionName",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "selectionStatus",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "isResultConfirmed",
+                "type": "Boolean"
+              },
+              {
+                "mode": "nullable",
+                "name": "outcomeMeaningMinorCode",
+                "type": "String"
               }
             ]
           }
@@ -47,25 +996,45 @@
       "id": "kafkatap-sportsbook",
       "bootstrap": "lc-df-nonprod-kafka-lb-1656149905.eu-west-2.elb.amazonaws.com:9092",
       "topic": "coral.prod.digital.sportsbook.1",
-      "group": "pai-saf-group-2",
-      "defaultOffset": "earliest",
+      "group": "pai-test-group",
+      "defaultOffset": "latest",
       "autoCommit": true
     },
     {
       "type": "bigquery",
       "id": "bigquerytap-selection",
-      "dataset": "bi_crm_poc",
-      "table": "saf_selection",
-      "createDisposition": "CREATE_IF_NEEDED",
-      "writeDisposition": "WRITE_APPEND"
+      "dataset": "coral_retail_df_prod",
+      "table": "selections"
     },
     {
       "type": "bigquery",
       "id": "bigquerytap-market",
-      "dataset": "bi_crm_poc",
-      "table": "saf_market",
-      "createDisposition": "CREATE_IF_NEEDED",
-      "writeDisposition": "WRITE_APPEND"
+      "dataset": "coral_retail_df_prod",
+      "table": "markets"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-type",
+      "dataset": "coral_retail_df_prod",
+      "table": "types"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-event",
+      "dataset": "coral_retail_df_prod",
+      "table": "events"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-class",
+      "dataset": "coral_retail_df_prod",
+      "table": "classes"
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap-category",
+      "dataset": "coral_retail_df_prod",
+      "table": "categories"
     }
   ],
   "steps": [
@@ -81,7 +1050,11 @@
       "id": "mapper",
       "name": "mapper",
       "op": "map",
-      "params": [["m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"]],
+      "params": [
+        [
+          "m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -89,7 +1062,11 @@
       "id": "filter-selection",
       "name": "filterSelection",
       "op": "filter",
-      "params": [["m => m.get('selection) != None"]],
+      "params": [
+        [
+          "m => m.get('selection) != None"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
@@ -97,22 +1074,171 @@
       "id": "filter-market",
       "name": "filterMarket",
       "op": "filter",
-      "params": [["m => m.get('market) != None"]],
+      "params": [
+        [
+          "m => m.get('market) != None"
+        ]
+      ],
       "paramsEncoded": false
     },
     {
+      "type": "transformation",
+      "id": "filter-event",
+      "name": "filterEvent",
+      "op": "filter",
+      "params": [
+        [
+          "m => m.get('event) != None"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "filter-type",
+      "name": "filterType",
+      "op": "filter",
+      "params": [
+        [
+          "m => m.get('type) != None"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "filter-class",
+      "name": "filterClass",
+      "op": "filter",
+      "params": [
+        [
+          "m => m.get('class) != None"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "filter-category",
+      "name": "filterCategory",
+      "op": "filter",
+      "params": [
+        [
+          "m => m.get('category) != None"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "map-selection",
+      "name": "mapSelection",
+      "op": "map",
+      "params": [
+        [
+          "m => { val selection = Row(m.get('selection).get); val meta = selection.get('meta); selection.remove('meta).appendList(meta) }"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "map-market",
+      "name": "mapMarket",
+      "op": "map",
+      "params": [
+        [
+          "m => { val market = Row(m.get('market).get); val meta = market.get('meta); market.remove('meta).appendList(meta) }"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "map-event",
+      "name": "mapEvent",
+      "op": "map",
+      "params": [
+        [
+          "m => { val event = Row(m.get('event).get); val meta = event.get('meta); event.remove('meta).appendList(meta)  }"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "map-type",
+      "name": "mapType",
+      "op": "map",
+      "params": [
+        [
+          "m => { val typeRow = Row(m.get('type).get); val meta = typeRow.get('meta); typeRow.remove('meta).appendList(meta)  }"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "map-class",
+      "name": "mapClass",
+      "op": "map",
+      "params": [
+        [
+          "m => { val classRow = Row(m.get('class).get); val meta = classRow.get('meta); classRow.remove('meta).appendList(meta)  }"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "transformation",
+      "id": "map-category",
+      "name": "mapCategory",
+      "op": "map",
+      "params": [
+        [
+          "m => { val category = Row(m.get('category).get); val meta = category.get('meta); category.remove('meta).appendList(meta) }"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+
+
+    {
       "type": "sink",
-      "id": "out-selection",
-      "name": "outSelection",
+      "id": "out-bq-selection",
+      "name": "outBQSelection",
       "tap": "bigquerytap-selection"
     },
     {
       "type": "sink",
-      "id": "out-market",
-      "name": "outMarket",
+      "id": "out-bq-market",
+      "name": "outBQMarket",
       "tap": "bigquerytap-market"
+    },
+    {
+      "type": "sink",
+      "id": "out-bq-event",
+      "name": "outBQEvent",
+      "tap": "bigquerytap-event"
+    },
+    {
+      "type": "sink",
+      "id": "out-bq-type",
+      "name": "outBQType",
+      "tap": "bigquerytap-type"
+    },
+    {
+      "type": "sink",
+      "id": "out-bq-class",
+      "name": "outBQClass",
+      "tap": "bigquerytap-class"
+    },
+    {
+      "type": "sink",
+      "id": "out-bq-category",
+      "name": "outBQCategory",
+      "tap": "bigquerytap-category"
     }
-
   ],
   "dag": [
     {
@@ -128,12 +1254,68 @@
       "to": "filter-market"
     },
     {
+      "from": "mapper",
+      "to": "filter-event"
+    },
+    {
+      "from": "mapper",
+      "to": "filter-type"
+    },
+    {
+      "from": "mapper",
+      "to": "filter-class"
+    },
+    {
+      "from": "mapper",
+      "to": "filter-category"
+    },
+    {
       "from": "filter-selection",
-      "to": "out-selection"
+      "to": "map-selection"
     },
     {
       "from": "filter-market",
-      "to": "out-market"
+      "to": "map-market"
+    },
+    {
+      "from": "filter-event",
+      "to": "map-event"
+    },
+    {
+      "from": "filter-type",
+      "to": "map-type"
+    },
+    {
+      "from": "filter-class",
+      "to": "map-class"
+    },
+    {
+      "from": "filter-category",
+      "to": "map-category"
+    },
+    {
+      "from": "map-selection",
+      "to": "out-bq-selection"
+    },
+    {
+      "from": "map-market",
+      "to": "out-bq-market"
+    },
+    {
+      "from": "map-event",
+      "to": "out-bq-event"
+    },
+    {
+      "from": "map-type",
+      "to": "out-bq-type"
+    },
+    {
+      "from": "map-class",
+      "to": "out-bq-class"
+    },
+    {
+      "from": "map-category",
+      "to": "out-bq-category"
     }
   ]
 }
