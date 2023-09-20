@@ -1195,7 +1195,7 @@
       "id": "kafkasource1",
       "bootstrap": "internal-coral-epos2-prd1-kafka-lb-321246078.eu-west-2.elb.amazonaws.com:9092",
       "topic": "betslips",
-      "group": "pai-betslip-group-1",
+      "group": "pai-betslip-group-2"
       "defaultOffset": "earliest",
       "autoCommit": false
     },
