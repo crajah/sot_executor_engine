@@ -655,7 +655,7 @@
                           {
                             "mode": "repeated",
                             "name": "openBetIds",
-                            "type": "Int"
+                            "type": "Long"
                           },
                           {
                             "mode": "nullable",
@@ -1063,12 +1063,12 @@
                   {
                     "mode": "nullable",
                     "name": "totalPotentialWins",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "totalReturns",
-                    "type": "Int"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
