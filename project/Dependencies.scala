@@ -8,7 +8,7 @@ object Dependencies {
   val monocleVersion = "1.4.0"
   val trueAccordVersion = "0.6.6"
   val twitterBijectionVersion = "0.9.5"
-  val spotifyScioVersion = "0.4.5"
+  val spotifyScioVersion = "0.5.1"
   val shapelessDataTypeDataVersion = "0.1.7"
   val tensorflowVersion = "1.3.0"
   val gcloudVersion = "1.6.0"
@@ -23,7 +23,7 @@ object Dependencies {
   val scalacheck = "org.scalacheck" %% "scalacheck" % "1.13.5"
   val scalacheckShapeless = "com.github.alexarchambault" %% "scalacheck-shapeless_1.13" % "1.1.6"
   val mockito = "org.mockito" % "mockito-all" % "1.10.19"
-  val grizzledLogging = "org.clapper" %% "grizzled-slf4j" % "1.3.1"
+  val grizzledLogging = "org.clapper" %% "grizzled-slf4j" % "1.0.2"
   val logbackClassic = "ch.qos.logback" % "logback-classic" % "1.2.3"
   val testContainers = "com.dimafeng" %% "testcontainers-scala" % "0.11.0"
 
@@ -36,8 +36,8 @@ object Dependencies {
   val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.16"
 
   val sprayJson = "io.spray" %% "spray-json" % "1.3.3"
-  val circe = "io.circe" %% "circe-core" % "0.8.0"
-  val circeShapes = "io.circe" %% "circe-shapes" % "0.8.0"
+  val circe = "io.circe" %% "circe-core" % "0.9.1"
+  val circeShapes = "io.circe" %% "circe-shapes" % "0.9.1"
 
   val trueAccordCompiler = "com.trueaccord.scalapb" %% "compilerplugin" % trueAccordVersion
   val trueAccordRuntime = "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % trueAccordVersion
@@ -83,6 +83,7 @@ object Dependencies {
   val avro4sMacros = "com.sksamuel.avro4s" %% "avro4s-macros" % avro4sVersion
 
   val javaKafkaBeam = "org.apache.beam" % "beam-sdks-java-io-kafka" % "2.1.0"
+  val flinkBeam = "org.apache.beam" % "beam-runners-flink_2.11" % "2.4.0"
   val slfLoggingApi = "org.slf4j" % "slf4j-api" % "1.7.5"
   val slfLoggingSimple =  "org.slf4j" % "slf4j-simple" % "1.7.5"
   val springExpression = "org.springframework" % "spring-expression" % "4.3.5.RELEASE"

@@ -79,6 +79,9 @@ import parallelai.sot.executor.SOTNats._
   * sbt -Dconfig.resource=application-ps2ps-test.conf clean compile "sot-executor/runMain parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=DataflowRunner --region=europe-west1 --zone=europe-west2-a --workerMachineType=n1-standard-1 --diskSizeGb=150 --maxNumWorkers=1 --waitToFinish=false"
   * </pre>
   * NOTE That application configurations can also be set/overridden via system and environment properties.
+  *
+  * Run on Flink:
+  * java -cp sot-executor/target/scala-2.11/sot_executor_rule.jar  parallelai.sot.executor.builder.SOTBuilder --project=bi-crm-poc --runner=FlinkRunner --flinkMaster=flink-jobmanager:6123 --parallelism=1
   */
 @SOTBuilder
 object SOTBuilder {

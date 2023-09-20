@@ -20,6 +20,11 @@ lazy val assembySettings = assemblyMergeStrategy in assembly := {
     oldStrategy(x)
 }
 
+lazy val shadingAssemblySettings = assemblyShadeRules in assembly := Seq(
+  ShadeRule.rename("org.objenesis.**" -> "paishade.org.objenesis.@1").inAll,
+  ShadeRule.rename("com.esotericsoftware.**" -> "paishade.com.esotericsoftware.@1").inAll
+)
+
 lazy val `sot-containers` = (project in file("./sot-containers"))
   .configs(IntegrationTest)
   .settings(
@@ -58,6 +63,7 @@ lazy val `sot-executor` = (project in file("./sot-executor"))
     Common.settings,
     Common.macroSettings,
     assembySettings,
+    shadingAssemblySettings,
     unmanagedResourceDirectories in Compile += configResources,
     test in assembly := {},
     assemblyJarName in assembly := "sot_executor_rule.jar"
