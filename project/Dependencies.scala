@@ -36,8 +36,8 @@ object Dependencies {
   val scalaz = "org.scalaz" %% "scalaz-core" % "7.2.16"
 
   val sprayJson = "io.spray" %% "spray-json" % "1.3.3"
-  val circe = "io.circe" %% "circe-core" % "0.9.1"
-  val circeShapes = "io.circe" %% "circe-shapes" % "0.9.1"
+  val circe = "io.circe" %% "circe-core" % "0.8.0"
+  val circeShapes = "io.circe" %% "circe-shapes" % "0.8.0"
 
   val trueAccordCompiler = "com.trueaccord.scalapb" %% "compilerplugin" % trueAccordVersion
   val trueAccordRuntime = "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % trueAccordVersion
