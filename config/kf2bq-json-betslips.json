@@ -45,7 +45,7 @@
                   {
                     "mode": "nullable",
                     "name": "alienExpectedResultDate",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -70,7 +70,7 @@
                       {
                         "mode": "nullable",
                         "name": "dateAdded",
-                        "type": "String"
+                        "type": "Long"
                       },
                       {
                         "mode": "nullable",

@@ -197,7 +197,7 @@
                     ]
                   },
                   {
-                    "mode": "repeated",
+                    "mode": "nullable",
                     "name": "paymentMethod",
                     "type": "String"
                   },
