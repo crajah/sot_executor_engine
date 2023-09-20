@@ -245,7 +245,7 @@
                     "type": "Long"
                   },
                   {
-                    "mode": "required",
+                    "mode": "nullable",
                     "name": "id",
                     "type": "String"
                   },
