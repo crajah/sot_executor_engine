@@ -55,7 +55,7 @@
                   {
                     "mode": "nullable",
                     "name": "approvedDateTime",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
@@ -175,7 +175,7 @@
                     "type": "String"
                   },
                   {
-                    "mode": "repeated",
+                    "mode": "nullable",
                     "name": "locationType",
                     "type": "String"
                   },
