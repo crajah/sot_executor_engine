@@ -207,42 +207,42 @@
                   {
                     "mode": "nullable",
                     "name": "dateCancelled",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateCreated",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "datePaidOut",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateScanned",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateSettled",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateStruck",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateTranslated",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "nullable",
                     "name": "dateUpdated",
-                    "type": "String"
+                    "type": "Long"
                   },
                   {
                     "mode": "required",
@@ -459,17 +459,17 @@
                       {
                         "mode": "nullable",
                         "name": "dateAdded",
-                        "type": "String"
+                        "type": "Long"
                       },
                       {
                         "mode": "nullable",
                         "name": "dateCreated",
-                        "type": "Int"
+                        "type": "Long"
                       },
                       {
                         "mode": "nullable",
                         "name": "dateUpdated",
-                        "type": "Int"
+                        "type": "Long"
                       },
                       {
                         "mode": "nullable",
@@ -722,7 +722,7 @@
                           {
                             "mode": "nullable",
                             "name": "dateCashedOut",
-                            "type": "String"
+                            "type": "Long"
                           },
                           {
                             "mode": "nullable",
