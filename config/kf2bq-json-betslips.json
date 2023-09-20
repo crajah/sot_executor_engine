@@ -653,11 +653,6 @@
                             "type": "Int"
                           },
                           {
-                            "mode": "repeated",
-                            "name": "openBetIds",
-                            "type": "Long"
-                          },
-                          {
                             "mode": "nullable",
                             "name": "poolCriteria",
                             "type": "String"
