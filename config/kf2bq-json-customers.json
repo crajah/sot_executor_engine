@@ -1,0 +1,631 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "jsonschema1",
+      "name": "jsonschema1Name",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "Customers",
+        "fields": [
+          {
+            "mode": "required",
+            "name": "data",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "nullable",
+                "name": "terminalId",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "storeId",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "userId",
+                "type": "String"
+              },
+              {
+                "mode": "required",
+                "name": "content",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "nullable",
+                    "name": "additionalComments",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "addressLine1",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "addressLine2",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "ageRange",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "alias",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "repeated",
+                    "name": "aliases",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "nullable",
+                        "name": "value",
+                        "type": "String"
+                      }
+                    ]
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "allAliases",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "repeated",
+                    "name": "associatedPreviousStoreIds",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "repeated",
+                    "name": "associatedStoreIds",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "bannedFobt",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "bannedOtc",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "build",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "connectCardBalance",
+                    "type": "Double"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "connectCardNumber",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "connectCardType",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "repeated",
+                    "name": "customerAliases",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "nullable",
+                        "name": "additionalComments",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "alias",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "archived",
+                        "type": "Boolean"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "customerId",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "dateAdded",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "id",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "lastUpdated",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "ragStatus",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "time",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "vipGrade",
+                        "type": "String"
+                      }
+                    ]
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "dateAdded",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "dateOfBirth",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "dcmsToken",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "emailAddress",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "ethnicity",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "excluded",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "excludedOnline",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "excludedOrRetention",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "exclusionInfo",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "repeated",
+                        "name": "exclusionData",
+                        "type": "record",
+                        "fields": [
+                          {
+                            "mode": "nullable",
+                            "name": "active",
+                            "type": "Boolean"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "areaOfExclusion",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "customerId",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "dateAdded",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "endDateOnline",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "endDateRetail",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "exclusionType",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "howLongForOnline",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "howLongForRetail",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "id",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "lastUpdated",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "reasonForExclusion",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "reasonForExclusionOther",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "receiptImagePath",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "receiptImageUrl",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "retentionPeriodEndDateRetail",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "shopBrand",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "startDateOnline",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "startDateRetail",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "repeated",
+                            "name": "storeIds",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "time",
+                            "type": "String"
+                          }
+                        ]
+                      },
+                      {
+                        "mode": "repeated",
+                        "name": "exclusionHistoryData",
+                        "type": "record",
+                        "fields": [
+                          {
+                            "mode": "nullable",
+                            "name": "customerId",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "dateAdded",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "endDate",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "exclusionHistoryType",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "id",
+                            "type": "String"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "lastUpdated",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "startDate",
+                            "type": "Long"
+                          },
+                          {
+                            "mode": "nullable",
+                            "name": "time",
+                            "type": "Long"
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "favouriteDrink",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "favouriteGame",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "favouriteStore",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "firstName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "fobtVip",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "gender",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "hairColour",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "hairLength",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "height",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "id",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "image",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "imagePath",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lastName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lastSeen",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lastUpdated",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "lowerCaseName",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "mobileNumber",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "monitored",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "otc",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "otherKnownAliases",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "physicalDescription",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "postcode",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "primaryStoreId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "profilePictureUrl",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "ragStatus",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "reasonForExclusion",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "retentionPeriodActiveRetail",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "telephoneNumber",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "time",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "town",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "username",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "verifiedAlias",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "verifiedConnectCard",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "verifiedExclusion",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "verifiedFobt",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "vipGrade",
+                    "type": "String"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "mode": "required",
+            "name": "`type`",
+            "type": "String"
+          }
+        ]
+      }
+    }
+  ],
+  "lookups": [],
+  "taps": [
+    {
+      "type": "kafka",
+      "id": "kafkasource1",
+      "bootstrap": "internal-coral-epos2-prd1-kafka-lb-321246078.eu-west-2.elb.amazonaws.com:9092",
+      "topic": "customers",
+      "group": "pai-customers-group-1",
+      "defaultOffset": "earliest",
+      "autoCommit": false
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "coral_retail_omnia_prod",
+      "table": "customers",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "jsonschema1",
+      "tap": "kafkasource1"
+    },
+    {
+      "type": "transformation",
+      "id": "add-timestamp",
+      "name": "addTimestamp",
+      "op": "map",
+      "params": [["m => { val t = Helper.fmt.print(Helper.Instant.now()); m.append('ts, t) }"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "tap": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "add-timestamp"
+    },
+    {
+      "from": "add-timestamp",
+      "to": "out"
+    }
+  ]
+}
