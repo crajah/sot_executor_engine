@@ -1,0 +1,335 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "jsonschema1",
+      "name": "jsonschema1Name",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "Cashflow",
+        "fields": [
+          {
+            "mode": "required",
+            "name": "data",
+            "type": "record",
+            "fields": [
+              {
+                "mode": "nullable",
+                "name": "terminalId",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "storeId",
+                "type": "String"
+              },
+              {
+                "mode": "nullable",
+                "name": "userId",
+                "type": "String"
+              },
+              {
+                "mode": "required",
+                "name": "content",
+                "type": "record",
+                "fields": [
+                  {
+                    "mode": "nullable",
+                    "name": "additionalData",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "amount",
+                    "type": "Int"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "approvedByUserId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "approvedDateTime",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "cancelled",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "companion",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "concession",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "customerId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "dateAdded",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "nullable",
+                        "name": "date",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "day",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "hours",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "minutes",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "month",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "nanos",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "seconds",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "time",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "timezoneOffset",
+                        "type": "Long"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "year",
+                        "type": "Long"
+                      }
+                    ]
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "datetime",
+                    "type": "Long"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "description",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "direction",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "externalSlipId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "fromLocation",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "headOffice",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "id",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "location",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "locationType",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "repeated",
+                    "name": "metadata",
+                    "type": "record",
+                    "fields": [
+                      {
+                        "mode": "nullable",
+                        "name": "`type`",
+                        "type": "String"
+                      },
+                      {
+                        "mode": "nullable",
+                        "name": "value",
+                        "type": "String"
+                      }
+                    ]
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "paymentMethod",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "receiptNumber",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "requiresAuthorisation",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "shopCashCode",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "shopId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "slipId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "system",
+                    "type": "Boolean"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "terminalId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "toLocation",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "transactionStatus",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "transactionTypeCategory",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "transactionTypeId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "userId",
+                    "type": "String"
+                  },
+                  {
+                    "mode": "nullable",
+                    "name": "userName",
+                    "type": "String"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "mode": "required",
+            "name": "`type`",
+            "type": "String"
+          }
+        ]
+      }
+    }
+  ],
+  "lookups": [],
+  "taps": [
+    {
+      "type": "kafka",
+      "id": "kafkasource1",
+      "bootstrap": "internal-coral-epos2-prd1-kafka-lb-321246078.eu-west-2.elb.amazonaws.com:9092",
+      "topic": "cashflow",
+      "group": "pai-cashflow-group-2",
+      "defaultOffset": "earliest",
+      "autoCommit": false
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerysource1",
+      "dataset": "coral_retail_omnia_prod",
+      "table": "cashflow",
+      "createDisposition": "CREATE_IF_NEEDED",
+      "writeDisposition": "WRITE_APPEND"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "jsonschema1",
+      "tap": "kafkasource1"
+    },
+    {
+      "type": "transformation",
+      "id": "add-timestamp",
+      "name": "addTimestamp",
+      "op": "map",
+      "params": [["m => { val t = Helper.fmt.print(Helper.Instant.now()); m.append('ts, t) }"]],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "out",
+      "tap": "bigquerysource1"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "add-timestamp"
+    },
+    {
+      "from": "add-timestamp",
+      "to": "out"
+    }
+  ]
+}
