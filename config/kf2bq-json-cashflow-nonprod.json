@@ -284,7 +284,7 @@
     {
       "type": "kafka",
       "id": "kafkasource1",
-      "bootstrap": "internal-coral-epos2-prd1-kafka-lb-321246078.eu-west-2.elb.amazonaws.com:9092",
+      "bootstrap": "internal-coral-epos2-stg0-kafka-lb-998826191.eu-west-2.elb.amazonaws.com:9092",
       "topic": "cashflow",
       "group": "pai-cashflow-group-2",
       "defaultOffset": "earliest",
@@ -293,7 +293,7 @@
     {
       "type": "bigquery",
       "id": "bigquerysource1",
-      "dataset": "coral_retail_omnia_prod",
+      "dataset": "coral_retail_omnia_stg",
       "table": "cashflow",
       "createDisposition": "CREATE_IF_NEEDED",
       "writeDisposition": "WRITE_APPEND"
