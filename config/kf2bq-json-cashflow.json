@@ -145,7 +145,7 @@
                     "type": "String"
                   },
                   {
-                    "mode": "repeated",
+                    "mode": "nullable",
                     "name": "direction",
                     "type": "String"
                   },
@@ -242,12 +242,12 @@
                     "type": "String"
                   },
                   {
-                    "mode": "repeated",
+                    "mode": "nullable",
                     "name": "transactionStatus",
                     "type": "String"
                   },
                   {
-                    "mode": "repeated",
+                    "mode": "nullable",
                     "name": "transactionTypeCategory",
                     "type": "String"
                   },
