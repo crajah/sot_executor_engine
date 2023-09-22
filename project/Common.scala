@@ -35,7 +35,6 @@ object Common {
     s3region := Region.getRegion(Regions.EU_WEST_2),
     resolvers ++= Seq[Resolver](
       "Typesafe" at "http://repo.typesafe.com/typesafe/releases",
-      "Artima Maven Repository" at "http://repo.artima.com/releases",
       Resolver.sbtPluginRepo("releases"),
       s3resolver.value("Parallel AI S3 Releases resolver", s3("release.repo.parallelai.com")) withMavenPatterns,
       s3resolver.value("Parallel AI S3 Snapshots resolver", s3("snapshot.repo.parallelai.com")) withMavenPatterns,
