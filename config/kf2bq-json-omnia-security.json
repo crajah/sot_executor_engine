@@ -1,0 +1,249 @@
+{
+  "id": "schemaname",
+  "name": "schemaname",
+  "version": "version1",
+  "schemas": [
+    {
+      "type": "json",
+      "id": "schema-security",
+      "name": "SecuritySchema",
+      "version": "version1",
+      "definition": {
+        "type": "jsondefinition",
+        "name": "security",
+        "fields": [
+          {
+            "name": "exceptionId",
+            "mode": "nullable",
+            "type": "String"
+          },
+          {
+            "name": "userId",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "storeId",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "terminalId",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "slipId",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "previousStake",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "newStake",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "totalStake",
+            "mode": "required",
+            "type": "Long"
+          },
+          {
+            "name": "originalTotalPaid",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "newTotalPaid",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "slipImage",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "receiptNumber",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "dateStruck",
+            "mode": "nullable",
+            "type":"Long"
+          },
+          {
+            "name": "struckByUserId",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "datePaidOut",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "paidOutByUserId",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "dateTranslated",
+            "mode": "nullable",
+            "type":"Long"
+          },
+          {
+            "name": "translatedByUserId",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "auditType",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "dateUpdated",
+            "mode": "required",
+            "type": "Long"
+          },
+          {
+            "name": "updatedBy",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "totalPaid",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "manualVoidReturns",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "manualWinReturns",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "manualTotalReturns",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "selectionPrice",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "selectionPriceWhenStruck",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "participantId",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "slipDetails",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "pricesChanges",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "timeDelaySincePriceInvalid",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "validPriceAtStruckTime",
+            "mode": "required",
+            "type": "String"
+          },
+          {
+            "name": "totalReturns",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "oldTotalReturns",
+            "mode": "nullable",
+            "type": "Long"
+          },
+          {
+            "name": "newTotalReturns",
+            "mode": "nullable",
+            "type": "Long"
+          }
+        ]
+      }
+    }
+  ],
+  "lookups": [],
+  "taps": [
+    {
+      "type": "kafka",
+      "id": "kafkatap",
+      "bootstrap": "internal-coral-epos2-prd1-kafka-lb-321246078.eu-west-2.elb.amazonaws.com:9092",
+      "topic": "security",
+      "group": "pai-test-group.1",
+      "defaultOffset": "earliest",
+      "autoCommit": true
+    },
+    {
+      "type": "bigquery",
+      "id": "bigquerytap",
+      "dataset": "coral_retail_omnia_prod",
+      "table": "security"
+    }
+  ],
+  "steps": [
+    {
+      "type": "source",
+      "id": "in",
+      "name": "in",
+      "schema": "schema-security",
+      "tap": "kafkatap"
+    },
+    {
+      "type": "transformation",
+      "id": "mapper",
+      "name": "mapper",
+      "op": "map",
+      "params": [
+        [
+          "m => m.append('ts, Helper.fmt.print(Helper.Instant.now()))"
+        ]
+      ],
+      "paramsEncoded": false
+    },
+    {
+      "type": "sink",
+      "id": "out",
+      "name": "outBQ",
+      "tap": "bigquerytap"
+    }
+  ],
+  "dag": [
+    {
+      "from": "in",
+      "to": "mapper"
+    },
+    {
+      "from": "mapper",
+      "to": "out"
+    }
+  ]
+}

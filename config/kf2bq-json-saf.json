@@ -848,17 +848,17 @@
                     "type": "record",
                     "fields": [
                       {
-                        "mode": "required",
+                        "mode": "nullable",
                         "name": "selectionPriceType",
                         "type": "String"
                       },
                       {
-                        "mode": "required",
+                        "mode": "nullable",
                         "name": "denPrice",
                         "type": "Long"
                       },
                       {
-                        "mode": "required",
+                        "mode": "nullable",
                         "name": "numPrice",
                         "type": "Long"
                       }

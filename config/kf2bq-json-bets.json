@@ -672,15 +672,15 @@
       "type": "kafka",
       "id": "kafkatap-bets",
       "bootstrap": "lc-df-nonprod-kafka-lb-1656149905.eu-west-2.elb.amazonaws.com:9092",
-      "topic": "coral.stage.retail.betslip.1",
-      "group": "pai-bets-group-111",
+      "topic": "coral.prod.digital.betslip.1",
+      "group": "pai-bets-group-1",
       "defaultOffset": "earliest",
       "autoCommit": true
     },
     {
       "type": "bigquery",
       "id": "bigquerytap-bets",
-      "dataset": "coral_retail_df_stg",
+      "dataset": "coral_retail_df_prod",
       "table": "bets"
     }
   ],
